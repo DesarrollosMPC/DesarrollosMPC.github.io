@@ -1,0 +1,787 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Milenio PC | Capacitación de Seguridad</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:wght@400;500;700&family=JetBrains+Mono:wght@700&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #060b1e;
+    --surface: rgba(255,255,255,0.04);
+    --surface-hover: rgba(99,102,241,0.12);
+    --border: rgba(255,255,255,0.08);
+    --border-active: rgba(99,102,241,0.5);
+    --indigo: #6366f1;
+    --purple: #a855f7;
+    --cyan: #22d3ee;
+    --gold: #fbbf24;
+    --green: #22c55e;
+    --red: #ef4444;
+    --text: #f1f5f9;
+    --muted: rgba(255,255,255,0.4);
+    --font-head: 'Syne', sans-serif;
+    --font-body: 'DM Sans', sans-serif;
+    --font-mono: 'JetBrains Mono', monospace;
+  }
+
+  html, body {
+    min-height: 100%; width: 100%;
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--font-body);
+    overflow-x: hidden;
+  }
+
+  body {
+    background:
+      radial-gradient(ellipse 80% 50% at 20% -10%, rgba(99,102,241,0.18) 0%, transparent 60%),
+      radial-gradient(ellipse 60% 40% at 80% 110%, rgba(168,85,247,0.14) 0%, transparent 60%),
+      #060b1e;
+  }
+
+  /* ── PARTICLES ── */
+  #particles {
+    position: fixed; inset: 0; pointer-events: none; z-index: 0; overflow: hidden;
+  }
+  .p {
+    position: absolute; border-radius: 50%;
+    animation: rise linear infinite;
+  }
+  @keyframes rise {
+    0%   { transform: translateY(110vh) rotate(0deg); opacity: 0; }
+    8%   { opacity: 1; }
+    92%  { opacity: 1; }
+    100% { transform: translateY(-10vh) rotate(720deg); opacity: 0; }
+  }
+
+  /* ── LAYOUT ── */
+  .page {
+    position: relative; z-index: 1;
+    min-height: 100vh;
+    display: flex; flex-direction: column;
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 0 16px 40px;
+  }
+
+  /* ── HEADER ── */
+  header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 20px 0 14px;
+    border-bottom: 1px solid var(--border);
+    gap: 12px; flex-wrap: wrap;
+  }
+
+  .logo {
+    font-family: var(--font-mono);
+    font-size: clamp(18px, 4vw, 26px);
+    font-weight: 700;
+    background: linear-gradient(90deg, #818cf8, #c084fc, #22d3ee);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    letter-spacing: -1px;
+    white-space: nowrap;
+  }
+  .logo em { -webkit-text-fill-color: white; font-style: normal; }
+  .logo-sub {
+    font-size: 10px; color: var(--muted); letter-spacing: 2px;
+    text-transform: uppercase; margin-top: 2px;
+    font-family: var(--font-body);
+  }
+
+  .stats-row {
+    display: flex; gap: 8px; align-items: center; flex-wrap: wrap;
+  }
+  .pill {
+    display: flex; align-items: center; gap: 6px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 100px; padding: 7px 16px;
+    font-size: 14px; font-weight: 700;
+    white-space: nowrap;
+    transition: transform 0.2s;
+  }
+  .pill.bump { animation: bump 0.35s ease; }
+  @keyframes bump { 0%,100%{transform:scale(1)} 50%{transform:scale(1.2)} }
+  .lives { display: flex; gap: 3px; }
+  .h { font-size: 15px; transition: all 0.3s; }
+  .h.gone { opacity: 0.18; transform: scale(0.7); }
+
+  /* ── PROGRESS ── */
+  .prog-wrap { padding: 16px 0 0; }
+  .prog-meta {
+    display: flex; justify-content: space-between;
+    font-size: 11px; color: var(--muted); letter-spacing: 1px;
+    text-transform: uppercase; margin-bottom: 8px;
+  }
+  .prog-track {
+    height: 5px; background: rgba(255,255,255,0.07); border-radius: 10px; overflow: visible; position: relative;
+  }
+  .prog-fill {
+    height: 100%; border-radius: 10px;
+    background: linear-gradient(90deg, var(--indigo), var(--purple), var(--cyan));
+    transition: width 0.7s cubic-bezier(.4,0,.2,1);
+    position: relative;
+  }
+  .prog-fill::after {
+    content: ''; position: absolute; right: -1px; top: 50%; transform: translateY(-50%);
+    width: 11px; height: 11px; border-radius: 50%;
+    background: white;
+    box-shadow: 0 0 0 3px rgba(99,102,241,0.4), 0 0 12px rgba(99,102,241,0.7);
+  }
+
+  /* ── MAIN CONTENT ── */
+  .main {
+    display: grid;
+    grid-template-columns: 1fr 220px;
+    gap: 28px;
+    padding-top: 24px;
+    align-items: start;
+  }
+  @media (max-width: 680px) {
+    .main { grid-template-columns: 1fr; }
+    .inspector-col { order: -1; flex-direction: row; justify-content: center; gap: 16px; padding: 0; }
+    .insp-figure { width: 100px; height: 150px; }
+    .insp-bubble { max-width: 200px; font-size: 12px; }
+  }
+
+  /* ── QUIZ ── */
+  .badge {
+    display: inline-flex; align-items: center; gap: 6px;
+    background: linear-gradient(135deg, rgba(99,102,241,0.2), rgba(168,85,247,0.15));
+    border: 1px solid rgba(99,102,241,0.35);
+    border-radius: 100px; padding: 5px 16px;
+    font-size: 10px; font-weight: 700; color: #a5b4fc;
+    letter-spacing: 2.5px; text-transform: uppercase;
+    margin-bottom: 18px;
+    width: fit-content;
+  }
+
+  .q-text {
+    font-family: var(--font-head);
+    font-size: clamp(18px, 3.5vw, 26px);
+    font-weight: 700;
+    line-height: 1.35;
+    margin-bottom: 24px;
+    min-height: 60px;
+  }
+
+  .opts { display: flex; flex-direction: column; gap: 12px; }
+
+  .opt {
+    width: 100%; text-align: left;
+    padding: 15px 18px;
+    border-radius: 16px;
+    border: 1.5px solid var(--border);
+    background: var(--surface);
+    color: var(--text);
+    font-family: var(--font-body);
+    font-size: clamp(13px, 2.5vw, 15px);
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.18s;
+    display: flex; align-items: center; gap: 14px;
+  }
+  .opt:hover:not(:disabled) {
+    border-color: var(--border-active);
+    background: var(--surface-hover);
+    transform: translateX(5px);
+  }
+  .opt:disabled { cursor: not-allowed; }
+  .opt.correct {
+    border-color: var(--green);
+    background: rgba(34,197,94,0.1);
+    animation: slideRight 0.35s ease;
+  }
+  .opt.wrong {
+    border-color: var(--red);
+    background: rgba(239,68,68,0.1);
+    animation: shake 0.4s ease;
+  }
+  @keyframes slideRight { 0%,100%{transform:translateX(0)} 40%{transform:translateX(7px)} }
+  @keyframes shake { 0%,100%{transform:translateX(0)} 25%{transform:translateX(-7px)} 75%{transform:translateX(7px)} }
+
+  .opt-letter {
+    width: 30px; height: 30px; border-radius: 50%; flex-shrink: 0;
+    background: rgba(99,102,241,0.15);
+    border: 1px solid rgba(99,102,241,0.35);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 12px; font-weight: 700; color: #818cf8;
+    transition: all 0.18s;
+  }
+  .opt:hover:not(:disabled) .opt-letter { background: rgba(99,102,241,0.35); color: white; }
+  .opt.correct .opt-letter { background: rgba(34,197,94,0.25); border-color: var(--green); color: #86efac; }
+  .opt.wrong .opt-letter { background: rgba(239,68,68,0.25); border-color: var(--red); color: #fca5a5; }
+
+  /* ── FEEDBACK ── */
+  .feedback {
+    display: none; padding: 10px 0;
+    animation: fadeUp 0.4s ease;
+  }
+  .feedback.show { display: block; }
+  @keyframes fadeUp { from{opacity:0;transform:translateY(14px)} to{opacity:1;transform:translateY(0)} }
+
+  .fb-icon { font-size: 56px; margin-bottom: 12px; }
+  .fb-title { font-family: var(--font-head); font-size: 22px; font-weight: 800; margin-bottom: 8px; }
+  .fb-explain {
+    font-size: 14px; color: rgba(255,255,255,0.55);
+    line-height: 1.6; margin-bottom: 22px;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid var(--border);
+    border-radius: 12px; padding: 12px 16px;
+  }
+  .next-btn {
+    background: linear-gradient(135deg, var(--indigo), var(--purple));
+    color: white; border: none; border-radius: 100px;
+    padding: 13px 32px; font-size: 15px; font-weight: 700;
+    font-family: var(--font-body);
+    cursor: pointer; transition: all 0.2s;
+    box-shadow: 0 4px 24px rgba(99,102,241,0.35);
+    display: inline-flex; align-items: center; gap: 8px;
+  }
+  .next-btn:hover { transform: scale(1.04); box-shadow: 0 6px 32px rgba(99,102,241,0.55); }
+  .next-btn:active { transform: scale(0.97); }
+
+  /* ── INSPECTOR ── */
+  .inspector-col {
+    display: flex; flex-direction: column; align-items: center;
+    position: sticky; top: 20px;
+  }
+
+  .insp-bubble {
+    background: rgba(99,102,241,0.12);
+    border: 1px solid rgba(99,102,241,0.28);
+    border-radius: 16px 16px 4px 16px;
+    padding: 10px 14px;
+    font-size: 12px; color: #c7d2fe;
+    text-align: center; line-height: 1.5;
+    margin-bottom: 10px; width: 100%;
+    min-height: 48px;
+    display: flex; align-items: center; justify-content: center;
+    transition: all 0.4s;
+    position: relative;
+  }
+  .insp-bubble::after {
+    content: ''; position: absolute; bottom: -8px; right: 18px;
+    border: 5px solid transparent;
+    border-top-color: rgba(99,102,241,0.28);
+  }
+
+  .insp-figure {
+    width: 160px; height: 220px;
+    display: flex; align-items: flex-end; justify-content: center;
+  }
+  .char {
+    animation: float 3.5s ease-in-out infinite;
+    transform-origin: center bottom;
+  }
+  @keyframes float { 0%,100%{transform:translateY(0) rotate(-1deg)} 50%{transform:translateY(-10px) rotate(1deg)} }
+  .char.cheer { animation: cheer 0.65s ease; }
+  .char.wince { animation: wince 0.5s ease; }
+  @keyframes cheer {
+    0%{transform:translateY(0) rotate(0)}
+    30%{transform:translateY(-22px) rotate(4deg)}
+    60%{transform:translateY(-8px) rotate(-2deg)}
+    100%{transform:translateY(0) rotate(0)}
+  }
+  @keyframes wince {
+    0%,100%{transform:translateX(0)}
+    20%{transform:translateX(-8px) rotate(-3deg)}
+    60%{transform:translateX(8px) rotate(3deg)}
+  }
+
+  /* ── FINAL SCREEN ── */
+  .final {
+    display: none; text-align: center;
+    padding: 60px 20px;
+    animation: fadeUp 0.5s ease;
+  }
+  .final.show { display: block; }
+  .final-icon { font-size: 90px; margin-bottom: 20px; }
+  .final-title {
+    font-family: var(--font-head);
+    font-size: clamp(26px, 6vw, 42px);
+    font-weight: 800; margin-bottom: 10px;
+  }
+  .final-sub { font-size: 15px; color: var(--muted); margin-bottom: 20px; }
+  .final-pts {
+    font-family: var(--font-mono);
+    font-size: clamp(42px, 10vw, 64px);
+    font-weight: 700;
+    background: linear-gradient(90deg, var(--gold), #f59e0b);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    margin-bottom: 28px;
+  }
+  .stars { display: flex; justify-content: center; gap: 10px; margin-bottom: 28px; }
+  .star { font-size: 40px; opacity: 0; animation: popStar 0.4s ease forwards; }
+  .star:nth-child(1){animation-delay:.1s}
+  .star:nth-child(2){animation-delay:.3s}
+  .star:nth-child(3){animation-delay:.5s}
+  @keyframes popStar { from{opacity:0;transform:scale(0) rotate(-20deg)} to{opacity:1;transform:scale(1) rotate(0)} }
+
+  .restart {
+    background: linear-gradient(135deg, var(--indigo), var(--purple));
+    color: white; border: none; border-radius: 100px;
+    padding: 15px 42px; font-size: 16px; font-weight: 700;
+    font-family: var(--font-body); cursor: pointer;
+    box-shadow: 0 4px 28px rgba(99,102,241,0.45);
+    transition: all 0.2s;
+  }
+  .restart:hover { transform: scale(1.05); }
+
+  /* ── FLOATING PTS & COMBO ── */
+  .floatpt {
+    position: fixed; font-size: 20px; font-weight: 900;
+    font-family: var(--font-mono);
+    pointer-events: none; z-index: 999;
+    animation: floataway 1s ease forwards;
+  }
+  @keyframes floataway { 0%{opacity:1;transform:translateY(0)} 100%{opacity:0;transform:translateY(-50px)} }
+
+  .combo {
+    position: fixed; top: 50%; left: 50%;
+    transform: translate(-50%,-50%);
+    background: linear-gradient(135deg, var(--gold), #f59e0b);
+    color: #1c1402; border-radius: 100px;
+    padding: 10px 24px; font-size: 16px; font-weight: 900;
+    font-family: var(--font-mono);
+    pointer-events: none; z-index: 999; opacity: 0;
+  }
+  .combo.pop { animation: comboPop 1.3s ease forwards; }
+  @keyframes comboPop {
+    0%{opacity:0;transform:translate(-50%,-50%) scale(0.6)}
+    20%{opacity:1;transform:translate(-50%,-60%) scale(1.12)}
+    70%{opacity:1;transform:translate(-50%,-65%) scale(1)}
+    100%{opacity:0;transform:translate(-50%,-80%) scale(0.9)}
+  }
+
+  /* ── GRID COLS HIDE ── */
+  @media (max-width: 480px) {
+    .badge { font-size: 9px; letter-spacing: 1.5px; }
+    .opt { padding: 13px 14px; gap: 10px; }
+    .next-btn { width: 100%; justify-content: center; }
+    .restart { width: 100%; }
+  }
+</style>
+</head>
+<body>
+
+<div id="particles"></div>
+
+<div class="page">
+
+  <!-- HEADER -->
+  <header>
+    <div>
+      <div class="logo">MILENIO<em>PC</em></div>
+      <div class="logo-sub">Capacitación de Seguridad</div>
+    </div>
+    <div class="stats-row">
+      <div class="pill" id="score-pill">
+        ⭐ <span id="score-val">0</span><span style="color:var(--muted);font-size:11px;font-weight:400">pts</span>
+      </div>
+      <div class="pill" id="lives-pill">
+        <div class="lives" id="lives-el"></div>
+      </div>
+    </div>
+  </header>
+
+  <!-- PROGRESS -->
+  <div class="prog-wrap" id="prog-wrap">
+    <div class="prog-meta">
+      <span id="prog-label">Pregunta 1 de 5</span>
+      <span id="prog-pct">0%</span>
+    </div>
+    <div class="prog-track">
+      <div class="prog-fill" id="prog-fill" style="width:0%"></div>
+    </div>
+  </div>
+
+  <!-- GAME VIEW -->
+  <div id="game-view">
+    <div class="main">
+
+      <!-- QUIZ PANEL -->
+      <div>
+        <div id="quiz-section">
+          <div class="badge" id="lvl-badge">⚡ Nivel 1</div>
+          <div class="q-text" id="q-text">Cargando...</div>
+          <div class="opts" id="opts"></div>
+        </div>
+        <div class="feedback" id="fb-panel">
+          <div class="fb-icon" id="fb-icon"></div>
+          <div class="fb-title" id="fb-title"></div>
+          <div class="fb-explain" id="fb-explain"></div>
+          <button class="next-btn" id="next-btn">Siguiente desafío →</button>
+        </div>
+      </div>
+
+      <!-- INSPECTOR -->
+      <div class="inspector-col">
+        <div class="insp-bubble" id="insp-bubble">¡Demuestra lo que sabes!</div>
+        <div class="insp-figure">
+          <svg class="char" id="char" width="150" height="215" viewBox="0 0 150 215" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <!-- Shadow -->
+            <ellipse cx="75" cy="210" rx="38" ry="5" fill="rgba(0,0,0,0.35)"/>
+            <!-- Legs -->
+            <rect x="42" y="168" width="26" height="40" rx="11" fill="#1e3a5f"/>
+            <rect x="82" y="168" width="26" height="40" rx="11" fill="#1e3a5f"/>
+            <!-- Boots -->
+            <rect x="37" y="200" width="33" height="13" rx="7" fill="#0f172a"/>
+            <rect x="80" y="200" width="33" height="13" rx="7" fill="#0f172a"/>
+            <!-- Body -->
+            <rect x="28" y="90" width="94" height="82" rx="16" fill="#1e3a5f"/>
+            <!-- Vest -->
+            <polygon points="53,90 97,90 91,144 59,144" fill="#f97316"/>
+            <!-- Vest stripes -->
+            <rect x="57" y="100" width="36" height="3.5" rx="1.75" fill="#fbbf24" opacity="0.75"/>
+            <rect x="57" y="110" width="36" height="3.5" rx="1.75" fill="#fbbf24" opacity="0.75"/>
+            <!-- Badge -->
+            <rect x="60" y="122" width="30" height="16" rx="5" fill="rgba(255,255,255,0.13)"/>
+            <text x="75" y="134" text-anchor="middle" font-size="7" fill="white" font-weight="700" font-family="monospace">MPC</text>
+            <!-- Collar -->
+            <rect x="62" y="87" width="26" height="9" rx="4.5" fill="#1e3a5f"/>
+            <!-- Neck -->
+            <rect x="66" y="68" width="18" height="24" rx="9" fill="#f5c07a"/>
+            <!-- Head -->
+            <ellipse cx="75" cy="57" rx="30" ry="31" fill="#f5c07a"/>
+            <!-- Helmet -->
+            <ellipse cx="75" cy="35" rx="33" ry="17" fill="#1e3a5f"/>
+            <rect x="42" y="37" width="66" height="12" rx="4" fill="#1d4ed8"/>
+            <rect x="52" y="43" width="46" height="5" rx="2.5" fill="#60a5fa" opacity="0.45"/>
+            <ellipse cx="75" cy="49" rx="37" ry="7" fill="#1e40af"/>
+            <!-- Helmet emblem -->
+            <circle cx="75" cy="33" r="9" fill="rgba(255,255,255,0.08)" stroke="#60a5fa" stroke-width="1.5"/>
+            <text x="75" y="38" text-anchor="middle" font-size="9" fill="#93c5fd" font-weight="700" font-family="monospace">M</text>
+            <!-- Ears -->
+            <ellipse cx="45" cy="57" rx="6.5" ry="9" fill="#f5c07a"/>
+            <ellipse cx="105" cy="57" rx="6.5" ry="9" fill="#f5c07a"/>
+            <!-- Eyes -->
+            <ellipse cx="63" cy="57" rx="5.5" ry="6" fill="white"/>
+            <ellipse cx="87" cy="57" rx="5.5" ry="6" fill="white"/>
+            <circle cx="64" cy="58" r="3.2" fill="#1e3a5f" id="el"/>
+            <circle cx="88" cy="58" r="3.2" fill="#1e3a5f" id="er"/>
+            <circle cx="65" cy="57" r="1.1" fill="white"/>
+            <circle cx="89" cy="57" r="1.1" fill="white"/>
+            <!-- Brows -->
+            <path d="M57 50 Q63 46.5 69 50" stroke="#8b5e3c" stroke-width="2.2" stroke-linecap="round" fill="none" id="bl"/>
+            <path d="M81 50 Q87 46.5 93 50" stroke="#8b5e3c" stroke-width="2.2" stroke-linecap="round" fill="none" id="br"/>
+            <!-- Mouth -->
+            <path d="M65 70 Q75 77 85 70" stroke="#c07a45" stroke-width="2.2" stroke-linecap="round" fill="none" id="mo"/>
+            <!-- Arms -->
+            <rect x="5"  y="92" width="23" height="65" rx="11.5" fill="#1e3a5f"/>
+            <rect x="122" y="92" width="23" height="65" rx="11.5" fill="#1e3a5f"/>
+            <!-- Hands -->
+            <ellipse cx="16.5" cy="161" rx="12" ry="14" fill="#f5c07a"/>
+            <ellipse cx="133.5" cy="158" rx="12" ry="14" fill="#f5c07a"/>
+            <!-- Tablet -->
+            <rect x="120" y="143" width="27" height="20" rx="4" fill="#0f172a"/>
+            <rect x="122" y="145" width="23" height="16" rx="3" fill="#22d3ee" opacity="0.35" id="tscr"/>
+            <rect x="125" y="148" width="17" height="2" rx="1" fill="#22d3ee" opacity="0.5"/>
+            <rect x="125" y="153" width="12" height="2" rx="1" fill="#22d3ee" opacity="0.4"/>
+          </svg>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- FINAL SCREEN -->
+  <div class="final" id="final-screen">
+    <div class="final-icon" id="f-icon">🏆</div>
+    <div class="stars" id="f-stars"></div>
+    <div class="final-title" id="f-title">¡Capacitación de Seguridad Completada!</div>
+    <div class="final-sub" id="f-sub">Eres un experto certificado Milenio PC.</div>
+    <div class="final-pts" id="f-pts">0 pts</div>
+    <div id="cert-name-section" style="display:none; margin-bottom:24px;">
+      <p style="font-size:13px; color:var(--muted); margin-bottom:10px;">Ingresa tu nombre completo para el certificado:</p>
+      <input id="cert-name-input" type="text" placeholder="Ej: Juan Fernando Arango Muñoz"
+        style="width:100%; max-width:420px; padding:13px 18px; border-radius:12px; border:1.5px solid var(--border-active);
+               background:rgba(255,255,255,0.05); color:white; font-size:15px; font-family:var(--font-body);
+               outline:none; text-align:center;"
+        onkeydown="if(event.key==='Enter') showCert()" />
+      <br><br>
+      <button class="restart" onclick="showCert()" style="margin-right:10px;">Ver Certificado 🎓</button>
+    </div>
+    <button class="restart" id="restart-btn" onclick="restart()">↺ Reiniciar Capacitación</button>
+  </div>
+
+  <!-- CERTIFICADO -->
+  <div id="cert-screen" style="display:none; padding:30px 16px 50px;">
+    <div id="cert-card" style="
+      max-width:720px; margin:0 auto; background:white; border-radius:16px;
+      padding:48px 52px; position:relative; overflow:hidden;
+      box-shadow:0 20px 60px rgba(0,0,0,0.5); color:#1e293b;
+      font-family:'DM Sans',sans-serif;
+    ">
+      <div style="position:absolute;top:0;left:0;width:70px;height:70px;background:#0ea5e9;border-radius:0 0 16px 0;opacity:0.85;"></div>
+      <div style="position:absolute;top:0;left:20px;width:38px;height:38px;background:#0284c7;border-radius:0 0 10px 0;opacity:0.55;"></div>
+      <div style="position:absolute;bottom:0;right:0;width:80px;height:80px;background:#0ea5e9;border-radius:16px 0 0 0;opacity:0.85;"></div>
+      <div style="position:absolute;bottom:20px;right:0;width:44px;height:44px;background:#0284c7;border-radius:10px 0 0 0;opacity:0.55;"></div>
+      <div style="position:absolute;top:60px;left:0;width:3px;height:calc(100% - 120px);background:linear-gradient(180deg,#0ea5e9,#0284c7);"></div>
+      <div style="position:absolute;top:60px;right:0;width:3px;height:calc(100% - 120px);background:linear-gradient(180deg,#0ea5e9,#0284c7);"></div>
+
+      <div style="text-align:center; margin-bottom:24px;">
+        <div style="font-family:'JetBrains Mono',monospace; font-size:28px; font-weight:700; letter-spacing:-1px; color:#0284c7;">MILENIO<span style="color:#1e293b;">PC</span></div>
+        <div style="font-size:11px; color:#64748b; letter-spacing:2px; text-transform:uppercase; margin-top:3px;">La Selección Inteligente en Servicios de Tecnología</div>
+        <div style="width:80px;height:2px;background:linear-gradient(90deg,#0ea5e9,#0284c7);margin:14px auto 0;border-radius:2px;"></div>
+      </div>
+
+      <p style="text-align:center; font-size:15px; color:#475569; margin-bottom:10px;">Certifica que:</p>
+
+      <div id="cert-name-display" style="
+        text-align:center; font-family:'Syne',sans-serif;
+        font-size:clamp(18px,3.5vw,30px); font-weight:800;
+        color:#0f172a; letter-spacing:1px; text-transform:uppercase;
+        margin-bottom:20px; line-height:1.25; padding:0 10px;
+      "></div>
+
+      <p style="text-align:center; font-size:15px; color:#475569; margin-bottom:8px;">Aprobó con éxito la actividad:</p>
+
+      <div style="text-align:center; font-family:'Syne',sans-serif; font-size:clamp(15px,2.5vw,21px); font-weight:700;
+        color:#0284c7; letter-spacing:2px; text-transform:uppercase; margin-bottom:22px;">CAPACITACIÓN DE SEGURIDAD</div>
+
+      <div style="text-align:center; margin-bottom:8px;">
+        <span style="font-size:12px; color:#94a3b8; text-transform:uppercase; letter-spacing:1.5px;">Fecha</span>
+      </div>
+      <div id="cert-date" style="text-align:center; font-size:15px; color:#334155; margin-bottom:32px; font-weight:500;"></div>
+
+      <div style="width:160px;height:1.5px;background:#cbd5e1;margin:0 auto 8px;"></div>
+      <div style="text-align:center; font-size:12px; color:#94a3b8; letter-spacing:1px;">MILENIO PC S.A. — Cali, Colombia</div>
+    </div>
+
+    <div style="text-align:center; margin-top:28px; display:flex; gap:12px; justify-content:center; flex-wrap:wrap;">
+      <button class="restart" onclick="printCert()">🖨️ Imprimir / Guardar PDF</button>
+      <button class="restart" style="background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.1);" onclick="restart()">↺ Reiniciar</button>
+    </div>
+  </div>
+
+</div>
+
+<div class="combo" id="combo-el">🔥 COMBO!</div>
+
+<script>
+const Q = [
+  { lv:1, ln:"Las Reglas de Oro",
+    q:"¿Se pueden introducir manos o herramientas en equipos energizados?",
+    o:["Sí, con cuidado","No, bajo ninguna circunstancia"], a:1,
+    ex:"Nunca manipules equipos energizados. Es la regla #1 de seguridad eléctrica." },
+  { lv:1, ln:"Las Reglas de Oro",
+    q:"¿Qué tipo de guantes se deben usar para manipular componentes de alto voltaje?",
+    o:["Guantes de protección anticorte","Guantes de látex comunes"], a:0,
+    ex:"Los guantes anticorte protegen contra bordes metálicos afilados en el hardware." },
+  { lv:2, ln:"Servidores",
+    q:"¿A cuántas RPM puede operar un ventilador de servidor en carga máxima?",
+    o:["Entre 2,000 y 5,000 RPM","Entre 10,000 y 18,000 RPM"], a:1,
+    ex:"Los ventiladores de servidor alcanzan hasta 18,000 RPM — nunca introduzcas los dedos." },
+  { lv:2, ln:"Servidores",
+    q:"¿Qué tipo de servidor tiene componentes densos y ventiladores en el centro del chasis?",
+    o:["Servidor Torre","Servidor Rack"], a:1,
+    ex:"Los servidores Rack tienen diseño horizontal denso con ventiladores centrales de alta velocidad." },
+  { lv:3, ln:"Protocolo LOTO",
+    q:"¿Cuál es el orden correcto del Protocolo LOTO (Lockout/Tagout)?",
+    o:["Desconexión física → Inspección → Apagado","Apagado por software → Desconexión física → Inspección"], a:1,
+    ex:"LOTO: primero apagar por software, luego desconexión física, luego bloqueo e inspección." }
+];
+
+const IDLE_MSG = ["¡Demuestra lo que sabes!","Siguiente desafío...","Tú puedes, crack.","Concentración total.","¡Vamos a por ello!"];
+const OK_MSG   = ["¡Sí señor! 🎯","¡Excelente, pro!","¡Conocimiento top!","¡Así se hace!","¡Perfecto!"];
+const ERR_MSG  = ["¡La seguridad es vital!","Revisa los protocolos.","¡Cuidado! Esto importa.","Estudia este tema.","¡No lo olvides!"];
+
+let S = { pts:0, lives:3, i:0, combo:0, done:false };
+
+function rnd(a){ return a[Math.floor(Math.random()*a.length)]; }
+
+/* particles */
+(function(){
+  const wrap = document.getElementById('particles');
+  const cols = ['#818cf8','#a855f7','#22d3ee','#fbbf24','#34d399','#f472b6'];
+  for(let i=0;i<22;i++){
+    const p = document.createElement('div'); p.className='p';
+    const sz = Math.random()*5+2;
+    p.style.cssText = `width:${sz}px;height:${sz}px;left:${Math.random()*100}%;background:${cols[i%cols.length]};animation-duration:${Math.random()*9+7}s;animation-delay:${Math.random()*8}s;opacity:0;`;
+    wrap.appendChild(p);
+  }
+})();
+
+function renderLives(){
+  const el = document.getElementById('lives-el'); el.innerHTML='';
+  for(let i=0;i<3;i++){
+    const h=document.createElement('span');
+    h.className='h'+(i>=S.lives?' gone':''); h.textContent='❤️'; el.appendChild(h);
+  }
+}
+
+function renderQ(){
+  const q=Q[S.i]; S.done=false;
+  const pct=Math.round((S.i/Q.length)*100);
+  document.getElementById('prog-fill').style.width=pct+'%';
+  document.getElementById('prog-pct').textContent=pct+'%';
+  document.getElementById('prog-label').textContent=`Pregunta ${S.i+1} de ${Q.length}`;
+  document.getElementById('lvl-badge').textContent=`⚡ Nivel ${q.lv} — ${q.ln}`;
+  document.getElementById('q-text').textContent=q.q;
+
+  const opts=document.getElementById('opts'); opts.innerHTML='';
+  q.o.forEach((txt,idx)=>{
+    const b=document.createElement('button'); b.className='opt';
+    b.innerHTML=`<div class="opt-letter">${String.fromCharCode(65+idx)}</div><span>${txt}</span>`;
+    b.addEventListener('click',()=>answer(idx));
+    opts.appendChild(b);
+  });
+
+  document.getElementById('quiz-section').style.display='';
+  const fp=document.getElementById('fb-panel'); fp.style.display='none'; fp.classList.remove('show');
+  setBubble('idle',rnd(IDLE_MSG));
+}
+
+function answer(chosen){
+  if(S.done) return; S.done=true;
+  const q=Q[S.i]; const ok=chosen===q.a;
+  document.querySelectorAll('.opt').forEach((b,i)=>{
+    b.disabled=true;
+    if(i===q.a) b.classList.add('correct');
+    else if(i===chosen&&!ok) b.classList.add('wrong');
+  });
+  if(ok){
+    S.combo++; const bonus=S.combo>=2?30:20; S.pts+=bonus;
+    if(S.combo>=2) showCombo();
+    showFb('✅','¡Respuesta Correcta!',q.ex,true);
+    setBubble('ok',rnd(OK_MSG));
+    reactChar('cheer');
+    floatPts('+'+bonus+' pts','#86efac');
+    bump('score-pill');
+    document.getElementById('score-val').textContent=S.pts;
+  } else {
+    S.combo=0; S.lives=Math.max(0,S.lives-1); renderLives();
+    showFb('❌','Incorrecto',q.ex,false);
+    setBubble('err',rnd(ERR_MSG));
+    reactChar('wince');
+    bump('lives-pill');
+  }
+}
+
+function showFb(icon,title,explain,ok){
+  document.getElementById('quiz-section').style.display='none';
+  document.getElementById('fb-icon').textContent=icon;
+  document.getElementById('fb-title').textContent=title;
+  document.getElementById('fb-title').style.color=ok?'#86efac':'#fca5a5';
+  document.getElementById('fb-explain').textContent=explain;
+  const fp=document.getElementById('fb-panel'); fp.style.display='block'; fp.classList.add('show');
+}
+
+function setBubble(mode,msg){
+  const b=document.getElementById('insp-bubble');
+  b.style.opacity='0'; b.style.transform='translateY(6px)';
+  setTimeout(()=>{
+    b.textContent=msg;
+    b.style.transition='all 0.35s';
+    b.style.opacity='1'; b.style.transform='translateY(0)';
+    b.style.borderColor=mode==='ok'?'rgba(34,197,94,0.4)':mode==='err'?'rgba(239,68,68,0.4)':'rgba(99,102,241,0.3)';
+    b.style.background=mode==='ok'?'rgba(34,197,94,0.08)':mode==='err'?'rgba(239,68,68,0.08)':'rgba(99,102,241,0.12)';
+  },160);
+}
+
+function reactChar(cls){
+  const c=document.getElementById('char');
+  c.style.animation='none'; c.classList.remove('cheer','wince');
+  void c.offsetWidth; c.classList.add(cls);
+  const mo=document.getElementById('mo'),bl=document.getElementById('bl'),br=document.getElementById('br');
+  if(cls==='cheer'){ mo.setAttribute('d','M63 68 Q75 78 87 68'); bl.setAttribute('d','M57 48.5 Q63 44.5 69 48.5'); br.setAttribute('d','M81 48.5 Q87 44.5 93 48.5'); }
+  else { mo.setAttribute('d','M66 74 Q75 68 84 74'); bl.setAttribute('d','M57 52 Q63 49 69 52'); br.setAttribute('d','M81 52 Q87 49 93 52'); }
+  setTimeout(()=>{ c.classList.remove('cheer','wince'); c.style.animation=''; mo.setAttribute('d','M65 70 Q75 77 85 70'); bl.setAttribute('d','M57 50 Q63 46.5 69 50'); br.setAttribute('d','M81 50 Q87 46.5 93 50'); },1600);
+}
+
+function bump(id){ const e=document.getElementById(id); e.classList.remove('bump'); void e.offsetWidth; e.classList.add('bump'); }
+
+function floatPts(txt,col){
+  const el=document.createElement('div'); el.className='floatpt';
+  el.textContent=txt; el.style.color=col;
+  el.style.top='80px'; el.style.left='50%'; el.style.transform='translateX(-50%)';
+  document.body.appendChild(el); setTimeout(()=>el.remove(),1000);
+}
+
+function showCombo(){
+  const c=document.getElementById('combo-el');
+  c.textContent=`🔥 COMBO x${S.combo}!`;
+  c.classList.remove('pop'); void c.offsetWidth; c.classList.add('pop');
+}
+
+document.getElementById('next-btn').addEventListener('click',()=>{
+  S.i++;
+  if(S.lives<=0) endGame(false);
+  else if(S.i>=Q.length) endGame(true);
+  else renderQ();
+});
+
+function endGame(win){
+  document.getElementById('game-view').style.display='none';
+  document.getElementById('prog-wrap').style.display='none';
+  document.getElementById('f-icon').textContent=win?'🏆':'🚨';
+  document.getElementById('f-title').textContent=win?'¡Capacitación de Seguridad Completada!':'Game Over';
+  document.getElementById('f-sub').textContent=win?'Eres un experto certificado Milenio PC.':'La seguridad no es un juego. ¡Inténtalo de nuevo!';
+  document.getElementById('f-pts').textContent=S.pts+' pts';
+  if(win){
+    const sr=document.getElementById('f-stars');
+    const n=S.pts>=90?3:S.pts>=60?2:1;
+    for(let i=0;i<3;i++){ const s=document.createElement('span'); s.className='star'; s.textContent=i<n?'⭐':'☆'; sr.appendChild(s); }
+    document.getElementById('cert-name-section').style.display='block';
+    document.getElementById('restart-btn').style.display='none';
+  } else {
+    document.getElementById('f-stars').style.display='none';
+    document.getElementById('cert-name-section').style.display='none';
+    document.getElementById('restart-btn').style.display='';
+  }
+  document.getElementById('final-screen').classList.add('show');
+}
+
+function showCert(){
+  const name = document.getElementById('cert-name-input').value.trim();
+  if(!name){ document.getElementById('cert-name-input').style.borderColor='#ef4444'; document.getElementById('cert-name-input').focus(); return; }
+  document.getElementById('cert-name-input').style.borderColor='var(--border-active)';
+  // Fecha actual en español
+  const now = new Date();
+  const fecha = now.toLocaleDateString('es-CO',{day:'numeric',month:'long',year:'numeric'});
+  document.getElementById('cert-name-display').textContent = name.toUpperCase();
+  document.getElementById('cert-date').textContent = fecha;
+  document.getElementById('final-screen').classList.remove('show');
+  document.getElementById('final-screen').style.display='none';
+  const cs = document.getElementById('cert-screen');
+  cs.style.display='block';
+  cs.style.animation='fadeUp 0.6s ease';
+}
+
+function printCert(){
+  const card = document.getElementById('cert-card');
+  const win2 = window.open('','_blank','width=800,height=600');
+  win2.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8">
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:wght@400;500;700&family=JetBrains+Mono:wght@700&display=swap" rel="stylesheet">
+  <style>
+    *{box-sizing:border-box;margin:0;padding:0;}
+    body{background:#f8fafc;display:flex;align-items:center;justify-content:center;min-height:100vh;padding:20px;}
+    @media print{body{padding:0;background:white;} @page{size:A4 landscape;margin:0;}}
+  </style>
+  </head><body>${card.outerHTML}<script>window.onload=function(){window.print();}<\/script></body></html>`);
+  win2.document.close();
+}
+
+function restart(){
+  S={pts:0,lives:3,i:0,combo:0,done:false};
+  document.getElementById('game-view').style.display='';
+  document.getElementById('prog-wrap').style.display='';
+  document.getElementById('final-screen').classList.remove('show');
+  document.getElementById('final-screen').style.display='';
+  document.getElementById('cert-screen').style.display='none';
+  document.getElementById('f-stars').innerHTML='';
+  document.getElementById('f-stars').style.display='';
+  document.getElementById('score-val').textContent='0';
+  document.getElementById('cert-name-input').value='';
+  renderLives(); renderQ();
+}
+
+renderLives(); renderQ();
+</script>
+</body>
+</html>
