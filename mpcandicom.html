@@ -11,6 +11,9 @@
     <!-- FontAwesome para los íconos sin necesidad de node.js -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
+    <!-- LIBRERÍA DE ESCANEO QR (Agregada por Viernes) -->
+    <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
+
     <!-- React, ReactDOM y Babel (Para que el código React funcione directo en el HTML) -->
     <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
     <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
@@ -312,7 +315,7 @@
 
             const LeadCaptureView = () => {
                 const [isScanning, setIsScanning] = useState(false);
-                const videoRef = useRef(null);
+                const scannerRef = useRef(null);
 
                 const handleSubmit = (e) => {
                     if(e) e.preventDefault();
@@ -343,19 +346,49 @@
                     setTimeout(() => setCurrentView('success'), 800);
                 };
 
-                const startCamera = async () => {
+                const startCamera = () => {
                     setIsScanning(true);
-                    try {
-                        const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
-                        if (videoRef.current) videoRef.current.srcObject = stream;
-                    } catch (err) { console.error("Error cámara", err); }
+                    // Damos 200ms para que React renderice el contenedor del lector
+                    setTimeout(() => {
+                        scannerRef.current = new Html5Qrcode("qr-reader");
+                        scannerRef.current.start(
+                            { facingMode: "environment" },
+                            { fps: 10, qrbox: { width: 250, height: 250 } },
+                            (decodedText) => {
+                                // ¡BINGO! Encontró y leyó un código QR
+                                try {
+                                    // Intentamos interpretarlo como datos estructurados (JSON)
+                                    const data = JSON.parse(decodedText);
+                                    setLeadData({
+                                        name: data.name || '',
+                                        company: data.company || '',
+                                        email: data.email || ''
+                                    });
+                                } catch (e) {
+                                    // Si no es JSON (ej. texto plano), lo pone en el campo de nombre para que veas que sí leyó algo
+                                    setLeadData(prev => ({...prev, name: decodedText}));
+                                }
+                                stopCamera();
+                            },
+                            (errorMessage) => {
+                                // Ignoramos errores menores de enfoque mientras escanea
+                            }
+                        ).catch((err) => {
+                            console.error("Error al acceder a la cámara:", err);
+                            setIsScanning(false);
+                        });
+                    }, 200);
                 };
 
                 const stopCamera = () => {
-                    if (videoRef.current && videoRef.current.srcObject) {
-                        videoRef.current.srcObject.getTracks().forEach(track => track.stop());
+                    if (scannerRef.current) {
+                        scannerRef.current.stop().then(() => {
+                            scannerRef.current.clear();
+                            setIsScanning(false);
+                        }).catch(err => console.error(err));
+                    } else {
+                        setIsScanning(false);
                     }
-                    setIsScanning(false);
                 };
 
                 const simulateQRSuccess = () => {
@@ -375,14 +408,13 @@
                                     Escanear Escarapela
                                 </button>
                             ) : (
-                                <div className="relative rounded-2xl overflow-hidden bg-slate-900 aspect-video flex flex-col items-center justify-center shadow-inner border-4 border-slate-800">
-                                    <video ref={videoRef} autoPlay playsInline className="w-full h-full object-cover opacity-90"></video>
-                                    <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                                        <div className="w-2/3 h-2/3 border-4 border-[#00b991] rounded-2xl animate-pulse shadow-[0_0_20px_rgba(0,185,145,0.5)]"></div>
-                                    </div>
-                                    <div className="absolute bottom-4 flex space-x-4">
-                                        <button onClick={simulateQRSuccess} className="bg-[#00b991] hover:bg-emerald-500 text-white px-4 md:px-6 py-2 rounded-xl text-sm font-bold shadow-xl transition-colors">Lectura Exitosa (Bypass)</button>
-                                        <button onClick={stopCamera} className="bg-[#cc2335] hover:bg-red-600 text-white px-4 py-2 rounded-xl text-sm font-bold shadow-xl transition-colors"><i className="fa-solid fa-xmark"></i></button>
+                                <div className="relative rounded-2xl overflow-hidden bg-slate-900 flex flex-col items-center justify-center shadow-inner border-4 border-slate-800">
+                                    {/* Contenedor donde la librería inyectará el video en vivo */}
+                                    <div id="qr-reader" className="w-full min-h-[250px] bg-black"></div>
+                                    
+                                    <div className="p-4 w-full flex space-x-4 bg-slate-900 justify-center">
+                                        <button type="button" onClick={simulateQRSuccess} className="bg-[#00b991] hover:bg-emerald-500 text-white px-4 md:px-6 py-2 rounded-xl text-sm font-bold shadow-xl transition-colors">Bypass Manual</button>
+                                        <button type="button" onClick={stopCamera} className="bg-[#cc2335] hover:bg-red-600 text-white px-4 py-2 rounded-xl text-sm font-bold shadow-xl transition-colors"><i className="fa-solid fa-xmark"></i> Cerrar Cámara</button>
                                     </div>
                                 </div>
                             )}
