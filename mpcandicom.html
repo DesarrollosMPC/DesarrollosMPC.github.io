@@ -35,329 +35,338 @@
     <script type="text/babel">
         const { useState, useRef } = React;
 
-        function MilenioAndicomApp() {
-            const [currentView, setCurrentView] = useState('home');
-            const [selectedCategory, setSelectedCategory] = useState(null);
-            const [leadData, setLeadData] = useState({ name: '', company: '', email: '' });
-            const [gameAnswers, setGameAnswers] = useState([]);
-            const [calcAnswers, setCalcAnswers] = useState(null);
+        // --- DATOS GLOBALES EXTRAÍDOS PARA EVITAR REINICIOS ---
+        const categoriesData = [
+            {
+                id: 'hardware',
+                title: 'Equipos y Hardware',
+                subtitle: 'Ideal para: Renting y Alquiler',
+                icon: <i className="fa-solid fa-laptop text-4xl mb-2"></i>,
+                color: 'bg-[#008dd2] hover:bg-blue-600',
+                options: ['Equipos lentos u obsoletos', 'Altos costos de compra (CAPEX)', 'Garantías vencidas y fallas', 'Falta de disponibilidad inmediata']
+            },
+            {
+                id: 'cloud',
+                title: 'Infraestructura y Nube',
+                subtitle: 'Ideal para: Soluciones Cloud',
+                icon: <i className="fa-solid fa-cloud text-4xl mb-2"></i>,
+                color: 'bg-[#00b991] hover:bg-emerald-500',
+                options: ['Servidores locales inestables', 'Dificultad para trabajo remoto', 'Miedo a pérdida de datos', 'Altos costos de mantenimiento local']
+            },
+            {
+                id: 'soporte',
+                title: 'Soporte y Mesa de Ayuda',
+                subtitle: 'Ideal para: Modelo DaaS',
+                icon: <i className="fa-solid fa-headset text-4xl mb-2"></i>,
+                color: 'bg-[#0067b1] hover:bg-blue-800',
+                options: ['Usuarios frustrados por lentitud', 'Falta de personal TI especializado', 'Falta de control y métricas TI', 'Sobrecarga operativa del área']
+            },
+            {
+                id: 'seguridad',
+                title: 'Seguridad de la Información',
+                subtitle: 'Ideal para: Ciberseguridad',
+                icon: <i className="fa-solid fa-shield-halved text-4xl mb-2"></i>,
+                color: 'bg-[#cc2335] hover:bg-red-700',
+                options: ['Miedo a ataques de Ransomware', 'Fuga de información confidencial', 'Falta de copias de seguridad', 'Accesos de red no controlados']
+            }
+        ];
 
-            const categories = [
-                {
-                    id: 'hardware',
-                    title: 'Equipos y Hardware',
-                    subtitle: 'Ideal para: Renting y Alquiler',
-                    icon: <i className="fa-solid fa-laptop text-4xl mb-2"></i>,
-                    color: 'bg-[#008dd2] hover:bg-blue-600',
-                    options: ['Equipos lentos u obsoletos', 'Altos costos de compra (CAPEX)', 'Garantías vencidas y fallas', 'Falta de disponibilidad inmediata']
-                },
-                {
-                    id: 'cloud',
-                    title: 'Infraestructura y Nube',
-                    subtitle: 'Ideal para: Soluciones Cloud',
-                    icon: <i className="fa-solid fa-cloud text-4xl mb-2"></i>,
-                    color: 'bg-[#00b991] hover:bg-emerald-500',
-                    options: ['Servidores locales inestables', 'Dificultad para trabajo remoto', 'Miedo a pérdida de datos', 'Altos costos de mantenimiento local']
-                },
-                {
-                    id: 'soporte',
-                    title: 'Soporte y Mesa de Ayuda',
-                    subtitle: 'Ideal para: Modelo DaaS',
-                    icon: <i className="fa-solid fa-headset text-4xl mb-2"></i>,
-                    color: 'bg-[#0067b1] hover:bg-blue-800',
-                    options: ['Usuarios frustrados por lentitud', 'Falta de personal TI especializado', 'Falta de control y métricas TI', 'Sobrecarga operativa del área']
-                },
-                {
-                    id: 'seguridad',
-                    title: 'Seguridad de la Información',
-                    subtitle: 'Ideal para: Ciberseguridad',
-                    icon: <i className="fa-solid fa-shield-halved text-4xl mb-2"></i>,
-                    color: 'bg-[#cc2335] hover:bg-red-700',
-                    options: ['Miedo a ataques de Ransomware', 'Fuga de información confidencial', 'Falta de copias de seguridad', 'Accesos de red no controlados']
+        // --- COMPONENTES INDEPENDIENTES (ARQUITECTURA BLINDADA) ---
+
+        const HomeView = ({ setCurrentView }) => (
+            <div className="flex flex-col items-center justify-center h-full text-center space-y-8 animate-fade-in w-full">
+                <div className="mb-8 w-full max-w-4xl mx-auto">
+                    <h2 className="text-2xl md:text-3xl font-bold text-[#0067b1] mb-6 px-4 tracking-wide uppercase">
+                        Somos la selección inteligente en servicios de tecnología.
+                    </h2>
+                    <h1 className="text-4xl md:text-5xl font-extrabold text-slate-800 mb-6 tracking-tight">
+                        Bienvenido a <span className="text-[#cc2335]">Milenio PC</span>
+                    </h1>
+                    <p className="text-lg md:text-xl text-slate-500 max-w-3xl mx-auto leading-relaxed px-4">
+                        Nuestros modelos de servicio (DaaS, Renting, Nube) están diseñados para transformar los dolores de cabeza de tu área TI en verdadera eficiencia operativa.
+                    </p>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-8 w-full max-w-4xl px-4">
+                    <button onClick={() => setCurrentView('game')} className="flex flex-col items-center justify-center p-10 bg-white rounded-3xl shadow-xl hover:shadow-2xl transition-all transform hover:-translate-y-2 border-2 border-transparent hover:border-[#008dd2] group relative overflow-hidden">
+                        <div className="absolute top-0 left-0 w-full h-2 bg-[#008dd2]"></div>
+                        <div className="bg-[#e6f4fc] w-24 h-24 flex items-center justify-center rounded-full group-hover:scale-110 transition-transform mb-6">
+                            <i className="fa-solid fa-gamepad text-5xl text-[#008dd2]"></i>
+                        </div>
+                        <h2 className="text-2xl font-bold text-[#0067b1] mb-2">Diagnóstico Interactivo</h2>
+                        <p className="text-slate-500 font-medium">Selecciona tus retos y descubre la solución ideal.</p>
+                    </button>
+
+                    <button onClick={() => setCurrentView('calculator')} className="flex flex-col items-center justify-center p-10 bg-white rounded-3xl shadow-xl hover:shadow-2xl transition-all transform hover:-translate-y-2 border-2 border-transparent hover:border-[#00b991] group relative overflow-hidden">
+                        <div className="absolute top-0 left-0 w-full h-2 bg-[#00b991]"></div>
+                        <div className="bg-[#e6f8f4] w-24 h-24 flex items-center justify-center rounded-full group-hover:scale-110 transition-transform mb-6">
+                            <i className="fa-solid fa-calculator text-5xl text-[#00b991]"></i>
+                        </div>
+                        <h2 className="text-2xl font-bold text-[#0067b1] mb-2">Calculadora de Impacto</h2>
+                        <p className="text-slate-500 font-medium">Mide el costo real de tu ineficiencia TI mensual.</p>
+                    </button>
+                </div>
+            </div>
+        );
+
+        const GameView = ({ categories, selectedCategory, setSelectedCategory, gameAnswers, setGameAnswers, setCurrentView }) => {
+            const toggleOption = (category, option) => {
+                const exists = gameAnswers.find(a => a.problem === option);
+                if (exists) {
+                    setGameAnswers(gameAnswers.filter(a => a.problem !== option));
+                } else {
+                    setGameAnswers([...gameAnswers, { category: category.title, serviceFocus: category.subtitle, problem: option }]);
                 }
-            ];
+            };
 
-            const HomeView = () => (
-                <div className="flex flex-col items-center justify-center h-full text-center space-y-8 animate-fade-in w-full">
-                    <div className="mb-8 w-full max-w-4xl mx-auto">
-                        <h2 className="text-2xl md:text-3xl font-bold text-[#0067b1] mb-6 px-4 tracking-wide uppercase">
-                            Somos la selección inteligente en servicios de tecnología.
-                        </h2>
-                        <h1 className="text-4xl md:text-5xl font-extrabold text-slate-800 mb-6 tracking-tight">
-                            Bienvenido a <span className="text-[#cc2335]">Milenio PC</span>
-                        </h1>
-                        <p className="text-lg md:text-xl text-slate-500 max-w-3xl mx-auto leading-relaxed px-4">
-                            Nuestros modelos de servicio (DaaS, Renting, Nube) están diseñados para transformar los dolores de cabeza de tu área TI en verdadera eficiencia operativa.
-                        </p>
-                    </div>
+            const isSelected = (option) => gameAnswers.some(a => a.problem === option);
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8 w-full max-w-4xl px-4">
-                        <button onClick={() => setCurrentView('game')} className="flex flex-col items-center justify-center p-10 bg-white rounded-3xl shadow-xl hover:shadow-2xl transition-all transform hover:-translate-y-2 border-2 border-transparent hover:border-[#008dd2] group relative overflow-hidden">
-                            <div className="absolute top-0 left-0 w-full h-2 bg-[#008dd2]"></div>
-                            <div className="bg-[#e6f4fc] w-24 h-24 flex items-center justify-center rounded-full group-hover:scale-110 transition-transform mb-6">
-                                <i className="fa-solid fa-gamepad text-5xl text-[#008dd2]"></i>
+            return (
+                <div className="flex flex-col items-center justify-center h-full w-full max-w-6xl mx-auto px-4 animate-fade-in pb-24">
+                    <h2 className="text-3xl md:text-4xl font-bold text-[#0067b1] mb-4 text-center">¿Cuál es el mayor obstáculo de tu área TI hoy?</h2>
+                    <p className="text-lg md:text-xl text-slate-500 mb-10 text-center">Selecciona uno o varios retos y descubre la solución ideal.</p>
+
+                    {!selectedCategory ? (
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 w-full">
+                            {categories.map((cat) => (
+                                <button type="button" key={cat.id} onClick={() => setSelectedCategory(cat)} className={`${cat.color} text-white rounded-3xl p-8 flex flex-col items-center justify-center shadow-lg transform hover:scale-105 transition-all group relative`}>
+                                    {cat.icon}
+                                    <span className="text-xl font-bold text-center mb-2 mt-2">{cat.title}</span>
+                                    <span className="text-sm opacity-80 font-medium bg-black/20 px-3 py-1 rounded-full group-hover:bg-black/30 transition-colors">
+                                        {cat.subtitle.replace('Ideal para: ', '')}
+                                    </span>
+                                    {gameAnswers.some(a => a.category === cat.title) && (
+                                        <div className="absolute -top-3 -right-3 bg-[#cc2335] text-white w-8 h-8 rounded-full flex items-center justify-center font-bold shadow-lg border-2 border-white">
+                                            {gameAnswers.filter(a => a.category === cat.title).length}
+                                        </div>
+                                    )}
+                                </button>
+                            ))}
+                        </div>
+                    ) : (
+                        <div className="w-full max-w-4xl mx-auto animate-fade-in bg-white p-6 md:p-8 rounded-3xl shadow-xl">
+                            <div className="flex flex-col md:flex-row items-center justify-between mb-8 pb-4 border-b border-slate-100 gap-4">
+                                <div className="flex items-center text-center md:text-left">
+                                    <div className={`p-4 rounded-xl text-white mr-4 ${selectedCategory.color} hidden md:block`}>
+                                        {selectedCategory.icon}
+                                    </div>
+                                    <div>
+                                        <h3 className="text-2xl md:text-3xl font-bold text-[#0067b1]">{selectedCategory.title}</h3>
+                                        <p className="text-slate-500 font-medium">{selectedCategory.subtitle}</p>
+                                    </div>
+                                </div>
+                                <button type="button" onClick={() => setSelectedCategory(null)} className="text-slate-400 hover:text-[#0067b1] font-bold px-4 py-2 rounded-lg bg-slate-50 hover:bg-[#e6f4fc] transition-colors flex items-center">
+                                    <i className="fa-solid fa-arrow-left mr-2"></i> Volver a categorías
+                                </button>
                             </div>
-                            <h2 className="text-2xl font-bold text-[#0067b1] mb-2">Diagnóstico Interactivo</h2>
-                            <p className="text-slate-500 font-medium">Selecciona tus retos y descubre la solución ideal.</p>
-                        </button>
-
-                        <button onClick={() => setCurrentView('calculator')} className="flex flex-col items-center justify-center p-10 bg-white rounded-3xl shadow-xl hover:shadow-2xl transition-all transform hover:-translate-y-2 border-2 border-transparent hover:border-[#00b991] group relative overflow-hidden">
-                            <div className="absolute top-0 left-0 w-full h-2 bg-[#00b991]"></div>
-                            <div className="bg-[#e6f8f4] w-24 h-24 flex items-center justify-center rounded-full group-hover:scale-110 transition-transform mb-6">
-                                <i className="fa-solid fa-calculator text-5xl text-[#00b991]"></i>
+                            
+                            <h4 className="text-xl text-slate-700 mb-6 font-semibold text-center md:text-left">Selecciona las situaciones que presentas:</h4>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                {selectedCategory.options.map((opt, idx) => {
+                                    const selected = isSelected(opt);
+                                    return (
+                                        <button type="button" key={idx} onClick={() => toggleOption(selectedCategory, opt)} 
+                                            className={`p-6 rounded-2xl border-2 transition-all flex justify-between items-center group shadow-sm ${
+                                                selected 
+                                                ? 'border-[#008dd2] bg-[#008dd2] text-white shadow-md transform scale-[1.02]' 
+                                                : 'border-transparent bg-slate-50 hover:border-[#008dd2] hover:bg-[#e6f4fc] text-slate-700 hover:text-[#0067b1]'
+                                            }`}>
+                                            <span className="font-medium text-left">{opt}</span>
+                                            {selected ? <i className="fa-solid fa-check text-white text-xl"></i> : <i className="fa-solid fa-plus text-slate-300 group-hover:text-[#008dd2]"></i>}
+                                        </button>
+                                    );
+                                })}
                             </div>
-                            <h2 className="text-2xl font-bold text-[#0067b1] mb-2">Calculadora de Impacto</h2>
-                            <p className="text-slate-500 font-medium">Mide el costo real de tu ineficiencia TI mensual.</p>
-                        </button>
-                    </div>
+                            
+                            <div className="mt-8 flex justify-center md:justify-end">
+                                <button type="button" onClick={() => setSelectedCategory(null)} className="bg-slate-800 hover:bg-black text-white font-bold py-3 px-6 rounded-xl transition-all shadow-md flex items-center group">
+                                    Ver otras categorías <i className="fa-solid fa-layer-group ml-3 group-hover:scale-110 transition-transform"></i>
+                                </button>
+                            </div>
+                        </div>
+                    )}
+
+                    {gameAnswers.length > 0 && (
+                        <div className="fixed bottom-0 left-0 w-full bg-white/90 backdrop-blur-md border-t border-slate-200 p-4 shadow-[0_-10px_20px_rgba(0,0,0,0.05)] flex justify-center z-50 animate-fade-in">
+                            <button type="button" onClick={() => setCurrentView('lead_capture')} className="bg-[#cc2335] hover:bg-red-700 text-white px-8 py-4 rounded-2xl font-black text-xl md:text-2xl transition-all shadow-xl hover:shadow-red-500/30 flex items-center transform hover:scale-105">
+                                Finalizar Diagnóstico ({gameAnswers.length}) <i className="fa-solid fa-arrow-right ml-3"></i>
+                            </button>
+                        </div>
+                    )}
                 </div>
             );
+        };
 
-            const GameView = () => {
-                const toggleOption = (category, option) => {
-                    const exists = gameAnswers.find(a => a.problem === option);
-                    if (exists) {
-                        setGameAnswers(gameAnswers.filter(a => a.problem !== option));
-                    } else {
-                        setGameAnswers([...gameAnswers, { category: category.title, serviceFocus: category.subtitle, problem: option }]);
-                    }
-                };
+        const CalculatorView = ({ setCalcAnswers, calcAnswers, setCurrentView }) => {
+            // Estado local de la calculadora
+            const [calcState, setCalcState] = useState({ users: 50, costPerHour: 25000, downtimeHours: 4, complexity: 'media' });
+            const [showResult, setShowResult] = useState(false);
 
-                const isSelected = (option) => gameAnswers.some(a => a.problem === option);
+            const handleCalculate = () => {
+                let multiplier = calcState.complexity === 'alta' ? 1.5 : (calcState.complexity === 'baja' ? 0.8 : 1);
+                const totalLoss = (calcState.users * calcState.costPerHour * calcState.downtimeHours) * multiplier;
+                
+                let profile = "", pitch = "", solution = "";
+                if (calcState.users >= 150 || calcState.complexity === 'alta') {
+                    profile = "Riesgo Financiero Alto (Operación Crítica)";
+                    solution = "Alianza Estratégica DaaS + Renting Milenio PC";
+                    pitch = `Al no contar con nosotros, su empresa está dejando sobre la mesa más de $${new Intl.NumberFormat('es-CO').format(totalLoss)} COP mensuales. Como su aliado estratégico, Milenio PC asume la gestión total de sus equipos, garantizando continuidad y blindando su operación para que detenga esta fuga de capital hoy mismo.`;
+                } else if (calcState.downtimeHours >= 10) {
+                    profile = "Alta Ineficiencia Operativa";
+                    solution = "Mesa de Ayuda Gestionada + Cloud Milenio PC";
+                    pitch = `Las fallas tecnológicas le están costando muy caro. Al no tener a Milenio PC como aliado, su equipo pierde tiempo valioso apagando incendios. Nuestra Mesa de Ayuda y soluciones Cloud reducen drásticamente esas horas perdidas, convirtiendo sus pérdidas en productividad real.`;
+                } else {
+                    profile = "Fuga de Capital Silenciosa";
+                    solution = "Renting de Tecnología Milenio PC";
+                    pitch = `Incluso con problemas "menores", la falta de un aliado tecnológico le cuesta millones. Con nuestro modelo de Renting, estandarizamos su parque informático, incluimos soporte inmediato y detenemos esta fuga mensual para que usted se enfoque exclusivamente en crecer su negocio.`;
+                }
 
-                return (
-                    <div className="flex flex-col items-center justify-center h-full w-full max-w-6xl mx-auto px-4 animate-fade-in pb-24">
-                        <h2 className="text-3xl md:text-4xl font-bold text-[#0067b1] mb-4 text-center">¿Cuál es el mayor obstáculo de tu área TI hoy?</h2>
-                        <p className="text-lg md:text-xl text-slate-500 mb-10 text-center">Selecciona uno o varios retos y descubre la solución ideal.</p>
-
-                        {!selectedCategory ? (
-                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 w-full">
-                                {categories.map((cat) => (
-                                    <button type="button" key={cat.id} onClick={() => setSelectedCategory(cat)} className={`${cat.color} text-white rounded-3xl p-8 flex flex-col items-center justify-center shadow-lg transform hover:scale-105 transition-all group relative`}>
-                                        {cat.icon}
-                                        <span className="text-xl font-bold text-center mb-2 mt-2">{cat.title}</span>
-                                        <span className="text-sm opacity-80 font-medium bg-black/20 px-3 py-1 rounded-full group-hover:bg-black/30 transition-colors">
-                                            {cat.subtitle.replace('Ideal para: ', '')}
-                                        </span>
-                                        {gameAnswers.some(a => a.category === cat.title) && (
-                                            <div className="absolute -top-3 -right-3 bg-[#cc2335] text-white w-8 h-8 rounded-full flex items-center justify-center font-bold shadow-lg border-2 border-white">
-                                                {gameAnswers.filter(a => a.category === cat.title).length}
-                                            </div>
-                                        )}
-                                    </button>
-                                ))}
-                            </div>
-                        ) : (
-                            <div className="w-full max-w-4xl mx-auto animate-fade-in bg-white p-6 md:p-8 rounded-3xl shadow-xl">
-                                <div className="flex flex-col md:flex-row items-center justify-between mb-8 pb-4 border-b border-slate-100 gap-4">
-                                    <div className="flex items-center text-center md:text-left">
-                                        <div className={`p-4 rounded-xl text-white mr-4 ${selectedCategory.color} hidden md:block`}>
-                                            {selectedCategory.icon}
-                                        </div>
-                                        <div>
-                                            <h3 className="text-2xl md:text-3xl font-bold text-[#0067b1]">{selectedCategory.title}</h3>
-                                            <p className="text-slate-500 font-medium">{selectedCategory.subtitle}</p>
-                                        </div>
-                                    </div>
-                                    <button type="button" onClick={() => setSelectedCategory(null)} className="text-slate-400 hover:text-[#0067b1] font-bold px-4 py-2 rounded-lg bg-slate-50 hover:bg-[#e6f4fc] transition-colors flex items-center">
-                                        <i className="fa-solid fa-arrow-left mr-2"></i> Volver a categorías
-                                    </button>
-                                </div>
-                                
-                                <h4 className="text-xl text-slate-700 mb-6 font-semibold text-center md:text-left">Selecciona las situaciones que presentas:</h4>
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                    {selectedCategory.options.map((opt, idx) => {
-                                        const selected = isSelected(opt);
-                                        return (
-                                            <button type="button" key={idx} onClick={() => toggleOption(selectedCategory, opt)} 
-                                                className={`p-6 rounded-2xl border-2 transition-all flex justify-between items-center group shadow-sm ${
-                                                    selected 
-                                                    ? 'border-[#008dd2] bg-[#008dd2] text-white shadow-md transform scale-[1.02]' 
-                                                    : 'border-transparent bg-slate-50 hover:border-[#008dd2] hover:bg-[#e6f4fc] text-slate-700 hover:text-[#0067b1]'
-                                                }`}>
-                                                <span className="font-medium text-left">{opt}</span>
-                                                {selected ? <i className="fa-solid fa-check text-white text-xl"></i> : <i className="fa-solid fa-plus text-slate-300 group-hover:text-[#008dd2]"></i>}
-                                            </button>
-                                        );
-                                    })}
-                                </div>
-                                
-                                {/* BOTÓN DE NAVEGACIÓN - LA SELECCIÓN ES AUTOMÁTICA */}
-                                <div className="mt-8 flex justify-center md:justify-end">
-                                    <button type="button" onClick={() => setSelectedCategory(null)} className="bg-slate-800 hover:bg-black text-white font-bold py-3 px-6 rounded-xl transition-all shadow-md flex items-center group">
-                                        Ver otras categorías <i className="fa-solid fa-layer-group ml-3 group-hover:scale-110 transition-transform"></i>
-                                    </button>
-                                </div>
-                            </div>
-                        )}
-
-                        {/* Botón flotante para Finalizar */}
-                        {gameAnswers.length > 0 && (
-                            <div className="fixed bottom-0 left-0 w-full bg-white/90 backdrop-blur-md border-t border-slate-200 p-4 shadow-[0_-10px_20px_rgba(0,0,0,0.05)] flex justify-center z-50 animate-fade-in">
-                                <button type="button" onClick={() => setCurrentView('lead_capture')} className="bg-[#cc2335] hover:bg-red-700 text-white px-8 py-4 rounded-2xl font-black text-xl md:text-2xl transition-all shadow-xl hover:shadow-red-500/30 flex items-center transform hover:scale-105">
-                                    Finalizar Diagnóstico ({gameAnswers.length}) <i className="fa-solid fa-arrow-right ml-3"></i>
-                                </button>
-                            </div>
-                        )}
-                    </div>
-                );
+                // Guardamos en el cerebro principal, pero la pantalla NO se reinicia
+                setCalcAnswers({ ...calcState, estimatedLoss: totalLoss, profile, pitch, solution });
+                setShowResult(true);
             };
 
-            const CalculatorView = () => {
-                const [calcState, setCalcState] = useState({ users: 50, costPerHour: 25000, downtimeHours: 4, complexity: 'media' });
-                const [showResult, setShowResult] = useState(false);
+            return (
+                <div className="w-full max-w-4xl mx-auto bg-white rounded-3xl shadow-2xl p-6 md:p-12 animate-fade-in relative overflow-hidden mb-10">
+                    <div className="absolute top-0 right-0 w-32 h-32 bg-slate-50 rounded-bl-full -z-10"></div>
+                    <h2 className="text-2xl md:text-3xl font-bold text-[#0067b1] mb-8 flex items-center">
+                        <i className="fa-solid fa-calculator text-[#00b991] text-3xl mr-4"></i>
+                        Análisis de Impacto Financiero TI
+                    </h2>
 
-                const handleCalculate = () => {
-                    let multiplier = calcState.complexity === 'alta' ? 1.5 : (calcState.complexity === 'baja' ? 0.8 : 1);
-                    const totalLoss = (calcState.users * calcState.costPerHour * calcState.downtimeHours) * multiplier;
-                    
-                    let profile = "", pitch = "", solution = "";
-                    if (calcState.users >= 150 || calcState.complexity === 'alta') {
-                        profile = "Operación Crítica / Enterprise";
-                        solution = "Modelo DaaS Integral + Renting Corporativo";
-                        pitch = "Con una operación tan grande, la inactividad cuesta millones. Milenio PC asume la gestión total de tus equipos mediante DaaS, garantizando SLAs estrictos y renovación tecnológica sin descapitalización.";
-                    } else if (calcState.downtimeHours >= 10) {
-                        profile = "Alta Ineficiencia Operativa";
-                        solution = "Mesa de Ayuda Gestionada + Soluciones Cloud";
-                        pitch = "El equipo TI actual está apagando incendios. Nuestro servicio de Mesa de Ayuda tercerizada y migración a la nube estabilizará la infraestructura, reduciendo radicalmente estas horas perdidas.";
-                    } else {
-                        profile = "Crecimiento Estratégico";
-                        solution = "Renting de Tecnología + Alquiler";
-                        pitch = "Invertir en comprar equipos frena tu flujo de caja. Con nuestro Renting de tecnología, estandarizamos tu parque informático con soporte incluido, para que solo te preocupes por crecer.";
-                    }
-
-                    setCalcAnswers({ ...calcState, estimatedLoss: totalLoss, profile, pitch, solution });
-                    setShowResult(true);
-                };
-
-                return (
-                    <div className="w-full max-w-4xl mx-auto bg-white rounded-3xl shadow-2xl p-6 md:p-12 animate-fade-in relative overflow-hidden mb-10">
-                        <div className="absolute top-0 right-0 w-32 h-32 bg-slate-50 rounded-bl-full -z-10"></div>
-                        <h2 className="text-2xl md:text-3xl font-bold text-[#0067b1] mb-8 flex items-center">
-                            <i className="fa-solid fa-calculator text-[#00b991] text-3xl mr-4"></i>
-                            Análisis de Impacto Financiero TI
-                        </h2>
-
-                        {!showResult ? (
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                                <div className="space-y-8">
-                                    <div>
-                                        <label className="block text-sm font-bold text-slate-700 mb-4">Número de Usuarios (Computadores)</label>
-                                        <input type="range" min="10" max="1000" step="10" value={calcState.users} onChange={(e) => setCalcState({...calcState, users: parseInt(e.target.value)})} className="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-[#00b991]" />
-                                        <div className="mt-2 text-xl font-black text-[#00b991] flex items-center"><i className="fa-solid fa-user mr-2 text-lg"></i> {calcState.users} Empleados</div>
-                                    </div>
-                                    <div>
-                                        <label className="block text-sm font-bold text-slate-700 mb-4">Horas de caída/lentitud TI por empleado (Al mes)</label>
-                                        <input type="range" min="1" max="40" value={calcState.downtimeHours} onChange={(e) => setCalcState({...calcState, downtimeHours: parseInt(e.target.value)})} className="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-[#008dd2]" />
-                                        <div className="mt-2 text-xl font-black text-[#008dd2] flex items-center"><i className="fa-solid fa-triangle-exclamation mr-2 text-lg"></i> {calcState.downtimeHours} Horas perdidas</div>
-                                    </div>
+                    {!showResult ? (
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                            <div className="space-y-8">
+                                <div>
+                                    <label className="block text-sm font-bold text-slate-700 mb-4">Número de Usuarios (Computadores)</label>
+                                    <input type="range" min="10" max="1000" step="10" value={calcState.users} onChange={(e) => setCalcState({...calcState, users: parseInt(e.target.value)})} className="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-[#00b991]" />
+                                    <div className="mt-2 text-xl font-black text-[#00b991] flex items-center"><i className="fa-solid fa-user mr-2 text-lg"></i> {calcState.users} Empleados</div>
                                 </div>
-
-                                <div className="space-y-8 bg-slate-50 p-6 rounded-2xl border border-slate-100">
-                                    <div>
-                                        <label className="block text-sm font-bold text-slate-700 mb-2">Costo promedio por empleado (Hora COP)</label>
-                                        <p className="text-xs text-slate-500 mb-3">Incluye salario + carga prestacional.</p>
-                                        <div className="relative">
-                                            <span className="absolute left-4 top-3 text-slate-400 font-bold">$</span>
-                                            <input type="number" value={calcState.costPerHour} onChange={(e) => setCalcState({...calcState, costPerHour: parseInt(e.target.value)})} className="pl-8 w-full p-3 border-2 border-slate-200 rounded-xl focus:border-[#00b991] focus:ring-0 focus:outline-none font-bold text-slate-700" />
-                                        </div>
-                                    </div>
-                                    <div>
-                                        <label className="block text-sm font-bold text-slate-700 mb-2">Complejidad de la Operación</label>
-                                        <select value={calcState.complexity} onChange={(e) => setCalcState({...calcState, complexity: e.target.value})} className="w-full p-3 border-2 border-slate-200 rounded-xl focus:border-[#00b991] focus:ring-0 focus:outline-none font-bold text-slate-700 bg-white">
-                                            <option value="baja">Baja (Oficina, procesos estándar)</option>
-                                            <option value="media">Media (Ventas, sistemas integrados)</option>
-                                            <option value="alta">Alta (Producción 24/7, logística, finanzas)</option>
-                                        </select>
-                                    </div>
-                                </div>
-
-                                <div className="md:col-span-2 mt-4">
-                                    <button onClick={handleCalculate} className="w-full py-5 bg-[#00b991] hover:bg-emerald-600 text-white rounded-2xl font-black text-xl transition-all shadow-lg hover:shadow-emerald-500/30 flex justify-center items-center">
-                                        <i className="fa-solid fa-arrow-trend-up mr-3"></i> Calcular Fuga de Capital
-                                    </button>
+                                <div>
+                                    <label className="block text-sm font-bold text-slate-700 mb-4">Horas de caída/lentitud TI por empleado (Al mes)</label>
+                                    <input type="range" min="1" max="40" value={calcState.downtimeHours} onChange={(e) => setCalcState({...calcState, downtimeHours: parseInt(e.target.value)})} className="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-[#008dd2]" />
+                                    <div className="mt-2 text-xl font-black text-[#008dd2] flex items-center"><i className="fa-solid fa-triangle-exclamation mr-2 text-lg"></i> {calcState.downtimeHours} Horas perdidas</div>
                                 </div>
                             </div>
-                        ) : (
-                            <div className="animate-fade-in">
-                                <div className="text-center mb-8">
-                                    <p className="text-lg font-semibold text-slate-500 uppercase tracking-wider mb-2">Pérdida Económica Estimada:</p>
-                                    <div className="text-5xl md:text-6xl font-black text-[#cc2335] mb-2 drop-shadow-sm">
-                                        ${new Intl.NumberFormat('es-CO').format(calcAnswers.estimatedLoss)} <span className="text-xl md:text-2xl text-slate-500 font-bold block mt-2">COP / Mensuales</span>
+
+                            <div className="space-y-8 bg-slate-50 p-6 rounded-2xl border border-slate-100">
+                                <div>
+                                    <label className="block text-sm font-bold text-slate-700 mb-2">Costo promedio por empleado (Hora COP)</label>
+                                    <p className="text-xs text-slate-500 mb-3">Incluye salario + carga prestacional.</p>
+                                    <div className="relative">
+                                        <span className="absolute left-4 top-3 text-slate-400 font-bold">$</span>
+                                        <input type="number" value={calcState.costPerHour} onChange={(e) => setCalcState({...calcState, costPerHour: parseInt(e.target.value)})} className="pl-8 w-full p-3 border-2 border-slate-200 rounded-xl focus:border-[#00b991] focus:ring-0 focus:outline-none font-bold text-slate-700" />
                                     </div>
                                 </div>
-                                
-                                <div className="bg-gradient-to-br from-[#0067b1] to-[#008dd2] p-6 md:p-8 rounded-3xl mb-8 shadow-2xl relative overflow-hidden text-white">
-                                    <div className="absolute top-0 right-0 p-4 opacity-10"><i className="fa-solid fa-shield-halved text-8xl"></i></div>
-                                    <h3 className="text-xl font-bold text-blue-100 mb-1 uppercase tracking-wider">Diagnóstico Milenio PC:</h3>
-                                    <h4 className="text-2xl md:text-3xl font-black mb-4">{calcAnswers.profile}</h4>
-                                    
-                                    <div className="bg-white/10 p-5 rounded-2xl border border-white/20 mb-6 backdrop-blur-sm">
-                                        <p className="text-lg leading-relaxed">{calcAnswers.pitch}</p>
-                                    </div>
-
-                                    <div className="flex flex-col md:flex-row items-start md:items-center">
-                                        <div className="bg-emerald-500 text-white font-bold px-4 py-2 rounded-lg text-sm mr-4 mb-2 md:mb-0 shadow-md uppercase tracking-wide whitespace-nowrap">
-                                            Solución Ideal
-                                        </div>
-                                        <p className="font-bold text-lg md:text-xl">{calcAnswers.solution}</p>
-                                    </div>
+                                <div>
+                                    <label className="block text-sm font-bold text-slate-700 mb-2">Complejidad de la Operación</label>
+                                    <select value={calcState.complexity} onChange={(e) => setCalcState({...calcState, complexity: e.target.value})} className="w-full p-3 border-2 border-slate-200 rounded-xl focus:border-[#00b991] focus:ring-0 focus:outline-none font-bold text-slate-700 bg-white">
+                                        <option value="baja">Baja (Oficina, procesos estándar)</option>
+                                        <option value="media">Media (Ventas, sistemas integrados)</option>
+                                        <option value="alta">Alta (Producción 24/7, logística, finanzas)</option>
+                                    </select>
                                 </div>
+                            </div>
 
-                                <button onClick={() => setCurrentView('lead_capture')} className="w-full py-5 bg-slate-800 hover:bg-black text-white rounded-2xl font-black text-xl transition-all flex justify-center items-center shadow-xl group">
-                                    Registrar Cliente y Solución <i className="fa-solid fa-arrow-right ml-3 group-hover:translate-x-2 transition-transform"></i>
+                            <div className="md:col-span-2 mt-4">
+                                <button type="button" onClick={handleCalculate} className="w-full py-5 bg-[#00b991] hover:bg-emerald-600 text-white rounded-2xl font-black text-xl transition-all shadow-lg hover:shadow-emerald-500/30 flex justify-center items-center">
+                                    <i className="fa-solid fa-arrow-trend-up mr-3"></i> Calcular Fuga de Capital
                                 </button>
                             </div>
-                        )}
-                    </div>
-                );
-            };
+                        </div>
+                    ) : (
+                        <div className="animate-fade-in">
+                            <div className="text-center mb-8 bg-red-50 p-6 rounded-3xl border border-red-100">
+                                <p className="text-lg md:text-xl font-bold text-[#cc2335] uppercase tracking-wider mb-4">
+                                    <i className="fa-solid fa-triangle-exclamation mr-2"></i>
+                                    Dinero que está perdiendo al mes por no tener a Milenio PC como aliado estratégico:
+                                </p>
+                                <div className="text-5xl md:text-7xl font-black text-[#cc2335] mb-2 drop-shadow-sm tracking-tighter">
+                                    ${new Intl.NumberFormat('es-CO').format(calcAnswers?.estimatedLoss)}
+                                </div>
+                                <span className="text-xl md:text-2xl text-red-800 font-bold block mt-2">COP / Mensuales</span>
+                                <p className="text-sm text-red-400 mt-4 font-medium">* Cálculo aproximado basado en tiempos inactivos, costos de nómina y complejidad.</p>
+                            </div>
+                            
+                            <div className="bg-gradient-to-br from-[#0067b1] to-[#008dd2] p-6 md:p-8 rounded-3xl mb-8 shadow-2xl relative overflow-hidden text-white">
+                                <div className="absolute top-0 right-0 p-4 opacity-10"><i className="fa-solid fa-handshake text-8xl"></i></div>
+                                <h3 className="text-xl font-bold text-blue-100 mb-1 uppercase tracking-wider">Análisis de la Alianza:</h3>
+                                <h4 className="text-2xl md:text-3xl font-black mb-4">{calcAnswers?.profile}</h4>
+                                
+                                <div className="bg-white/10 p-5 rounded-2xl border border-white/20 mb-6 backdrop-blur-sm">
+                                    <p className="text-lg leading-relaxed">{calcAnswers?.pitch}</p>
+                                </div>
 
-            const LeadCaptureView = () => {
-                const [isScanning, setIsScanning] = useState(false);
-                const scannerRef = useRef(null);
+                                <div className="flex flex-col md:flex-row items-start md:items-center">
+                                    <div className="bg-emerald-500 text-white font-bold px-4 py-2 rounded-lg text-sm mr-4 mb-2 md:mb-0 shadow-md uppercase tracking-wide whitespace-nowrap">
+                                        Su solución estratégica
+                                    </div>
+                                    <p className="font-bold text-lg md:text-xl">{calcAnswers?.solution}</p>
+                                </div>
+                            </div>
 
-                const handleSubmit = (e) => {
-                    if(e) e.preventDefault();
-                    
-                    const formatDiagnostico = () => {
-                        if (gameAnswers.length > 0) return gameAnswers.map(a => `[${a.category}] ${a.problem}`).join(' | ');
-                        if (calcAnswers) return `Perfil: ${calcAnswers.profile} | Pérdida: $${calcAnswers.estimatedLoss}`;
-                        return 'N/A';
-                    };
+                            <button type="button" onClick={() => setCurrentView('lead_capture')} className="w-full py-5 bg-slate-800 hover:bg-black text-white rounded-2xl font-black text-xl transition-all flex justify-center items-center shadow-xl group">
+                                Registrar Cliente y Solución <i className="fa-solid fa-arrow-right ml-3 group-hover:translate-x-2 transition-transform"></i>
+                            </button>
+                        </div>
+                    )}
+                </div>
+            );
+        };
 
-                    const payload = {
-                        contacto: leadData,
-                        origen: gameAnswers.length > 0 ? 'Juego Rompehielos (Multi)' : 'Calculadora de Impacto',
-                        detalle_diagnostico: formatDiagnostico()
-                    };
+        const LeadCaptureView = ({ leadData, setLeadData, gameAnswers, calcAnswers, setCurrentView }) => {
+            const [isScanning, setIsScanning] = useState(false);
+            const [cameraError, setCameraError] = useState('');
+            const [isSubmitting, setIsSubmitting] = useState(false);
+            const scannerRef = useRef(null);
 
-                    // AQUÍ ESTÁ EL CÓDIGO DE ENVÍO. 
-                    // Cuando crees tu cuenta en Formspree, pega el enlace aquí abajo:
-                    /*
-                    fetch("TU_URL_DE_FORMSPREE_AQUI", {
-                        method: "POST",
-                        headers: { "Content-Type": "application/json" },
-                        body: JSON.stringify(payload)
-                    });
-                    */
-                    
-                    console.log("== DATOS CAPTURADOS ==", payload);
-                    setTimeout(() => setCurrentView('success'), 800);
+            const handleSubmit = (e) => {
+                if(e) e.preventDefault();
+                
+                if (!leadData.name || !leadData.company || !leadData.email) {
+                    setCameraError("Por favor completa los tres campos de texto o usa el botón azul para simular.");
+                    return;
+                }
+                
+                setIsSubmitting(true);
+                setCameraError('');
+
+                const formatDiagnostico = () => {
+                    if (gameAnswers.length > 0) return gameAnswers.map(a => `[${a.category}] ${a.problem}`).join(' | ');
+                    if (calcAnswers) return `Perfil: ${calcAnswers.profile} | Pérdida: $${calcAnswers.estimatedLoss}`;
+                    return 'N/A';
                 };
 
-                const startCamera = () => {
-                    setIsScanning(true);
-                    // Damos 200ms para que React renderice el contenedor del lector
-                    setTimeout(() => {
+                const payload = {
+                    contacto: leadData,
+                    origen: gameAnswers.length > 0 ? 'Juego Rompehielos' : 'Calculadora de Impacto',
+                    detalle_diagnostico: formatDiagnostico()
+                };
+
+                // AQUÍ ESTÁ EL CÓDIGO DE ENVÍO FORMSPREE (Para cuando subas a GitHub Pages)
+                console.log("== DATOS CAPTURADOS ==", payload);
+                
+                setTimeout(() => {
+                    setIsSubmitting(false);
+                    setCurrentView('success');
+                }, 1500);
+            };
+
+            const startCamera = () => {
+                setIsScanning(true);
+                setCameraError('');
+                setTimeout(() => {
+                    try {
+                        if (typeof Html5Qrcode === 'undefined') {
+                            throw new Error("Librería bloqueada en vista previa");
+                        }
+                        
                         scannerRef.current = new Html5Qrcode("qr-reader");
                         scannerRef.current.start(
                             { facingMode: "environment" },
                             { fps: 10, qrbox: { width: 250, height: 250 } },
                             (decodedText) => {
-                                // ¡BINGO! Encontró y leyó un código QR
                                 try {
-                                    // Intentamos interpretarlo como datos estructurados (JSON)
                                     const data = JSON.parse(decodedText);
                                     setLeadData({
                                         name: data.name || '',
@@ -365,104 +374,134 @@
                                         email: data.email || ''
                                     });
                                 } catch (e) {
-                                    // Si no es JSON (ej. texto plano), lo pone en el campo de nombre para que veas que sí leyó algo
                                     setLeadData(prev => ({...prev, name: decodedText}));
                                 }
                                 stopCamera();
                             },
-                            (errorMessage) => {
-                                // Ignoramos errores menores de enfoque mientras escanea
-                            }
+                            () => {} // Ignorar errores de foco
                         ).catch((err) => {
-                            console.error("Error al acceder a la cámara:", err);
+                            console.error("Error de cámara:", err);
+                            setCameraError("El navegador bloqueó la cámara por seguridad. Por favor usa el botón azul de 'Simular Escaneo'.");
                             setIsScanning(false);
                         });
-                    }, 200);
-                };
-
-                const stopCamera = () => {
-                    if (scannerRef.current) {
-                        scannerRef.current.stop().then(() => {
-                            scannerRef.current.clear();
-                            setIsScanning(false);
-                        }).catch(err => console.error(err));
-                    } else {
+                    } catch (err) {
+                        setCameraError("Error de cámara. Por favor usa el botón azul de 'Simular Escaneo'.");
                         setIsScanning(false);
                     }
-                };
-
-                const simulateQRSuccess = () => {
-                    stopCamera();
-                    setLeadData({ name: 'Asistente Andicom 2024', company: 'Corporación Demo SAS', email: 'contacto@corporaciondemo.com' });
-                };
-
-                return (
-                    <div className="w-full max-w-xl mx-auto bg-white rounded-3xl shadow-2xl p-6 md:p-10 animate-fade-in border border-slate-100 mb-10">
-                        <h2 className="text-2xl md:text-3xl font-black text-[#0067b1] mb-2 text-center">¡Último Paso!</h2>
-                        <p className="text-slate-500 text-center mb-8 font-medium">Capturemos tus datos para enviarte nuestra propuesta personalizada.</p>
-
-                        <div className="mb-8">
-                            {!isScanning ? (
-                                <button type="button" onClick={startCamera} className="w-full flex items-center justify-center py-4 bg-slate-800 hover:bg-black text-white rounded-2xl font-bold transition-all shadow-lg text-lg">
-                                    <i className="fa-solid fa-qrcode mr-3 text-[#00b991] text-xl"></i>
-                                    Escanear Escarapela
-                                </button>
-                            ) : (
-                                <div className="relative rounded-2xl overflow-hidden bg-slate-900 flex flex-col items-center justify-center shadow-inner border-4 border-slate-800">
-                                    {/* Contenedor donde la librería inyectará el video en vivo */}
-                                    <div id="qr-reader" className="w-full min-h-[250px] bg-black"></div>
-                                    
-                                    <div className="p-4 w-full flex space-x-4 bg-slate-900 justify-center">
-                                        <button type="button" onClick={simulateQRSuccess} className="bg-[#00b991] hover:bg-emerald-500 text-white px-4 md:px-6 py-2 rounded-xl text-sm font-bold shadow-xl transition-colors">Bypass Manual</button>
-                                        <button type="button" onClick={stopCamera} className="bg-[#cc2335] hover:bg-red-600 text-white px-4 py-2 rounded-xl text-sm font-bold shadow-xl transition-colors"><i className="fa-solid fa-xmark"></i> Cerrar Cámara</button>
-                                    </div>
-                                </div>
-                            )}
-
-                            <div className="relative flex py-6 items-center">
-                                <div className="flex-grow border-t-2 border-slate-100"></div>
-                                <span className="flex-shrink-0 mx-4 text-slate-400 font-bold uppercase tracking-wider text-xs">O Ingreso Manual</span>
-                                <div className="flex-grow border-t-2 border-slate-100"></div>
-                            </div>
-                        </div>
-
-                        <form onSubmit={handleSubmit} className="space-y-5">
-                            <div className="relative">
-                                <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none"><i className="fa-solid fa-user text-[#008dd2] text-lg"></i></div>
-                                <input required type="text" placeholder="Nombre completo" value={leadData.name} onChange={(e) => setLeadData({...leadData, name: e.target.value})} className="pl-12 w-full p-4 border-2 border-slate-200 rounded-2xl focus:border-[#0067b1] focus:ring-0 focus:outline-none font-bold text-slate-700 bg-slate-50 focus:bg-white transition-colors" />
-                            </div>
-                            <div className="relative">
-                                <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none"><i className="fa-solid fa-building text-[#008dd2] text-lg"></i></div>
-                                <input required type="text" placeholder="Empresa" value={leadData.company} onChange={(e) => setLeadData({...leadData, company: e.target.value})} className="pl-12 w-full p-4 border-2 border-slate-200 rounded-2xl focus:border-[#0067b1] focus:ring-0 focus:outline-none font-bold text-slate-700 bg-slate-50 focus:bg-white transition-colors" />
-                            </div>
-                            <div className="relative">
-                                <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none"><i className="fa-solid fa-envelope text-[#008dd2] text-lg"></i></div>
-                                <input required type="email" placeholder="Correo corporativo" value={leadData.email} onChange={(e) => setLeadData({...leadData, email: e.target.value})} className="pl-12 w-full p-4 border-2 border-slate-200 rounded-2xl focus:border-[#0067b1] focus:ring-0 focus:outline-none font-bold text-slate-700 bg-slate-50 focus:bg-white transition-colors" />
-                            </div>
-
-                            <button type="submit" className="w-full py-5 bg-[#cc2335] hover:bg-red-700 text-white rounded-2xl font-black text-xl transition-all mt-8 shadow-xl hover:shadow-red-500/30">
-                                Finalizar Registro
-                            </button>
-                        </form>
-                    </div>
-                );
+                }, 300);
             };
 
-            const SuccessView = () => (
-                <div className="flex flex-col items-center justify-center h-full text-center animate-fade-in w-full max-w-2xl mx-auto px-4 pb-10">
-                    <div className="bg-white p-10 md:p-12 rounded-full shadow-2xl mb-8 relative">
-                        <div className="absolute inset-0 border-4 border-[#00b991] rounded-full animate-ping opacity-20"></div>
-                        <i className="fa-solid fa-circle-check text-8xl text-[#00b991] relative z-10"></i>
+            const stopCamera = () => {
+                if (scannerRef.current) {
+                    scannerRef.current.stop().then(() => {
+                        scannerRef.current.clear();
+                        setIsScanning(false);
+                    }).catch(err => console.error(err));
+                } else {
+                    setIsScanning(false);
+                }
+            };
+
+            const simulateQRSuccess = () => {
+                stopCamera();
+                setCameraError('');
+                setLeadData({ name: 'Asistente VIP Andicom', company: 'Empresa Demo SAS', email: 'contacto@empresademo.com' });
+            };
+
+            return (
+                <div className="w-full max-w-xl mx-auto bg-white rounded-3xl shadow-2xl p-6 md:p-10 animate-fade-in border border-slate-100 mb-10">
+                    <h2 className="text-2xl md:text-3xl font-black text-[#0067b1] mb-2 text-center">¡Último Paso!</h2>
+                    <p className="text-slate-500 text-center mb-8 font-medium">Capturemos tus datos para enviarte nuestra propuesta personalizada.</p>
+
+                    {cameraError && (
+                        <div className="bg-red-50 border border-red-200 text-[#cc2335] p-4 rounded-xl mb-6 text-sm font-bold text-center animate-fade-in shadow-sm">
+                            <i className="fa-solid fa-triangle-exclamation mr-2"></i> {cameraError}
+                        </div>
+                    )}
+
+                    <div className="mb-8">
+                        {!isScanning ? (
+                            <div className="flex flex-col space-y-3">
+                                <button type="button" onClick={startCamera} className="w-full flex items-center justify-center py-4 bg-slate-800 hover:bg-black text-white rounded-2xl font-bold transition-all shadow-lg text-lg">
+                                    <i className="fa-solid fa-qrcode mr-3 text-[#00b991] text-xl"></i>
+                                    Escanear Escarapela (Cámara real)
+                                </button>
+                                <button type="button" onClick={simulateQRSuccess} className="w-full flex items-center justify-center py-3 bg-[#e6f4fc] hover:bg-blue-100 text-[#0067b1] border border-[#008dd2] rounded-2xl font-bold transition-all shadow-sm text-sm">
+                                    <i className="fa-solid fa-magic mr-2"></i> Simular Escaneo (Prueba en PC)
+                                </button>
+                            </div>
+                        ) : (
+                            <div className="relative rounded-2xl overflow-hidden bg-slate-900 flex flex-col items-center justify-center shadow-inner border-4 border-slate-800">
+                                <div id="qr-reader" className="w-full min-h-[250px] bg-black"></div>
+                                <div className="p-4 w-full flex space-x-4 bg-slate-900 justify-center">
+                                    <button type="button" onClick={simulateQRSuccess} className="bg-[#00b991] hover:bg-emerald-500 text-white px-4 md:px-6 py-2 rounded-xl text-sm font-bold shadow-xl transition-colors">Bypass Manual</button>
+                                    <button type="button" onClick={stopCamera} className="bg-[#cc2335] hover:bg-red-600 text-white px-4 py-2 rounded-xl text-sm font-bold shadow-xl transition-colors"><i className="fa-solid fa-xmark"></i> Cerrar</button>
+                                </div>
+                            </div>
+                        )}
+
+                        <div className="relative flex py-6 items-center">
+                            <div className="flex-grow border-t-2 border-slate-100"></div>
+                            <span className="flex-shrink-0 mx-4 text-slate-400 font-bold uppercase tracking-wider text-xs">O Ingreso Manual</span>
+                            <div className="flex-grow border-t-2 border-slate-100"></div>
+                        </div>
                     </div>
-                    <h2 className="text-4xl md:text-5xl font-black text-[#0067b1] mb-6">¡Perfil Guardado!</h2>
-                    <p className="text-xl md:text-2xl text-slate-600 mb-12 font-medium leading-relaxed">
-                        Gracias por confiar en <span className="font-bold text-[#cc2335]">Milenio PC</span>. Uno de nuestros consultores VIP se acercará con la solución perfecta para tu operación.
-                    </p>
-                    <button onClick={() => { setLeadData({ name: '', company: '', email: '' }); setGameAnswers([]); setCalcAnswers(null); setSelectedCategory(null); setCurrentView('home'); }} className="px-10 py-5 bg-slate-100 hover:bg-slate-200 border-2 border-slate-200 text-[#0067b1] rounded-2xl font-black text-xl transition-all shadow-sm">
-                        Volver al Inicio (Nuevo Cliente)
-                    </button>
+
+                    <form onSubmit={handleSubmit} className="space-y-5">
+                        <div className="relative">
+                            <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none"><i className="fa-solid fa-user text-[#008dd2] text-lg"></i></div>
+                            <input type="text" placeholder="Nombre completo" value={leadData.name} onChange={(e) => setLeadData({...leadData, name: e.target.value})} className="pl-12 w-full p-4 border-2 border-slate-200 rounded-2xl focus:border-[#0067b1] focus:ring-0 focus:outline-none font-bold text-slate-700 bg-slate-50 focus:bg-white transition-colors" />
+                        </div>
+                        <div className="relative">
+                            <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none"><i className="fa-solid fa-building text-[#008dd2] text-lg"></i></div>
+                            <input type="text" placeholder="Empresa" value={leadData.company} onChange={(e) => setLeadData({...leadData, company: e.target.value})} className="pl-12 w-full p-4 border-2 border-slate-200 rounded-2xl focus:border-[#0067b1] focus:ring-0 focus:outline-none font-bold text-slate-700 bg-slate-50 focus:bg-white transition-colors" />
+                        </div>
+                        <div className="relative">
+                            <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none"><i className="fa-solid fa-envelope text-[#008dd2] text-lg"></i></div>
+                            <input type="email" placeholder="Correo corporativo" value={leadData.email} onChange={(e) => setLeadData({...leadData, email: e.target.value})} className="pl-12 w-full p-4 border-2 border-slate-200 rounded-2xl focus:border-[#0067b1] focus:ring-0 focus:outline-none font-bold text-slate-700 bg-slate-50 focus:bg-white transition-colors" />
+                        </div>
+
+                        <button type="submit" disabled={isSubmitting} className={`w-full py-5 rounded-2xl font-black text-xl transition-all mt-8 shadow-xl flex justify-center items-center ${isSubmitting ? 'bg-slate-400 cursor-not-allowed text-white' : 'bg-[#cc2335] hover:bg-red-700 text-white hover:shadow-red-500/30'}`}>
+                            {isSubmitting ? (
+                                <><i className="fa-solid fa-spinner animate-spin mr-3"></i> Procesando datos...</>
+                            ) : (
+                                "Finalizar Registro"
+                            )}
+                        </button>
+                    </form>
                 </div>
             );
+        };
+
+        const SuccessView = ({ setLeadData, setGameAnswers, setCalcAnswers, setSelectedCategory, setCurrentView }) => (
+            <div className="flex flex-col items-center justify-center h-full text-center animate-fade-in w-full max-w-2xl mx-auto px-4 pb-10">
+                <div className="bg-white p-10 md:p-12 rounded-full shadow-2xl mb-8 relative">
+                    <div className="absolute inset-0 border-4 border-[#00b991] rounded-full animate-ping opacity-20"></div>
+                    <i className="fa-solid fa-circle-check text-8xl text-[#00b991] relative z-10"></i>
+                </div>
+                <h2 className="text-4xl md:text-5xl font-black text-[#0067b1] mb-6">¡Perfil Guardado!</h2>
+                <p className="text-xl md:text-2xl text-slate-600 mb-12 font-medium leading-relaxed">
+                    Gracias por confiar en <span className="font-bold text-[#cc2335]">Milenio PC</span>. Uno de nuestros consultores VIP se acercará con la solución perfecta para tu operación.
+                </p>
+                <button onClick={() => { 
+                    setLeadData({ name: '', company: '', email: '' }); 
+                    setGameAnswers([]); 
+                    setCalcAnswers(null); 
+                    setSelectedCategory(null); 
+                    setCurrentView('home'); 
+                }} className="px-10 py-5 bg-slate-100 hover:bg-slate-200 border-2 border-slate-200 text-[#0067b1] rounded-2xl font-black text-xl transition-all shadow-sm">
+                    Volver al Inicio (Nuevo Cliente)
+                </button>
+            </div>
+        );
+
+        // --- CEREBRO PRINCIPAL ---
+        function MilenioAndicomApp() {
+            const [currentView, setCurrentView] = useState('home');
+            const [selectedCategory, setSelectedCategory] = useState(null);
+            const [leadData, setLeadData] = useState({ name: '', company: '', email: '' });
+            const [gameAnswers, setGameAnswers] = useState([]);
+            const [calcAnswers, setCalcAnswers] = useState(null);
 
             return (
                 <div className="min-h-screen flex flex-col">
@@ -478,11 +517,38 @@
                     </header>
 
                     <main className="flex-grow p-4 md:p-8 overflow-y-auto flex items-center justify-center relative">
-                        {currentView === 'home' && <HomeView />}
-                        {currentView === 'game' && <GameView />}
-                        {currentView === 'calculator' && <CalculatorView />}
-                        {currentView === 'lead_capture' && <LeadCaptureView />}
-                        {currentView === 'success' && <SuccessView />}
+                        {currentView === 'home' && <HomeView setCurrentView={setCurrentView} />}
+                        
+                        {currentView === 'game' && <GameView 
+                            categories={categoriesData} 
+                            selectedCategory={selectedCategory} 
+                            setSelectedCategory={setSelectedCategory} 
+                            gameAnswers={gameAnswers} 
+                            setGameAnswers={setGameAnswers} 
+                            setCurrentView={setCurrentView} 
+                        />}
+                        
+                        {currentView === 'calculator' && <CalculatorView 
+                            setCalcAnswers={setCalcAnswers} 
+                            calcAnswers={calcAnswers} 
+                            setCurrentView={setCurrentView} 
+                        />}
+                        
+                        {currentView === 'lead_capture' && <LeadCaptureView 
+                            leadData={leadData} 
+                            setLeadData={setLeadData} 
+                            gameAnswers={gameAnswers} 
+                            calcAnswers={calcAnswers} 
+                            setCurrentView={setCurrentView} 
+                        />}
+                        
+                        {currentView === 'success' && <SuccessView 
+                            setLeadData={setLeadData} 
+                            setGameAnswers={setGameAnswers} 
+                            setCalcAnswers={setCalcAnswers} 
+                            setSelectedCategory={setSelectedCategory} 
+                            setCurrentView={setCurrentView} 
+                        />}
                         
                         <div className="fixed bottom-0 left-0 w-full h-1/2 bg-gradient-to-t from-[#e6f4fc] to-transparent pointer-events-none -z-10 opacity-70"></div>
                     </main>
