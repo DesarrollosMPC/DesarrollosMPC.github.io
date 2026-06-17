@@ -1,14 +1,16 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Milenio PC | Experiencia Andicom</title>
-    
+
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;700;800;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;700;800;900&display=swap"
+        rel="stylesheet">
     <!-- Escáner QR -->
     <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
     <!-- Iconos -->
@@ -32,7 +34,7 @@
             }
         }
     </script>
-    
+
     <style>
         body {
             margin: 0;
@@ -48,9 +50,17 @@
         }
 
         @keyframes gradientBG {
-            0% { background-position: 0% 50%; }
-            50% { background-position: 100% 50%; }
-            100% { background-position: 0% 50%; }
+            0% {
+                background-position: 0% 50%;
+            }
+
+            50% {
+                background-position: 100% 50%;
+            }
+
+            100% {
+                background-position: 0% 50%;
+            }
         }
 
         .glass-panel {
@@ -68,15 +78,16 @@
         }
 
         /* TRANSICIONES DE PANTALLAS */
-        .screen { 
-            display: none; 
+        .screen {
+            display: none;
             opacity: 0;
             transition: opacity 0.4s ease-in-out, transform 0.4s ease-in-out;
             transform: scale(0.98) translateY(10px);
             width: 100%;
         }
-        .screen.active { 
-            display: flex; 
+
+        .screen.active {
+            display: flex;
             opacity: 1;
             transform: scale(1) translateY(0);
         }
@@ -85,8 +96,11 @@
         .play-btn {
             transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
-        .play-btn:active { transform: scale(0.92); }
-        
+
+        .play-btn:active {
+            transform: scale(0.92);
+        }
+
         .play-btn.selected {
             background: linear-gradient(135deg, #009fe3, #47a5ad);
             color: white;
@@ -94,33 +108,94 @@
             box-shadow: 0 10px 20px -5px rgba(0, 159, 227, 0.4);
             border-color: transparent;
         }
-        
+
         .play-btn .check-ring {
             opacity: 0;
             transform: scale(0) rotate(-45deg);
             transition: all 0.4s ease;
         }
-        .play-btn.selected .check-ring { opacity: 1; transform: scale(1) rotate(0); }
+
+        .play-btn.selected .check-ring {
+            opacity: 1;
+            transform: scale(1) rotate(0);
+        }
 
         /* ESCÁNER */
-        #reader { width: 100%; border-radius: 12px; overflow: hidden; border: none !important; }
-        #reader button { background-color: #005085; color: white; padding: 10px 20px; border-radius: 8px; font-weight: 600; cursor: pointer; border: none;}
-        #reader video { border-radius: 12px; }
+        #reader {
+            width: 100%;
+            border-radius: 12px;
+            overflow: hidden;
+            border: none !important;
+        }
+
+        #reader button {
+            background-color: #005085;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            border: none;
+        }
+
+        #reader video {
+            border-radius: 12px;
+        }
 
         /* NOTIFICACIONES TOAST */
         #toast {
-            visibility: hidden; min-width: 250px; background-color: #333; color: #fff; text-align: center; border-radius: 8px;
-            padding: 16px; position: fixed; z-index: 100; left: 50%; bottom: 30px; font-size: 17px; transform: translateX(-50%);
+            visibility: hidden;
+            min-width: 250px;
+            background-color: #333;
+            color: #fff;
+            text-align: center;
+            border-radius: 8px;
+            padding: 16px;
+            position: fixed;
+            z-index: 100;
+            left: 50%;
+            bottom: 30px;
+            font-size: 17px;
+            transform: translateX(-50%);
         }
-        #toast.show { visibility: visible; animation: fadein 0.5s, fadeout 0.5s 2.5s; }
-        @keyframes fadein { from {bottom: 0; opacity: 0;} to {bottom: 30px; opacity: 1;} }
-        @keyframes fadeout { from {bottom: 30px; opacity: 1;} to {bottom: 0; opacity: 0;} }
+
+        #toast.show {
+            visibility: visible;
+            animation: fadein 0.5s, fadeout 0.5s 2.5s;
+        }
+
+        @keyframes fadein {
+            from {
+                bottom: 0;
+                opacity: 0;
+            }
+
+            to {
+                bottom: 30px;
+                opacity: 1;
+            }
+        }
+
+        @keyframes fadeout {
+            from {
+                bottom: 30px;
+                opacity: 1;
+            }
+
+            to {
+                bottom: 0;
+                opacity: 0;
+            }
+        }
     </style>
 </head>
+
 <body class="flex flex-col items-center">
 
-    <header class="w-full glass-panel p-3 md:p-4 flex flex-col items-center justify-center sticky top-0 z-50 rounded-b-3xl">
-        <img src="https://www.mileniopc.com/wp-content/uploads/2024/03/MPC_logo.svg" alt="Milenio PC" class="h-10 md:h-14 mb-1">
+    <header
+        class="w-full glass-panel p-3 md:p-4 flex flex-col items-center justify-center sticky top-0 z-50 rounded-b-3xl">
+        <img src="https://www.mileniopc.com/wp-content/uploads/2024/03/MPC_logo.svg" alt="Milenio PC"
+            class="h-10 md:h-14 mb-1">
         <h2 class="text-milenio-blue font-bold text-[10px] md:text-sm text-center tracking-widest uppercase">
             Somos la selección inteligente en servicios de tecnología
         </h2>
@@ -134,26 +209,31 @@
         <section id="screen-dashboard" class="screen active flex-col items-center justify-center w-full max-w-3xl">
             <div class="glass-panel rounded-3xl p-6 md:p-8 w-full shadow-2xl relative overflow-hidden">
                 <div class="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-milenio-blue to-milenio-teal"></div>
-                
+
                 <div class="flex justify-between items-center mb-6 border-b pb-4">
                     <div>
-                        <h3 class="text-milenio-blue font-black text-sm tracking-widest uppercase mb-1"><i class="fa-solid fa-user-tie mr-2"></i>Panel Comercial</h3>
+                        <h3 class="text-milenio-blue font-black text-sm tracking-widest uppercase mb-1"><i
+                                class="fa-solid fa-user-tie mr-2"></i>Panel Comercial</h3>
                         <h1 class="text-2xl md:text-3xl font-extrabold text-milenio-dark">Centro de Mando Andicom</h1>
                     </div>
                 </div>
 
                 <!-- Tarjeta del Lead -->
-                <div class="bg-gray-50 border border-gray-200 rounded-2xl p-5 mb-8 flex flex-col md:flex-row justify-between items-center gap-4">
+                <div
+                    class="bg-gray-50 border border-gray-200 rounded-2xl p-5 mb-8 flex flex-col md:flex-row justify-between items-center gap-4">
                     <div class="flex items-center gap-4 w-full">
-                        <div class="w-14 h-14 rounded-full bg-milenio-blue/10 flex items-center justify-center text-milenio-blue text-2xl">
+                        <div
+                            class="w-14 h-14 rounded-full bg-milenio-blue/10 flex items-center justify-center text-milenio-blue text-2xl">
                             <i class="fa-solid fa-id-badge"></i>
                         </div>
                         <div class="flex-grow">
                             <p class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">Lead Actual</p>
-                            <p id="dash-lead-data" class="font-bold text-milenio-dark truncate max-w-xs md:max-w-md">Sin Escanear / Anónimo</p>
+                            <p id="dash-lead-data" class="font-bold text-milenio-dark truncate max-w-xs md:max-w-md">Sin
+                                Escanear / Anónimo</p>
                         </div>
                     </div>
-                    <button onclick="goToScreen('screen-scanner')" class="bg-milenio-blue text-white font-bold py-2 px-4 rounded-lg hover:bg-blue-800 transition-colors whitespace-nowrap text-sm shadow-md">
+                    <button onclick="openScanner()"
+                        class="bg-milenio-blue text-white font-bold py-2 px-4 rounded-lg hover:bg-blue-800 transition-colors whitespace-nowrap text-sm shadow-md">
                         <i class="fa-solid fa-qrcode mr-1"></i> Escanear Escarapela
                     </button>
                 </div>
@@ -161,28 +241,37 @@
                 <!-- Herramientas Independientes -->
                 <h3 class="text-sm font-bold text-gray-500 uppercase tracking-wider mb-4">Herramientas Disponibles</h3>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
-                    
+
                     <!-- Botón Juego -->
-                    <div onclick="goToScreen('screen-game')" class="group cursor-pointer bg-white border-2 border-gray-100 hover:border-milenio-teal p-5 rounded-2xl shadow-sm hover:shadow-lg transition-all flex flex-col justify-between h-full">
+                    <div onclick="goToScreen('screen-game')"
+                        class="group cursor-pointer bg-white border-2 border-gray-100 hover:border-milenio-teal p-5 rounded-2xl shadow-sm hover:shadow-lg transition-all flex flex-col justify-between h-full">
                         <div class="flex justify-between items-start mb-4">
-                            <div class="w-12 h-12 rounded-xl bg-milenio-teal/10 flex items-center justify-center text-milenio-teal text-xl group-hover:scale-110 transition-transform">
+                            <div
+                                class="w-12 h-12 rounded-xl bg-milenio-teal/10 flex items-center justify-center text-milenio-teal text-xl group-hover:scale-110 transition-transform">
                                 <i class="fa-solid fa-gamepad"></i>
                             </div>
-                            <span id="badge-game" class="bg-gray-200 text-gray-600 text-[10px] font-bold px-2 py-1 rounded uppercase tracking-wide">Sin Iniciar</span>
+                            <span id="badge-game"
+                                class="bg-gray-200 text-gray-600 text-[10px] font-bold px-2 py-1 rounded uppercase tracking-wide">Sin
+                                Iniciar</span>
                         </div>
                         <div>
                             <h4 class="font-bold text-lg text-milenio-dark mb-1">Rompehielos (Dolores)</h4>
-                            <p class="text-sm text-gray-500">Juego interactivo para que el cliente seleccione sus retos TI.</p>
+                            <p class="text-sm text-gray-500">Juego interactivo para que el cliente seleccione sus retos
+                                TI.</p>
                         </div>
                     </div>
 
                     <!-- Botón Calculadora -->
-                    <div onclick="goToScreen('screen-calc')" class="group cursor-pointer bg-white border-2 border-gray-100 hover:border-milenio-lightblue p-5 rounded-2xl shadow-sm hover:shadow-lg transition-all flex flex-col justify-between h-full">
+                    <div onclick="goToScreen('screen-calc')"
+                        class="group cursor-pointer bg-white border-2 border-gray-100 hover:border-milenio-lightblue p-5 rounded-2xl shadow-sm hover:shadow-lg transition-all flex flex-col justify-between h-full">
                         <div class="flex justify-between items-start mb-4">
-                            <div class="w-12 h-12 rounded-xl bg-milenio-lightblue/10 flex items-center justify-center text-milenio-lightblue text-xl group-hover:scale-110 transition-transform">
+                            <div
+                                class="w-12 h-12 rounded-xl bg-milenio-lightblue/10 flex items-center justify-center text-milenio-lightblue text-xl group-hover:scale-110 transition-transform">
                                 <i class="fa-solid fa-calculator"></i>
                             </div>
-                            <span id="badge-calc" class="bg-gray-200 text-gray-600 text-[10px] font-bold px-2 py-1 rounded uppercase tracking-wide">Sin Iniciar</span>
+                            <span id="badge-calc"
+                                class="bg-gray-200 text-gray-600 text-[10px] font-bold px-2 py-1 rounded uppercase tracking-wide">Sin
+                                Iniciar</span>
                         </div>
                         <div>
                             <h4 class="font-bold text-lg text-milenio-dark mb-1">Calculadora Impacto</h4>
@@ -193,8 +282,10 @@
                 </div>
 
                 <!-- Botón de Resultado Final -->
-                <button onclick="processFinalCV()" class="w-full bg-milenio-dark text-white font-bold py-4 rounded-xl text-lg hover:bg-black transition-all shadow-lg flex items-center justify-center gap-2 group">
-                    Generar Hoja de Vida y Clasificar <i class="fa-solid fa-arrow-right group-hover:translate-x-2 transition-transform"></i>
+                <button onclick="processFinalCV()"
+                    class="w-full bg-milenio-dark text-white font-bold py-4 rounded-xl text-lg hover:bg-black transition-all shadow-lg flex items-center justify-center gap-2 group">
+                    Generar Hoja de Vida y Clasificar <i
+                        class="fa-solid fa-arrow-right group-hover:translate-x-2 transition-transform"></i>
                 </button>
 
             </div>
@@ -205,10 +296,12 @@
              ========================================== -->
         <section id="screen-scanner" class="screen flex-col items-center justify-center w-full max-w-md">
             <div class="glass-panel rounded-3xl p-6 w-full text-center shadow-2xl relative">
-                <button onclick="closeScanner()" class="absolute top-4 left-4 text-gray-400 hover:text-gray-700"><i class="fa-solid fa-arrow-left text-xl"></i></button>
+                <button onclick="closeScanner()" class="absolute top-4 left-4 text-gray-400 hover:text-gray-700"><i
+                        class="fa-solid fa-arrow-left text-xl"></i></button>
                 <h2 class="text-2xl font-extrabold text-milenio-dark mb-6 mt-4">Captura de Lead</h2>
                 <div id="reader" class="mb-6 shadow-inner bg-gray-50 border-2 border-dashed border-gray-300"></div>
-                <button onclick="goToScreen('screen-manual')" class="w-full bg-white text-milenio-blue border-2 border-milenio-blue font-bold py-3 rounded-xl text-lg hover:bg-blue-50 transition-all flex justify-center items-center gap-2">
+                <button onclick="goToScreen('screen-manual')"
+                    class="w-full bg-white text-milenio-blue border-2 border-milenio-blue font-bold py-3 rounded-xl text-lg hover:bg-blue-50 transition-all flex justify-center items-center gap-2">
                     <i class="fa-solid fa-keyboard"></i> Ingresar Manualmente
                 </button>
             </div>
@@ -219,7 +312,8 @@
              ========================================== -->
         <section id="screen-manual" class="screen flex-col items-center justify-center w-full max-w-md">
             <div class="glass-panel rounded-3xl p-6 md:p-8 w-full shadow-2xl relative">
-                <button onclick="goToScreen('screen-dashboard')" class="absolute top-4 left-4 text-gray-400 hover:text-milenio-blue transition-colors flex items-center gap-2 font-bold text-sm">
+                <button onclick="goToScreen('screen-dashboard')"
+                    class="absolute top-4 left-4 text-gray-400 hover:text-milenio-blue transition-colors flex items-center gap-2 font-bold text-sm">
                     <i class="fa-solid fa-chevron-left"></i>
                 </button>
                 <h2 class="text-2xl font-extrabold text-milenio-dark mb-2 mt-4 text-center">Datos del Asistente</h2>
@@ -227,23 +321,36 @@
 
                 <form id="manual-form" class="space-y-4" onsubmit="event.preventDefault(); saveManualData();">
                     <div class="relative">
-                        <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none"><i class="fa-solid fa-user text-gray-400"></i></div>
-                        <input type="text" id="manual-name" required class="w-full pl-12 pr-4 py-3 text-base border-2 border-gray-200 rounded-xl focus:border-milenio-blue outline-none transition-all bg-white font-semibold" placeholder="Nombre completo">
+                        <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none"><i
+                                class="fa-solid fa-user text-gray-400"></i></div>
+                        <input type="text" id="manual-name" required
+                            class="w-full pl-12 pr-4 py-3 text-base border-2 border-gray-200 rounded-xl focus:border-milenio-blue outline-none transition-all bg-white font-semibold"
+                            placeholder="Nombre completo">
                     </div>
                     <div class="relative">
-                        <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none"><i class="fa-solid fa-building text-gray-400"></i></div>
-                        <input type="text" id="manual-company" required class="w-full pl-12 pr-4 py-3 text-base border-2 border-gray-200 rounded-xl focus:border-milenio-blue outline-none transition-all bg-white font-semibold" placeholder="Empresa">
+                        <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none"><i
+                                class="fa-solid fa-building text-gray-400"></i></div>
+                        <input type="text" id="manual-company" required
+                            class="w-full pl-12 pr-4 py-3 text-base border-2 border-gray-200 rounded-xl focus:border-milenio-blue outline-none transition-all bg-white font-semibold"
+                            placeholder="Empresa">
                     </div>
                     <div class="relative">
-                        <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none"><i class="fa-solid fa-briefcase text-gray-400"></i></div>
-                        <input type="text" id="manual-role" class="w-full pl-12 pr-4 py-3 text-base border-2 border-gray-200 rounded-xl focus:border-milenio-blue outline-none transition-all bg-white font-semibold" placeholder="Cargo (Opcional)">
+                        <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none"><i
+                                class="fa-solid fa-briefcase text-gray-400"></i></div>
+                        <input type="text" id="manual-role"
+                            class="w-full pl-12 pr-4 py-3 text-base border-2 border-gray-200 rounded-xl focus:border-milenio-blue outline-none transition-all bg-white font-semibold"
+                            placeholder="Cargo (Opcional)">
                     </div>
                     <div class="relative">
-                        <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none"><i class="fa-solid fa-envelope text-gray-400"></i></div>
-                        <input type="email" id="manual-email" class="w-full pl-12 pr-4 py-3 text-base border-2 border-gray-200 rounded-xl focus:border-milenio-blue outline-none transition-all bg-white font-semibold" placeholder="Correo (Opcional)">
+                        <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none"><i
+                                class="fa-solid fa-envelope text-gray-400"></i></div>
+                        <input type="email" id="manual-email"
+                            class="w-full pl-12 pr-4 py-3 text-base border-2 border-gray-200 rounded-xl focus:border-milenio-blue outline-none transition-all bg-white font-semibold"
+                            placeholder="Correo (Opcional)">
                     </div>
 
-                    <button type="submit" class="w-full bg-milenio-blue text-white font-bold py-4 rounded-xl text-lg hover:bg-blue-800 transition-all shadow-md mt-4 flex justify-center items-center gap-2">
+                    <button type="submit"
+                        class="w-full bg-milenio-blue text-white font-bold py-4 rounded-xl text-lg hover:bg-blue-800 transition-all shadow-md mt-4 flex justify-center items-center gap-2">
                         <i class="fa-solid fa-floppy-disk"></i> Guardar Datos
                     </button>
                 </form>
@@ -255,28 +362,36 @@
              ========================================== -->
         <section id="screen-game" class="screen flex-col items-center justify-center w-full">
             <div class="glass-panel rounded-[2.5rem] p-6 md:p-10 w-full shadow-2xl relative">
-                
+
                 <!-- Botón volver comercial -->
-                <button onclick="goToScreen('screen-dashboard')" class="absolute top-6 left-6 text-gray-400 hover:text-milenio-blue transition-colors flex items-center gap-2 font-bold text-sm z-10">
+                <button onclick="goToScreen('screen-dashboard')"
+                    class="absolute top-6 left-6 text-gray-400 hover:text-milenio-blue transition-colors flex items-center gap-2 font-bold text-sm z-10">
                     <i class="fa-solid fa-chevron-left"></i> Volver al Panel
                 </button>
 
                 <div class="flex justify-center mb-4 mt-8 md:mt-0">
-                    <span class="bg-gradient-to-r from-milenio-blue to-milenio-teal text-white px-6 py-2 rounded-full text-sm font-bold uppercase tracking-widest shadow-md animate-pulse">
+                    <span
+                        class="bg-gradient-to-r from-milenio-blue to-milenio-teal text-white px-6 py-2 rounded-full text-sm font-bold uppercase tracking-widest shadow-md animate-pulse">
                         <i class="fa-solid fa-tablet-screen-button mr-2"></i> Vista Cliente
                     </span>
                 </div>
 
-                <h1 class="text-3xl md:text-4xl font-black text-center text-milenio-dark mb-2">¿Qué le duele hoy a su empresa?</h1>
-                <p class="text-center text-gray-500 mb-8 font-medium text-lg">Seleccione los mayores retos tecnológicos que enfrenta actualmente.</p>
+                <h1 class="text-3xl md:text-4xl font-black text-center text-milenio-dark mb-2">¿Qué le duele hoy a su
+                    empresa?</h1>
+                <p class="text-center text-gray-500 mb-8 font-medium text-lg">Seleccione los mayores retos tecnológicos
+                    que enfrenta actualmente.</p>
 
                 <!-- Tablero del Juego (Inyectado por JS) -->
                 <div id="game-board" class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10"></div>
 
                 <div class="flex justify-center">
-                    <button onclick="saveGame()" class="group relative overflow-hidden bg-milenio-dark text-white font-black py-4 px-12 rounded-2xl text-xl transition-all hover:scale-105 shadow-[0_10px_30px_rgba(14,29,44,0.3)]">
-                        <span class="relative z-10 flex items-center gap-3">¡Guardar Selección! <i class="fa-solid fa-check"></i></span>
-                        <div class="absolute inset-0 bg-gradient-to-r from-milenio-teal to-milenio-lightblue opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                    <button onclick="saveGame()"
+                        class="group relative overflow-hidden bg-milenio-dark text-white font-black py-4 px-12 rounded-2xl text-xl transition-all hover:scale-105 shadow-[0_10px_30px_rgba(14,29,44,0.3)]">
+                        <span class="relative z-10 flex items-center gap-3">¡Guardar Selección! <i
+                                class="fa-solid fa-check"></i></span>
+                        <div
+                            class="absolute inset-0 bg-gradient-to-r from-milenio-teal to-milenio-lightblue opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                        </div>
                     </button>
                 </div>
             </div>
@@ -287,35 +402,50 @@
              ========================================== -->
         <section id="screen-calc" class="screen flex-col items-center justify-center w-full max-w-2xl">
             <div class="glass-panel rounded-3xl p-6 md:p-8 w-full shadow-2xl relative">
-                
-                <button onclick="goToScreen('screen-dashboard')" class="absolute top-6 left-6 text-gray-400 hover:text-milenio-teal transition-colors flex items-center gap-2 font-bold text-sm">
+
+                <button onclick="goToScreen('screen-dashboard')"
+                    class="absolute top-6 left-6 text-gray-400 hover:text-milenio-teal transition-colors flex items-center gap-2 font-bold text-sm">
                     <i class="fa-solid fa-chevron-left"></i> Volver
                 </button>
 
-                <h3 class="text-milenio-teal font-black text-sm tracking-widest uppercase mb-1 mt-8 text-center"><i class="fa-solid fa-user-tie mr-2"></i>Vista Comercial</h3>
-                <h2 class="text-2xl md:text-3xl font-extrabold text-milenio-dark mb-2 text-center">Calculadora de Impacto</h2>
-                <p class="text-gray-500 mb-8 font-medium text-center text-sm md:text-base">Ingrese los datos para estimar la pérdida oculta.</p>
+                <h3 class="text-milenio-teal font-black text-sm tracking-widest uppercase mb-1 mt-8 text-center"><i
+                        class="fa-solid fa-user-tie mr-2"></i>Vista Comercial</h3>
+                <h2 class="text-2xl md:text-3xl font-extrabold text-milenio-dark mb-2 text-center">Calculadora de
+                    Impacto</h2>
+                <p class="text-gray-500 mb-8 font-medium text-center text-sm md:text-base">Ingrese los datos para
+                    estimar la pérdida oculta.</p>
 
                 <form id="calc-form" class="space-y-4" onsubmit="event.preventDefault(); saveCalc();">
-                    
+
                     <div class="relative">
-                        <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none"><i class="fa-solid fa-users text-gray-400"></i></div>
-                        <input type="number" id="calc-users" min="1" class="w-full pl-12 pr-4 py-3 text-lg border-2 border-gray-200 rounded-xl focus:border-milenio-teal outline-none transition-all bg-white font-semibold" placeholder="Número de Usuarios">
+                        <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none"><i
+                                class="fa-solid fa-users text-gray-400"></i></div>
+                        <input type="number" id="calc-users" min="1"
+                            class="w-full pl-12 pr-4 py-3 text-lg border-2 border-gray-200 rounded-xl focus:border-milenio-teal outline-none transition-all bg-white font-semibold"
+                            placeholder="Número de Usuarios">
                     </div>
 
                     <div class="relative">
-                        <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none"><i class="fa-solid fa-money-bill-wave text-gray-400"></i></div>
-                        <input type="number" id="calc-cost" min="1" class="w-full pl-12 pr-4 py-3 text-lg border-2 border-gray-200 rounded-xl focus:border-milenio-teal outline-none transition-all bg-white font-semibold" placeholder="Costo promedio empleado/hora (COP)">
+                        <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none"><i
+                                class="fa-solid fa-money-bill-wave text-gray-400"></i></div>
+                        <input type="number" id="calc-cost" min="1"
+                            class="w-full pl-12 pr-4 py-3 text-lg border-2 border-gray-200 rounded-xl focus:border-milenio-teal outline-none transition-all bg-white font-semibold"
+                            placeholder="Costo promedio empleado/hora (COP)">
                     </div>
 
                     <div class="relative">
-                        <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none"><i class="fa-solid fa-clock text-gray-400"></i></div>
-                        <input type="number" id="calc-hours" min="0" step="0.5" class="w-full pl-12 pr-4 py-3 text-lg border-2 border-gray-200 rounded-xl focus:border-milenio-teal outline-none transition-all bg-white font-semibold" placeholder="Horas caída sistema (Mensual)">
+                        <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none"><i
+                                class="fa-solid fa-clock text-gray-400"></i></div>
+                        <input type="number" id="calc-hours" min="0" step="0.5"
+                            class="w-full pl-12 pr-4 py-3 text-lg border-2 border-gray-200 rounded-xl focus:border-milenio-teal outline-none transition-all bg-white font-semibold"
+                            placeholder="Horas caída sistema (Mensual)">
                     </div>
 
                     <div class="relative">
-                        <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none"><i class="fa-solid fa-network-wired text-gray-400"></i></div>
-                        <select id="calc-complexity" class="w-full pl-12 pr-4 py-3 text-lg border-2 border-gray-200 rounded-xl focus:border-milenio-teal outline-none transition-all bg-white font-semibold text-gray-600 appearance-none">
+                        <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none"><i
+                                class="fa-solid fa-network-wired text-gray-400"></i></div>
+                        <select id="calc-complexity"
+                            class="w-full pl-12 pr-4 py-3 text-lg border-2 border-gray-200 rounded-xl focus:border-milenio-teal outline-none transition-all bg-white font-semibold text-gray-600 appearance-none">
                             <option value="" disabled selected>Nivel Complejidad TI...</option>
                             <option value="Baja">Baja (Ofimática)</option>
                             <option value="Media">Media (Software específico)</option>
@@ -323,7 +453,8 @@
                         </select>
                     </div>
 
-                    <button type="submit" class="w-full bg-milenio-teal text-white font-bold py-4 rounded-xl text-lg hover:bg-teal-600 transition-all shadow-md mt-4 flex justify-center items-center gap-2">
+                    <button type="submit"
+                        class="w-full bg-milenio-teal text-white font-bold py-4 rounded-xl text-lg hover:bg-teal-600 transition-all shadow-md mt-4 flex justify-center items-center gap-2">
                         <i class="fa-solid fa-floppy-disk"></i> Guardar Cálculos
                     </button>
                 </form>
@@ -335,40 +466,55 @@
              ========================================== -->
         <section id="screen-cv" class="screen flex-col items-center justify-center w-full">
             <div class="glass-dark rounded-[2.5rem] p-6 md:p-10 w-full shadow-2xl text-white relative">
-                
-                <button onclick="goToScreen('screen-dashboard')" class="absolute top-6 left-6 text-gray-400 hover:text-white transition-colors flex items-center gap-2 font-bold text-sm">
+
+                <button onclick="goToScreen('screen-dashboard')"
+                    class="absolute top-6 left-6 text-gray-400 hover:text-white transition-colors flex items-center gap-2 font-bold text-sm">
                     <i class="fa-solid fa-chevron-left"></i> Modificar Datos
                 </button>
 
                 <div class="flex flex-col items-center text-center mb-8 border-b border-white/20 pb-6 mt-8 md:mt-0">
-                    <h2 class="text-3xl md:text-4xl font-black text-transparent bg-clip-text bg-gradient-to-r from-milenio-teal to-milenio-lightblue mb-2">Hoja de Vida de TI</h2>
+                    <h2
+                        class="text-3xl md:text-4xl font-black text-transparent bg-clip-text bg-gradient-to-r from-milenio-teal to-milenio-lightblue mb-2">
+                        Hoja de Vida de TI</h2>
                     <p class="text-gray-300 font-medium break-words w-full px-4" id="cv-qr-data"></p>
                 </div>
 
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-                    
+
                     <!-- Scoring del Lead -->
-                    <div class="md:col-span-3 bg-white/10 rounded-2xl p-6 border border-white/20 flex flex-col md:flex-row items-center justify-between gap-6">
+                    <div
+                        class="md:col-span-3 bg-white/10 rounded-2xl p-6 border border-white/20 flex flex-col md:flex-row items-center justify-between gap-6">
                         <div>
-                            <h3 class="text-sm uppercase tracking-widest text-milenio-lightblue font-bold mb-1">Clasificación Automática</h3>
-                            <div id="cv-score-title" class="text-2xl md:text-3xl font-black text-white">Evaluando...</div>
+                            <h3 class="text-sm uppercase tracking-widest text-milenio-lightblue font-bold mb-1">
+                                Clasificación Automática</h3>
+                            <div id="cv-score-title" class="text-2xl md:text-3xl font-black text-white">Evaluando...
+                            </div>
                             <p id="cv-score-desc" class="text-gray-300 text-sm mt-1"></p>
                         </div>
                         <div id="cv-score-icon" class="text-6xl drop-shadow-[0_0_15px_rgba(255,255,255,0.5)]">🎯</div>
                     </div>
 
                     <!-- Pérdida Financiera -->
-                    <div class="md:col-span-1 bg-white/5 rounded-2xl p-6 border border-white/10 flex flex-col justify-center items-center text-center relative overflow-hidden">
-                        <div class="absolute top-0 right-0 p-2 opacity-10 text-5xl"><i class="fa-solid fa-calculator"></i></div>
+                    <div
+                        class="md:col-span-1 bg-white/5 rounded-2xl p-6 border border-white/10 flex flex-col justify-center items-center text-center relative overflow-hidden">
+                        <div class="absolute top-0 right-0 p-2 opacity-10 text-5xl"><i
+                                class="fa-solid fa-calculator"></i></div>
                         <i class="fa-solid fa-money-bill-trend-up text-3xl text-red-400 mb-3 relative z-10"></i>
-                        <h3 class="text-xs uppercase tracking-widest text-gray-400 font-bold mb-2 relative z-10">Pérdida Mensual</h3>
-                        <div id="cv-loss" class="text-2xl md:text-3xl font-black text-white relative z-10">Sin datos</div>
+                        <h3 class="text-xs uppercase tracking-widest text-gray-400 font-bold mb-2 relative z-10">Pérdida
+                            Mensual</h3>
+                        <div id="cv-loss" class="text-2xl md:text-3xl font-black text-white relative z-10">Sin datos
+                        </div>
                     </div>
 
                     <!-- Dolores Seleccionados -->
-                    <div class="md:col-span-2 bg-white/5 rounded-2xl p-6 border border-white/10 relative overflow-hidden">
-                        <div class="absolute top-0 right-0 p-2 opacity-10 text-5xl"><i class="fa-solid fa-gamepad"></i></div>
-                        <h3 class="text-xs uppercase tracking-widest text-milenio-teal font-bold mb-4 flex items-center gap-2 relative z-10"><i class="fa-solid fa-briefcase-medical"></i> Dolores Detectados</h3>
+                    <div
+                        class="md:col-span-2 bg-white/5 rounded-2xl p-6 border border-white/10 relative overflow-hidden">
+                        <div class="absolute top-0 right-0 p-2 opacity-10 text-5xl"><i class="fa-solid fa-gamepad"></i>
+                        </div>
+                        <h3
+                            class="text-xs uppercase tracking-widest text-milenio-teal font-bold mb-4 flex items-center gap-2 relative z-10">
+                            <i class="fa-solid fa-briefcase-medical"></i> Dolores Detectados
+                        </h3>
                         <div id="cv-pains" class="flex flex-wrap gap-2 relative z-10">
                             <span class="text-gray-400 text-sm italic">No se utilizó el juego interactivo.</span>
                         </div>
@@ -377,15 +523,65 @@
 
                 <!-- Botones de Acción -->
                 <div class="flex flex-col md:flex-row gap-4 justify-center">
-                    <button onclick="sendToCRM()" class="bg-gradient-to-r from-green-500 to-emerald-600 text-white font-bold py-4 px-8 rounded-xl text-xl hover:scale-105 transition-all shadow-[0_0_20px_rgba(16,185,129,0.4)] flex items-center justify-center gap-2 w-full md:w-auto">
+                    <button onclick="sendToCRM()"
+                        class="bg-gradient-to-r from-green-500 to-emerald-600 text-white font-bold py-4 px-8 rounded-xl text-xl hover:scale-105 transition-all shadow-[0_0_20px_rgba(16,185,129,0.4)] flex items-center justify-center gap-2 w-full md:w-auto">
                         <i class="fa-solid fa-paper-plane"></i> Enviar a Correo
                     </button>
-                    <button onclick="resetApp()" class="bg-transparent border border-gray-400 text-gray-300 font-bold py-4 px-8 rounded-xl text-lg hover:bg-white/10 transition-all flex items-center justify-center gap-2 w-full md:w-auto">
+                    <button onclick="resetApp()"
+                        class="bg-transparent border border-gray-400 text-gray-300 font-bold py-4 px-8 rounded-xl text-lg hover:bg-white/10 transition-all flex items-center justify-center gap-2 w-full md:w-auto">
                         <i class="fa-solid fa-trash-can"></i> Limpiar y Reiniciar
                     </button>
                 </div>
             </div>
         </section>
+
+
+        <!-- ==========================================
+             PANTALLA NUEVA: ÉXITO POST-ENVÍO
+             ========================================== -->
+        <section id="screen-success" class="screen flex-col items-center justify-center w-full max-w-2xl">
+            <div
+                class="glass-panel rounded-[2.5rem] p-8 md:p-12 w-full shadow-2xl text-center relative overflow-hidden">
+                <div class="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-emerald-500 to-green-600"></div>
+
+                <div class="flex justify-center mb-6">
+                    <div class="relative">
+                        <div class="absolute inset-0 bg-emerald-400 rounded-full animate-ping opacity-20"></div>
+                        <div
+                            class="relative w-28 h-28 md:w-32 md:h-32 rounded-full bg-gradient-to-br from-emerald-500 to-green-600 flex items-center justify-center shadow-2xl">
+                            <i class="fa-solid fa-check text-white text-5xl md:text-6xl"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <h2 class="text-3xl md:text-4xl font-black text-milenio-dark mb-3">¡Lead Registrado!</h2>
+                <p class="text-gray-600 text-base md:text-lg mb-2 font-medium leading-relaxed">
+                    La información llegó al equipo comercial de <span class="text-milenio-blue font-bold">Milenio
+                        PC</span>.
+                </p>
+                <p class="text-gray-500 text-sm md:text-base mb-8">
+                    Un consultor estratégico se contactará en las próximas horas.
+                </p>
+
+                <div id="success-classification"
+                    class="inline-block bg-gray-50 border border-gray-200 rounded-2xl px-6 py-3 mb-8">
+                    <p class="text-xs uppercase tracking-widest text-gray-500 font-bold mb-1">Clasificación enviada</p>
+                    <p id="success-tier" class="text-xl font-black text-milenio-dark">—</p>
+                </div>
+
+                <div id="success-status" class="text-xs text-gray-500 mb-6 font-medium"></div>
+
+                <button onclick="resetApp()"
+                    class="bg-milenio-dark text-white font-bold py-3 px-8 rounded-xl hover:bg-black transition-all shadow-lg flex items-center justify-center gap-2 mx-auto">
+                    <i class="fa-solid fa-rotate-right"></i> Atender nuevo cliente
+                </button>
+
+                <p class="mt-4 text-xs text-gray-400 font-medium">
+                    Reinicio automático en <span id="success-countdown">30</span>s
+                </p>
+            </div>
+        </section>
+
 
     </main>
 
@@ -393,13 +589,41 @@
     <div id="toast">Notificación</div>
 
     <script>
-        /* ==========================================
+        /* ==========================================================
+           MILENIO PC - ANDICOM 2026
+           Lógica completa con envío real a Google Sheets + correos
+           ========================================================== */
+
+        /* ==========================================================
+           CONFIGURACIÓN - editar antes de desplegar a GitHub Pages
+           ========================================================== */
+        const CONFIG = {
+            // URL del Google Apps Script desplegado como Web App
+            // (ver README para los pasos)
+            APPS_SCRIPT_URL: 'https://script.google.com/macros/s/AKfycbxf9YgVcvv5jDuM8Q6tFLcp1wUOGZGk8E0ZfUs5MDpeMeUW7OJEx649ZZVW-V4S6lrk/exec',
+
+            // Segundos antes de reiniciar la app automáticamente
+            // después de un envío exitoso (modo kiosko / tablet)
+            AUTO_RESET_SECONDS: 30,
+
+            // Nombre del evento (se envía con cada lead)
+            EVENTO: 'Andicom 2026',
+
+            // Llave para guardar leads pendientes en localStorage
+            // (cuando la red de la feria se cae)
+            STORAGE_KEY: 'milenio_pending_leads_v2'
+        };
+
+        /* ==========================================================
            1. ESTADO GLOBAL
-           ========================================== */
+           ========================================================== */
         let appState = {
-            qrData: "",
+            lead: { name: "", company: "", role: "", email: "", phone: "", qr_raw: "" },
             pains: [],
-            calc: null // null indica que no se ha usado
+            calc: null,
+            score: null,
+            autoResetTimer: null,
+            countdownInterval: null
         };
 
         const boardConfig = [
@@ -432,33 +656,60 @@
             }
         ];
 
-        /* ==========================================
+        // Mapa rápido: dolor -> categoría (para análisis y scoring)
+        const painToCategory = {};
+        boardConfig.forEach(cat => {
+            cat.items.forEach(it => { painToCategory[it.text] = cat.title; });
+        });
+
+        /* ==========================================================
            2. NAVEGACIÓN Y UTILIDADES
-           ========================================== */
+           ========================================================== */
         function goToScreen(id) {
+            // Cancelar auto-reset si el usuario navega manualmente
+            if (id !== 'screen-success') stopAutoReset();
+
             document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
             setTimeout(() => {
                 document.getElementById(id).classList.add('active');
-                window.scrollTo(0,0);
+                window.scrollTo(0, 0);
             }, 50);
-            
-            if(id === 'screen-dashboard') updateDashboardUI();
+
+            if (id === 'screen-dashboard') updateDashboardUI();
         }
 
         function showToast(msg) {
             const toast = document.getElementById("toast");
             toast.innerText = msg;
             toast.className = "show";
-            setTimeout(function(){ toast.className = toast.className.replace("show", ""); }, 3000);
+            setTimeout(() => { toast.className = toast.className.replace("show", ""); }, 3000);
+        }
+
+        function showMessage(msg) { showToast(msg); }
+
+        function formatCOP(value) {
+            return new Intl.NumberFormat('es-CO', {
+                style: 'currency', currency: 'COP', minimumFractionDigits: 0
+            }).format(value || 0);
+        }
+
+        function leadDisplayString() {
+            const l = appState.lead;
+            if (l.name && l.company) {
+                return `${l.name} · ${l.company}` + (l.role ? ` (${l.role})` : '');
+            }
+            if (l.name) return l.name;
+            if (l.qr_raw) return l.qr_raw.substring(0, 80);
+            return "Sin Escanear / Anónimo";
         }
 
         function updateDashboardUI() {
-            // Actualizar Info Lead
-            document.getElementById('dash-lead-data').innerText = appState.qrData || "Sin Escanear / Anónimo";
-            
-            // Actualizar Badge Juego
+            // Lead actual
+            document.getElementById('dash-lead-data').innerText = leadDisplayString();
+
+            // Badge Juego
             const badgeGame = document.getElementById('badge-game');
-            if(appState.pains.length > 0) {
+            if (appState.pains.length > 0) {
                 badgeGame.innerText = `${appState.pains.length} Seleccionados`;
                 badgeGame.className = "bg-green-100 text-green-700 text-[10px] font-bold px-2 py-1 rounded uppercase tracking-wide";
             } else {
@@ -466,37 +717,144 @@
                 badgeGame.className = "bg-gray-200 text-gray-600 text-[10px] font-bold px-2 py-1 rounded uppercase tracking-wide";
             }
 
-            // Actualizar Badge Calculadora
+            // Badge Calculadora
             const badgeCalc = document.getElementById('badge-calc');
-            if(appState.calc) {
+            if (appState.calc) {
                 badgeCalc.innerText = "Completada";
                 badgeCalc.className = "bg-green-100 text-green-700 text-[10px] font-bold px-2 py-1 rounded uppercase tracking-wide";
             } else {
                 badgeCalc.innerText = "Sin Iniciar";
                 badgeCalc.className = "bg-gray-200 text-gray-600 text-[10px] font-bold px-2 py-1 rounded uppercase tracking-wide";
             }
+
+            // Indicador de leads pendientes (offline)
+            updatePendingIndicator();
         }
 
-        /* ==========================================
-           3. ESCÁNER QR
-           ========================================== */
+        /* ==========================================================
+           3. PARSER DE QR (acepta JSON, vCard, correo, URL, texto)
+           ========================================================== */
+        function parseQRContent(raw) {
+            const result = { name: "", company: "", role: "", email: "", phone: "", qr_raw: raw };
+            if (!raw) return result;
+
+            // 1) JSON puro
+            try {
+                const d = JSON.parse(raw);
+                result.name = d.name || d.nombre || d.fullName || "";
+                result.company = d.company || d.empresa || d.organization || "";
+                result.role = d.role || d.cargo || d.title || "";
+                result.email = d.email || d.correo || d.mail || "";
+                result.phone = d.phone || d.tel || d.telefono || "";
+                if (result.name || result.email) return result;
+            } catch (e) { /* no era JSON */ }
+
+            // 2) vCard
+            if (raw.toUpperCase().indexOf('BEGIN:VCARD') !== -1) {
+                raw.split(/\r?\n/).forEach(line => {
+                    const u = line.toUpperCase();
+                    if (u.indexOf('FN:') === 0) {
+                        result.name = line.substring(3).trim();
+                    } else if (u.indexOf('N:') === 0 && !result.name) {
+                        const parts = line.substring(2).split(';');
+                        result.name = ((parts[1] || '') + ' ' + (parts[0] || '')).trim();
+                    } else if (u.indexOf('ORG:') === 0) {
+                        result.company = line.substring(4).split(';')[0].trim();
+                    } else if (u.indexOf('TITLE:') === 0) {
+                        result.role = line.substring(6).trim();
+                    } else if (u.indexOf('EMAIL') === 0 && line.indexOf(':') !== -1) {
+                        result.email = line.substring(line.indexOf(':') + 1).trim();
+                    } else if (u.indexOf('TEL') === 0 && line.indexOf(':') !== -1) {
+                        result.phone = line.substring(line.indexOf(':') + 1).trim();
+                    }
+                });
+                return result;
+            }
+
+            // 3) Correo plano embebido
+            const emailMatch = raw.match(/[\w.+-]+@[\w-]+\.[\w.-]+/);
+            if (emailMatch) {
+                result.email = emailMatch[0];
+                return result;
+            }
+
+            // 4) URL (probablemente del organizador, dejar campos vacíos para llenar manual)
+            if (/^https?:\/\//i.test(raw)) {
+                return result;
+            }
+
+            // 5) Texto plano: asumir nombre o ID
+            result.name = raw.substring(0, 100).trim();
+            return result;
+        }
+
+        /* ==========================================================
+           4. ESCÁNER QR
+           ========================================================== */
         let scanner = null;
-        
+
         function openScanner() {
             goToScreen('screen-scanner');
-            if(!scanner) {
-                scanner = new Html5QrcodeScanner("reader", { fps: 10, qrbox: {width: 250, height: 250} }, false);
-            }
-            scanner.render((text) => {
-                appState.qrData = text;
-                try{ navigator.vibrate(200); }catch(e){}
-                closeScanner();
-                showToast("¡Escarapela escaneada con éxito!");
-            }, () => {});
+
+            // Esperar a que la pantalla esté visible antes de inicializar
+            // (html5-qrcode necesita que el div #reader exista y sea visible)
+            setTimeout(() => {
+                const readerDiv = document.getElementById('reader');
+                if (!readerDiv) return;
+
+                // Limpiar contenido previo del div por si quedó algo de un intento anterior
+                readerDiv.innerHTML = '';
+
+                try {
+                    scanner = new Html5QrcodeScanner(
+                        "reader",
+                        {
+                            fps: 10,
+                            qrbox: { width: 250, height: 250 },
+                            rememberLastUsedCamera: true,
+                            showTorchButtonIfSupported: true,
+                            supportedScanTypes: [Html5QrcodeScanType.SCAN_TYPE_CAMERA, Html5QrcodeScanType.SCAN_TYPE_FILE]
+                        },
+                        false
+                    );
+
+                    scanner.render(
+                        // Éxito al leer un QR
+                        (text) => {
+                            const parsed = parseQRContent(text);
+                            appState.lead = {
+                                name: parsed.name || appState.lead.name,
+                                company: parsed.company || appState.lead.company,
+                                role: parsed.role || appState.lead.role,
+                                email: parsed.email || appState.lead.email,
+                                phone: parsed.phone || appState.lead.phone,
+                                qr_raw: text
+                            };
+                            try { navigator.vibrate(200); } catch (e) { }
+                            closeScanner();
+                            if (parsed.name || parsed.email) {
+                                showToast("Escarapela escaneada: " + (parsed.name || parsed.email));
+                            } else {
+                                showToast("QR detectado sin datos legibles. Use ingreso manual.");
+                            }
+                        },
+                        // Error de lectura (silencioso, sigue intentando)
+                        (errorMessage) => { /* no hacer ruido */ }
+                    );
+                } catch (e) {
+                    console.error('Error inicializando escáner:', e);
+                    showToast("No se pudo iniciar la cámara. Use 'Ingresar Manualmente'.");
+                }
+            }, 150);
         }
 
         function closeScanner() {
-            if(scanner) { scanner.clear().catch(e=>{}); }
+            if (scanner) {
+                scanner.clear().catch(e => { });
+                scanner = null;
+            }
+            const readerDiv = document.getElementById('reader');
+            if (readerDiv) readerDiv.innerHTML = '';
             goToScreen('screen-dashboard');
         }
 
@@ -506,40 +864,49 @@
             const role = document.getElementById('manual-role').value.trim();
             const email = document.getElementById('manual-email').value.trim();
 
-            if(!name || !company) {
+            if (!name || !company) {
                 showToast("Por favor, ingrese al menos Nombre y Empresa.");
                 return;
             }
 
-            // Guardamos con un formato limpio para el correo y la hoja de vida
-            appState.qrData = `Nombre: ${name}\nEmpresa: ${company}\nCargo: ${role || 'N/A'}\nCorreo: ${email || 'N/A'}`;
-            
-            // Limpiar formulario y cerrar scanner si quedó abierto en background
+            if (email && email.indexOf('@') === -1) {
+                showToast("El correo no parece válido.");
+                return;
+            }
+
+            appState.lead = {
+                name: name,
+                company: company,
+                role: role || "",
+                email: email || "",
+                phone: appState.lead.phone || "",
+                qr_raw: appState.lead.qr_raw || ""
+            };
+
             document.getElementById('manual-form').reset();
-            if(scanner) { scanner.clear().catch(e=>{}); }
-            
-            showToast("Datos manuales guardados");
+            if (scanner) { scanner.clear().catch(e => { }); }
+
+            showToast("Datos guardados correctamente");
             goToScreen('screen-dashboard');
         }
 
-        /* ==========================================
-           4. EL JUEGO (ROMPEHIELOS)
-           ========================================== */
+        /* ==========================================================
+           5. JUEGO ROMPEHIELOS
+           ========================================================== */
         function renderGame() {
             const container = document.getElementById('game-board');
-            if(container.innerHTML !== '') return; // Evitar re-renderizado
+            if (container.innerHTML !== '') return;
 
             boardConfig.forEach(cat => {
                 const col = document.createElement('div');
                 col.className = "flex flex-col gap-3";
                 col.innerHTML = `<h3 class="text-lg md:text-xl font-bold ${cat.color} mb-2 text-center uppercase tracking-wide"><i class="fa-solid ${cat.icon}"></i> ${cat.title}</h3>`;
-                
+
                 cat.items.forEach(item => {
                     const btn = document.createElement('button');
-                    // Mantener seleccionado si ya estaba en el estado
                     const isSelected = appState.pains.includes(item.text);
                     btn.className = `play-btn bg-white border-2 border-gray-100 text-gray-600 font-semibold p-3 md:p-4 rounded-2xl shadow-sm flex items-center justify-between w-full text-left ${isSelected ? 'selected' : ''}`;
-                    
+
                     btn.innerHTML = `
                         <span class="flex items-center gap-3 text-[14px] leading-tight">
                             <div class="w-10 h-10 rounded-full ${isSelected ? 'bg-white/20 text-white' : 'bg-gray-50 text-gray-400'} flex shrink-0 items-center justify-center btn-icon transition-colors"><i class="fa-solid ${item.icon}"></i></div>
@@ -547,14 +914,14 @@
                         </span>
                         <div class="check-ring w-8 h-8 rounded-full bg-white text-milenio-teal flex shrink-0 items-center justify-center text-xl shadow-inner"><i class="fa-solid fa-check"></i></div>
                     `;
-                    
+
                     btn.onclick = () => {
                         btn.classList.toggle('selected');
                         const iconBg = btn.querySelector('.btn-icon');
-                        if(btn.classList.contains('selected')) {
+                        if (btn.classList.contains('selected')) {
                             iconBg.classList.replace('bg-gray-50', 'bg-white/20');
                             iconBg.classList.replace('text-gray-400', 'text-white');
-                            if(!appState.pains.includes(item.text)) appState.pains.push(item.text);
+                            if (!appState.pains.includes(item.text)) appState.pains.push(item.text);
                         } else {
                             iconBg.classList.replace('bg-white/20', 'bg-gray-50');
                             iconBg.classList.replace('text-white', 'text-gray-400');
@@ -567,46 +934,150 @@
             });
         }
 
-        window.addEventListener('DOMContentLoaded', renderGame);
+        window.addEventListener('DOMContentLoaded', () => {
+            renderGame();
+            updatePendingIndicator();
+            // Intentar reenviar pendientes si hay red
+            flushPendingLeads(true);
+        });
 
         function saveGame() {
-            showToast("Respuestas Guardadas");
+            if (appState.pains.length === 0) {
+                showToast("Selecciona al menos un dolor antes de guardar");
+                return;
+            }
+            showToast(`${appState.pains.length} dolores guardados`);
             goToScreen('screen-dashboard');
         }
 
-        /* ==========================================
-           5. CALCULADORA
-           ========================================== */
+        /* ==========================================================
+           6. CALCULADORA
+           ========================================================== */
         function saveCalc() {
             const users = parseFloat(document.getElementById('calc-users').value) || 0;
             const cost = parseFloat(document.getElementById('calc-cost').value) || 0;
             const hours = parseFloat(document.getElementById('calc-hours').value) || 0;
-            
             const compSelect = document.getElementById('calc-complexity');
-            const complexity = compSelect.options[compSelect.selectedIndex]?.text || "No definida";
-            
-            const loss = users * cost * hours;
+            const complexity = compSelect.value || "No definida";
 
-            if(users > 0 || cost > 0) {
-                appState.calc = { users, cost, hours, complexity, loss };
-                showToast("Cálculos Guardados");
-                goToScreen('screen-dashboard');
-            } else {
-                showMessage("Por favor ingrese al menos datos básicos");
+            // Multiplicador por complejidad
+            const multiplier = complexity === 'Alta' ? 1.5 : (complexity === 'Baja' ? 0.8 : 1);
+            const loss = users * cost * hours * multiplier;
+
+            if (users <= 0 || cost <= 0) {
+                showToast("Ingrese al menos número de usuarios y costo");
+                return;
             }
+
+            appState.calc = {
+                users: users,
+                cost: cost,
+                hours: hours,
+                complexity: complexity,
+                multiplier: multiplier,
+                loss: Math.round(loss),
+                yearlyLoss: Math.round(loss * 12)
+            };
+            showToast("Pérdida estimada: " + formatCOP(loss) + " / mes");
+            goToScreen('screen-dashboard');
         }
 
-        /* ==========================================
-           6. RESULTADOS Y HOJA DE VIDA
-           ========================================== */
+        /* ==========================================================
+           7. LEAD SCORING (puntaje numérico + tier)
+           ========================================================== */
+        function calculateLeadScore() {
+            let score = 0;
+            const reasons = [];
+
+            // Puntos por dolores seleccionados
+            if (appState.pains.length > 0) {
+                score += appState.pains.length * 10;
+                reasons.push(`${appState.pains.length} dolores marcados (+${appState.pains.length * 10})`);
+
+                // Bonus por diversidad de categorías
+                const cats = {};
+                appState.pains.forEach(p => { if (painToCategory[p]) cats[painToCategory[p]] = true; });
+                const catCount = Object.keys(cats).length;
+                if (catCount > 1) {
+                    score += catCount * 5;
+                    reasons.push(`${catCount} categorías afectadas (+${catCount * 5})`);
+                }
+            }
+
+            // Puntos por pérdida financiera
+            if (appState.calc) {
+                const loss = appState.calc.loss;
+                if (loss >= 10000000) { score += 50; reasons.push(`Pérdida > $10M (+50)`); }
+                else if (loss >= 5000000) { score += 30; reasons.push(`Pérdida > $5M (+30)`); }
+                else if (loss >= 1000000) { score += 15; reasons.push(`Pérdida > $1M (+15)`); }
+
+                if (appState.calc.complexity === 'Alta') {
+                    score += 15;
+                    reasons.push(`Complejidad alta (+15)`);
+                }
+                if (appState.calc.users >= 150) {
+                    score += 10;
+                    reasons.push(`+150 usuarios (+10)`);
+                }
+            }
+
+            // Bonus si el lead tiene datos de contacto completos
+            const l = appState.lead;
+            if (l.email && l.name && l.company) {
+                score += 5;
+                reasons.push(`Datos completos (+5)`);
+            }
+
+            let tier, tierLabel, tierIcon, tierColor, tierDesc;
+            if (score >= 50) {
+                tier = 'HOT';
+                tierLabel = 'Cliente Diamante (Alta Prioridad)';
+                tierIcon = '💎';
+                tierColor = 'text-yellow-400';
+                tierDesc = 'Impacto crítico detectado. Ofrecer modelo DaaS integral urgente.';
+            } else if (score >= 20) {
+                tier = 'WARM';
+                tierLabel = 'Cliente Potencial (Media)';
+                tierIcon = '🚀';
+                tierColor = 'text-emerald-400';
+                tierDesc = 'Oportunidad clara de optimización. Ofrecer Renting + Soporte gestionado.';
+            } else if (score > 0) {
+                tier = 'COLD';
+                tierLabel = 'Lead Exploratorio';
+                tierIcon = '👀';
+                tierColor = 'text-milenio-lightblue';
+                tierDesc = 'Información básica recolectada. Mantener en radar para futuras campañas.';
+            } else {
+                tier = 'EMPTY';
+                tierLabel = 'Datos Incompletos';
+                tierIcon = '❓';
+                tierColor = 'text-gray-400';
+                tierDesc = 'Use el Juego o la Calculadora antes de enviar.';
+            }
+
+            return { score, tier, tierLabel, tierIcon, tierColor, tierDesc, reasons };
+        }
+
+        /* ==========================================================
+           8. RESULTADO Y HOJA DE VIDA
+           ========================================================== */
         function processFinalCV() {
-            // Renderizar Datos Base
-            document.getElementById('cv-qr-data').innerText = appState.qrData || "Contacto no identificado";
-            
-            // Renderizar Pains (Juego)
+            // Validar que tenga al menos algo
+            if (appState.pains.length === 0 && !appState.calc) {
+                showToast("Complete el Juego o la Calculadora antes de generar la hoja de vida");
+                return;
+            }
+
+            const scoring = calculateLeadScore();
+            appState.score = scoring;
+
+            // Datos del contacto
+            document.getElementById('cv-qr-data').innerText = leadDisplayString();
+
+            // Dolores
             const painsDiv = document.getElementById('cv-pains');
             painsDiv.innerHTML = '';
-            if(appState.pains.length > 0) {
+            if (appState.pains.length > 0) {
                 appState.pains.forEach(p => {
                     painsDiv.innerHTML += `<span class="bg-white/10 text-white px-3 py-1 rounded-full text-sm border border-white/20">${p}</span>`;
                 });
@@ -614,119 +1085,286 @@
                 painsDiv.innerHTML = `<span class="text-gray-400 text-sm italic">Herramienta no utilizada.</span>`;
             }
 
-            // Renderizar Pérdida (Calculadora)
-            let lossValue = 0;
-            if(appState.calc) {
-                lossValue = appState.calc.loss;
-                document.getElementById('cv-loss').innerText = new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', minimumFractionDigits: 0 }).format(lossValue);
-                document.getElementById('cv-loss').classList.remove('text-gray-500');
+            // Pérdida financiera
+            const lossElem = document.getElementById('cv-loss');
+            if (appState.calc) {
+                lossElem.innerText = formatCOP(appState.calc.loss);
+                lossElem.classList.remove('text-gray-500');
             } else {
-                document.getElementById('cv-loss').innerText = "Sin datos";
-                document.getElementById('cv-loss').classList.add('text-gray-500');
+                lossElem.innerText = "Sin datos";
+                lossElem.classList.add('text-gray-500');
             }
 
-            // ALGORITMO DE LEAD SCORING FLEXIBLE
-            let scoreTitle = "💡 Lead Exploratorio";
-            let scoreDesc = "Información básica recolectada. Mantener en radar.";
-            let scoreIcon = "👀";
-            let scoreColor = "text-milenio-lightblue";
-
-            const numPains = appState.pains.length;
-
-            if (lossValue >= 10000000 || numPains >= 5) {
-                scoreTitle = "🔥 Cliente Diamante (Alta Prioridad)";
-                scoreDesc = "Impacto crítico detectado. Ofrecer modelo DaaS integral urgente.";
-                scoreIcon = "💎";
-                scoreColor = "text-yellow-400";
-            } else if (lossValue >= 3000000 || numPains >= 2) {
-                scoreTitle = "🌟 Cliente Potencial (Media)";
-                scoreDesc = "Oportunidad de optimización. Ofrecer Renting y Soporte.";
-                scoreIcon = "🚀";
-                scoreColor = "text-emerald-400";
-            } else if (lossValue === 0 && numPains === 0) {
-                 scoreTitle = "⚠️ Datos Incompletos";
-                 scoreDesc = "Utilice el Juego o la Calculadora para generar un perfil válido.";
-                 scoreIcon = "❓";
-                 scoreColor = "text-gray-400";
-            }
-
+            // Clasificación
             const st = document.getElementById('cv-score-title');
-            st.innerText = scoreTitle;
-            st.className = `text-2xl md:text-3xl font-black ${scoreColor}`;
-            document.getElementById('cv-score-desc').innerText = scoreDesc;
-            document.getElementById('cv-score-icon').innerText = scoreIcon;
+            st.innerText = `${scoring.tierIcon} ${scoring.tierLabel}`;
+            st.className = `text-2xl md:text-3xl font-black ${scoring.tierColor}`;
+            document.getElementById('cv-score-desc').innerText = scoring.tierDesc + ` · Puntaje: ${scoring.score}`;
+            document.getElementById('cv-score-icon').innerText = scoring.tierIcon;
 
             goToScreen('screen-cv');
         }
 
-        /* ==========================================
-           7. ENVÍO A CORREO Y REINICIO
-           ========================================== */
-        function sendToCRM() {
-            const email = "misoportemds4@mileniopc.com.co";
-            const scoreLabel = document.getElementById('cv-score-title').innerText;
-            
-            let lossFmt = "No calculada";
-            let calcDetails = "No se usó la calculadora.";
-            if(appState.calc) {
-                lossFmt = new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', minimumFractionDigits: 0 }).format(appState.calc.loss);
-                calcDetails = `
-- Empleados: ${appState.calc.users}
-- Costo Promedio Hora: $${appState.calc.cost}
-- Horas indisponibilidad: ${appState.calc.hours} hrs/mes
-- Complejidad: ${appState.calc.complexity}
-                `;
-            }
+        /* ==========================================================
+           9. ENVÍO AL BACKEND (Google Apps Script)
+           ========================================================== */
+        function buildPayload() {
+            const scoring = appState.score || calculateLeadScore();
+            const painsByCategory = {};
+            appState.pains.forEach(p => {
+                const cat = painToCategory[p] || 'Otro';
+                if (!painsByCategory[cat]) painsByCategory[cat] = [];
+                painsByCategory[cat].push(p);
+            });
 
-            let painsDetails = "No se usó el juego.";
-            if(appState.pains.length > 0) {
-                painsDetails = appState.pains.map(p => `- ${p}`).join("\n");
-            }
-            
-            const subject = encodeURIComponent(`Nuevo Lead Andicom: ${scoreLabel}`);
-            const body = encodeURIComponent(`
-=========================================
-   HOJA DE VIDA TECNOLÓGICA - ANDICOM
-=========================================
-
-PRE-CLASIFICACIÓN DEL LEAD:
-${scoreLabel}
-${document.getElementById('cv-score-desc').innerText}
-
-📋 DATOS DEL CLIENTE (QR):
--------------------------------------------
-${appState.qrData || "No provisto"}
-
-🎯 DOLORES DETECTADOS (JUEGO):
--------------------------------------------
-${painsDetails}
-
-📈 IMPACTO FINANCIERO (CALCULADORA):
--------------------------------------------
-${calcDetails}
-
-💥 PÉRDIDA ESTIMADA MENSUAL: ${lossFmt}
-            `);
-
-            window.location.href = `mailto:${email}?subject=${subject}&body=${body}`;
+            return {
+                timestamp: new Date().toISOString(),
+                evento: CONFIG.EVENTO,
+                contacto: {
+                    name: appState.lead.name || '',
+                    company: appState.lead.company || '',
+                    role: appState.lead.role || '',
+                    email: appState.lead.email || '',
+                    phone: appState.lead.phone || ''
+                },
+                qr_raw: appState.lead.qr_raw || '',
+                pains: appState.pains,
+                pains_by_category: painsByCategory,
+                pains_count: appState.pains.length,
+                calc: appState.calc,
+                lead_score: scoring.tier,
+                lead_score_numeric: scoring.score,
+                lead_label: scoring.tierLabel,
+                scoring_reasons: scoring.reasons
+            };
         }
 
+        function safeGetPending() {
+            try { return JSON.parse(localStorage.getItem(CONFIG.STORAGE_KEY) || '[]'); }
+            catch (e) { return []; }
+        }
+
+        function safeSetPending(list) {
+            try { localStorage.setItem(CONFIG.STORAGE_KEY, JSON.stringify(list)); }
+            catch (e) { /* localStorage lleno o desactivado */ }
+        }
+
+        function queuePending(payload) {
+            const list = safeGetPending();
+            list.push(Object.assign({}, payload, { queued_at: new Date().toISOString() }));
+            safeSetPending(list);
+            updatePendingIndicator();
+        }
+
+        function sendPayload(payload, onComplete) {
+            const url = CONFIG.APPS_SCRIPT_URL;
+            if (!url || url.indexOf('PEGAR_AQUI') === 0) {
+                // No configurado: guardar y reportar
+                queuePending(payload);
+                onComplete({ ok: false, reason: 'not_configured' });
+                return;
+            }
+
+            fetch(url, {
+                method: 'POST',
+                // text/plain evita preflight CORS en Apps Script
+                headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                body: JSON.stringify(payload)
+            })
+                .then(r => {
+                    if (r.ok) onComplete({ ok: true });
+                    else { queuePending(payload); onComplete({ ok: false, reason: 'http_' + r.status }); }
+                })
+                .catch(err => {
+                    queuePending(payload);
+                    onComplete({ ok: false, reason: 'network' });
+                });
+        }
+
+        function flushPendingLeads(silent) {
+            const list = safeGetPending();
+            if (list.length === 0) {
+                if (!silent) showToast("No hay leads pendientes");
+                return;
+            }
+            const url = CONFIG.APPS_SCRIPT_URL;
+            if (!url || url.indexOf('PEGAR_AQUI') === 0) {
+                if (!silent) showToast("Configure la URL del Apps Script primero");
+                return;
+            }
+
+            if (!silent) showToast(`Reenviando ${list.length} leads...`);
+
+            let sent = 0;
+            const remaining = [];
+            let done = 0;
+
+            list.forEach(item => {
+                fetch(url, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                    body: JSON.stringify(item)
+                })
+                    .then(r => { if (r.ok) sent++; else remaining.push(item); })
+                    .catch(() => { remaining.push(item); })
+                    .finally(() => {
+                        done++;
+                        if (done === list.length) {
+                            safeSetPending(remaining);
+                            updatePendingIndicator();
+                            if (!silent) {
+                                showToast(`Reenviados: ${sent}. Pendientes: ${remaining.length}.`);
+                            } else if (sent > 0) {
+                                console.log(`Auto-flush: ${sent} leads reenviados`);
+                            }
+                        }
+                    });
+            });
+        }
+
+        function updatePendingIndicator() {
+            const count = safeGetPending().length;
+            let indicator = document.getElementById('pending-indicator');
+
+            // Si no existe, crearlo dentro del dashboard
+            if (!indicator) {
+                const dashCard = document.querySelector('#screen-dashboard .glass-panel');
+                if (dashCard) {
+                    indicator = document.createElement('div');
+                    indicator.id = 'pending-indicator';
+                    indicator.className = 'hidden';
+                    dashCard.insertBefore(indicator, dashCard.firstChild.nextSibling);
+                }
+            }
+
+            if (indicator) {
+                if (count > 0) {
+                    indicator.className = 'bg-amber-50 border-2 border-amber-200 rounded-2xl p-3 mb-4 flex items-center justify-between gap-3';
+                    indicator.innerHTML = `
+                        <div class="flex items-center gap-3">
+                            <i class="fa-solid fa-cloud-arrow-up text-amber-600 text-xl"></i>
+                            <div>
+                                <p class="font-bold text-amber-800 text-sm">${count} lead${count > 1 ? 's' : ''} pendiente${count > 1 ? 's' : ''} de envío</p>
+                                <p class="text-xs text-amber-700">Guardados localmente. Reintentar cuando haya red.</p>
+                            </div>
+                        </div>
+                        <button onclick="flushPendingLeads(false)" class="bg-amber-600 hover:bg-amber-700 text-white text-xs font-bold py-2 px-3 rounded-lg whitespace-nowrap">
+                            Reenviar
+                        </button>
+                    `;
+                } else {
+                    indicator.className = 'hidden';
+                    indicator.innerHTML = '';
+                }
+            }
+        }
+
+        function sendToCRM() {
+            // Validar puntaje
+            if (appState.score && appState.score.tier === 'EMPTY') {
+                showToast("Complete al menos el juego o la calculadora antes de enviar");
+                return;
+            }
+
+            const sendBtn = event && event.target ? event.target.closest('button') : null;
+            if (sendBtn) {
+                sendBtn.disabled = true;
+                sendBtn.innerHTML = '<i class="fa-solid fa-spinner animate-spin"></i> Enviando...';
+            }
+
+            const payload = buildPayload();
+
+            sendPayload(payload, (result) => {
+                // Mostrar pantalla de éxito sin importar el resultado de red
+                // (porque si falló, ya quedó en cola local)
+                showSuccessScreen(payload, result);
+            });
+        }
+
+        /* ==========================================================
+           10. PANTALLA DE ÉXITO + AUTO-RESET (modo kiosko)
+           ========================================================== */
+        function showSuccessScreen(payload, result) {
+            // Mostrar el tier
+            const tierLabel = payload.lead_label || '—';
+            document.getElementById('success-tier').innerText = tierLabel;
+
+            // Mostrar estado de envío (discreto)
+            const statusEl = document.getElementById('success-status');
+            if (result.ok) {
+                statusEl.innerHTML = '<i class="fa-solid fa-check-circle text-emerald-500"></i> Enviado al equipo comercial';
+            } else if (result.reason === 'not_configured') {
+                statusEl.innerHTML = '<i class="fa-solid fa-info-circle text-blue-500"></i> Guardado localmente (configura Apps Script)';
+            } else {
+                statusEl.innerHTML = '<i class="fa-solid fa-cloud-arrow-up text-amber-500"></i> Sin conexión: guardado para reenvío automático';
+            }
+
+            goToScreen('screen-success');
+            startAutoReset();
+        }
+
+        function startAutoReset() {
+            stopAutoReset();
+            let seconds = CONFIG.AUTO_RESET_SECONDS;
+            const countdownEl = document.getElementById('success-countdown');
+            countdownEl.innerText = seconds;
+
+            appState.countdownInterval = setInterval(() => {
+                seconds--;
+                if (seconds < 0) {
+                    stopAutoReset();
+                    resetApp();
+                    return;
+                }
+                countdownEl.innerText = seconds;
+            }, 1000);
+        }
+
+        function stopAutoReset() {
+            if (appState.countdownInterval) {
+                clearInterval(appState.countdownInterval);
+                appState.countdownInterval = null;
+            }
+            if (appState.autoResetTimer) {
+                clearTimeout(appState.autoResetTimer);
+                appState.autoResetTimer = null;
+            }
+        }
+
+        /* ==========================================================
+           11. RESET
+           ========================================================== */
         function resetApp() {
-            appState = { qrData: "", pains: [], calc: null };
+            stopAutoReset();
+
+            appState = {
+                lead: { name: "", company: "", role: "", email: "", phone: "", qr_raw: "" },
+                pains: [],
+                calc: null,
+                score: null,
+                autoResetTimer: null,
+                countdownInterval: null
+            };
+
             document.getElementById('calc-form').reset();
             document.getElementById('manual-form').reset();
-            
-            // Reset botones juego visualmente
+
+            // Reset visual del juego
             document.querySelectorAll('.play-btn.selected').forEach(b => {
                 b.classList.remove('selected');
                 const icon = b.querySelector('.btn-icon');
-                icon.classList.replace('bg-white/20', 'bg-gray-50');
-                icon.classList.replace('text-white', 'text-gray-400');
+                if (icon) {
+                    icon.classList.replace('bg-white/20', 'bg-gray-50');
+                    icon.classList.replace('text-white', 'text-gray-400');
+                }
             });
-            
+
             goToScreen('screen-dashboard');
-            showToast("Aplicación lista para un nuevo cliente.");
+            showToast("Listo para un nuevo cliente");
         }
+
     </script>
+
 </body>
+
 </html>
