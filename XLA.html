@@ -1,0 +1,631 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Top 5 Experiencias - Milenio PC</title>
+
+    <!-- Cargando Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Fuentes corporativas e iconos -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        /* --- VARIABLES CORPORATIVAS MILENIO PC --- */
+        :root {
+            --milenio-blue: #0056b3;
+            --milenio-cyan: #00f0ff;
+            --milenio-gold: #d4af37;
+            --bg-dark: #070b19;
+            /* Azul noche súper elegante */
+        }
+
+        body {
+            background-color: var(--bg-dark);
+            font-family: 'Inter', sans-serif;
+            color: #ffffff;
+            margin: 0;
+            overflow: hidden;
+            /* Evita cualquier barra de desplazamiento indeseada */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        /* --- FONDO DE PARTÍCULAS (CIBERNÉTICO) --- */
+        #particle-canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            pointer-events: none;
+            /* Crucial: no bloquea los clics de las tarjetas */
+        }
+
+        /* --- PANTALLA DE INTRODUCCIÓN --- */
+        #intro-screen {
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(circle at center, #0a1329 0%, var(--bg-dark) 80%);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 50;
+            /* Por encima de todo */
+            transition: opacity 0.8s ease, visibility 0.8s ease;
+        }
+
+        .btn-intro {
+            background: linear-gradient(135deg, var(--milenio-cyan) 0%, var(--milenio-blue) 100%);
+            border: none;
+            padding: 16px 40px;
+            color: white;
+            font-size: 1.1rem;
+            font-weight: bold;
+            border-radius: 50px;
+            cursor: pointer;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            box-shadow: 0 10px 30px rgba(0, 240, 255, 0.4);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .btn-intro:hover {
+            transform: scale(1.05) translateY(-3px);
+            box-shadow: 0 15px 40px rgba(0, 240, 255, 0.6);
+        }
+
+        /* --- CONTENEDOR PRINCIPAL DEL DASHBOARD --- */
+        #dashboard-content {
+            position: relative;
+            z-index: 10;
+            width: 100%;
+            max-width: 900px;
+            padding: 20px;
+            opacity: 0;
+            visibility: hidden;
+            transform: scale(0.95);
+            transition: all 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        /* --- CÁPSULA DEL LOGO --- */
+        .logo-capsule {
+            background: white;
+            /* Forzamos blanco para que se lea el texto oscuro del SVG */
+            padding: 12px 30px;
+            border-radius: 50px;
+            display: inline-flex;
+            justify-content: center;
+            align-items: center;
+            box-shadow: 0 0 20px rgba(255, 255, 255, 0.1), inset 0 0 10px rgba(0, 240, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            margin-bottom: 20px;
+        }
+
+        /* --- TARJETAS TIPO GLASSMORPHISM --- */
+        .carousel-viewport {
+            position: relative;
+            height: 380px;
+            width: 100%;
+            margin: 0 auto;
+            perspective: 1200px;
+            /* Profundidad para el efecto Tilt */
+        }
+
+        .glass-card {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            /* Estilo Cristal Premium */
+            background: rgba(10, 20, 42, 0.7);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-left: 4px solid var(--milenio-cyan);
+            border-radius: 20px;
+            padding: 40px;
+            box-sizing: border-box;
+
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+            transform: translateZ(-100px) scale(0.9);
+            transition: opacity 0.6s ease, transform 0.6s cubic-bezier(0.2, 0.8, 0.2, 1), visibility 0.6s;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+        }
+
+        /* Alternamos el borde dorado para darle vida */
+        .glass-card:nth-child(even) {
+            border-left-color: var(--milenio-gold);
+        }
+
+        .glass-card.active {
+            opacity: 1;
+            visibility: visible;
+            pointer-events: auto;
+            /* Solo la tarjeta activa recibe clics o hovers */
+            transform: translateZ(0) scale(1);
+            z-index: 5;
+        }
+
+        /* Barra de progreso de carga individual por tarjeta */
+        .card-progress-bar {
+            position: absolute;
+            top: 0;
+            left: 0;
+            height: 3px;
+            background: linear-gradient(90deg, var(--milenio-cyan), var(--milenio-gold));
+            width: 0%;
+            border-top-left-radius: 20px;
+            transition: width 0.1s linear;
+        }
+
+        /* --- BOTONES DE NAVEGACIÓN MANUAL (< >) --- */
+        .nav-btn {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 50px;
+            height: 50px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            color: var(--milenio-cyan);
+            font-size: 1.2rem;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            z-index: 20;
+            backdrop-filter: blur(5px);
+            transition: all 0.3s ease;
+        }
+
+        .nav-btn:hover {
+            background: var(--milenio-cyan);
+            color: var(--bg-dark);
+            box-shadow: 0 0 20px rgba(0, 240, 255, 0.5);
+            transform: translateY(-50%) scale(1.1);
+        }
+
+        .nav-prev {
+            left: -70px;
+        }
+
+        .nav-next {
+            right: -70px;
+        }
+
+        /* Ajuste responsivo para pantallas pequeñas */
+        @media (max-width: 1024px) {
+            .nav-prev {
+                left: -20px;
+            }
+
+            .nav-next {
+                right: -20px;
+            }
+
+            .glass-card {
+                padding: 30px;
+            }
+        }
+
+        /* --- PUNTOS (DOTS) --- */
+        .dots-wrapper {
+            display: flex;
+            justify-content: center;
+            gap: 12px;
+            margin-top: 30px;
+        }
+
+        .dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.2);
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .dot.active {
+            background: var(--milenio-cyan);
+            transform: scale(1.4);
+            box-shadow: 0 0 10px var(--milenio-cyan);
+        }
+
+        /* Correcciones de Títulos */
+        .title-text {
+            background: linear-gradient(90deg, #fff, var(--milenio-cyan));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- Fondo Animado WebGL/Canvas -->
+    <canvas id="particle-canvas"></canvas>
+
+    <!-- Pantalla de Inicio -->
+    <div id="intro-screen">
+        <div class="logo-capsule mb-8">
+            <img src="https://www.mileniopc.com/wp-content/uploads/2024/03/MPC_logo.svg" alt="Milenio PC"
+                style="height: 50px;">
+        </div>
+        <h1 class="text-3xl md:text-5xl font-black text-white mb-4 tracking-wider text-center px-4 title-text">
+            MESA DE SERVICIO
+        </h1>
+        <p class="text-slate-400 text-lg mb-12">Experiencias de Usuario XLA</p>
+        <button class="btn-intro" onclick="startApp()">
+            <i class="fa-solid fa-power-off mr-2"></i> Iniciar Dashboard
+        </button>
+    </div>
+
+    <!-- Dashboard Principal -->
+    <div id="dashboard-content">
+
+        <!-- Cabecera -->
+        <div class="text-center mb-10">
+            <div class="logo-capsule">
+                <img src="https://www.mileniopc.com/wp-content/uploads/2024/03/MPC_logo.svg" alt="Milenio PC"
+                    style="height: 35px;">
+            </div>
+            <!-- TEXTO EXACTO DEL JEFE -->
+            <h2 class="text-2xl md:text-3xl font-black text-white uppercase tracking-wide mb-2">
+                Top 5. Comentarios de XLA experiencia de usuario en Mesa de Servicio.
+            </h2>
+            <p class="text-yellow-400 italic font-medium opacity-90">
+                "El éxito es la suma de pequeños esfuerzos repetidos día tras día"
+            </p>
+        </div>
+
+        <!-- Contenedor del Carrusel + Flechas -->
+        <div class="relative w-full max-w-4xl mx-auto">
+
+            <button class="nav-btn nav-prev" onclick="prevCard()" aria-label="Anterior">
+                <i class="fa-solid fa-chevron-left"></i>
+            </button>
+
+            <div class="carousel-viewport" id="cardContainer">
+
+                <!-- Tarjeta 1 -->
+                <div class="glass-card active" data-index="0">
+                    <div class="card-progress-bar"></div>
+                    <div class="flex items-center gap-3 mb-4">
+                        <span class="text-4xl drop-shadow-[0_0_8px_rgba(255,215,0,0.8)]">🥇</span>
+                        <div class="text-left">
+                            <h3 class="text-xl md:text-2xl font-bold text-yellow-400">Solucionado en Nivel 1 por Andrés
+                                Felipe Barrios.</h3>
+                        </div>
+                    </div>
+                    <p class="text-cyan-400 font-semibold mb-6 tracking-wide">
+                        Cliente: <span class="text-white">ACTIVOS POR COLOMBIA SAS (Jhonny Flórez)</span>
+                    </p>
+                    <blockquote class="text-lg md:text-xl text-slate-200 italic leading-relaxed mb-8 max-w-2xl">
+                        "Buen trabajo solucionando la falla del equipo; demostración de rapidez, coordinación y
+                        eficacia."
+                    </blockquote>
+                    <div
+                        class="mt-auto bg-white/5 border border-white/10 px-6 py-2 rounded-lg text-sm font-mono text-slate-300">
+                        CASO: 126698 — Bogotá
+                    </div>
+                </div>
+
+                <!-- Tarjeta 2 -->
+                <div class="glass-card" data-index="1">
+                    <div class="card-progress-bar"></div>
+                    <div class="flex items-center gap-3 mb-4">
+                        <span class="text-4xl drop-shadow-[0_0_8px_rgba(192,192,192,0.8)]">🥈</span>
+                        <div class="text-left">
+                            <h3 class="text-xl md:text-2xl font-bold text-yellow-400">Atendido por nivel 1 + Soporte en
+                                sitio Medellin Sebastian Zapata Zapata</h3>
+                        </div>
+                    </div>
+                    <p class="text-cyan-400 font-semibold mb-6 tracking-wide">
+                        Cliente: <span class="text-white">LYNKUS SOLUTIONS SAS (Gustavo Muñoz)</span>
+                    </p>
+                    <blockquote class="text-lg md:text-xl text-slate-200 italic leading-relaxed mb-8 max-w-2xl">
+                        "El soporte fue muy bueno. La atención fue clara y la solución se brindó de manera rápida."
+                    </blockquote>
+                    <div
+                        class="mt-auto bg-white/5 border border-white/10 px-6 py-2 rounded-lg text-sm font-mono text-slate-300">
+                        CASO: 130394 — Medellín
+                    </div>
+                </div>
+
+                <!-- Tarjeta 3 -->
+                <div class="glass-card" data-index="2">
+                    <div class="card-progress-bar"></div>
+                    <div class="flex items-center gap-3 mb-4">
+                        <span class="text-4xl drop-shadow-[0_0_8px_rgba(205,127,50,0.8)]">🥉</span>
+                        <div class="text-left">
+                            <h3 class="text-xl md:text-2xl font-bold text-yellow-400">Solucionado en Nivel 1 por Joseph
+                                Alexander Parra</h3>
+                        </div>
+                    </div>
+                    <p class="text-cyan-400 font-semibold mb-6 tracking-wide">
+                        Cliente: <span class="text-white">NUTRITEC SAS (Iván Fdo Pinto)</span>
+                    </p>
+                    <blockquote class="text-lg md:text-xl text-slate-200 italic leading-relaxed mb-8 max-w-2xl">
+                        "Muchas gracias. Excelente atención y respuesta oportuna."
+                    </blockquote>
+                    <div
+                        class="mt-auto bg-white/5 border border-white/10 px-6 py-2 rounded-lg text-sm font-mono text-slate-300">
+                        CASO: 132753 — Cali
+                    </div>
+                </div>
+
+                <!-- Tarjeta 4 -->
+                <div class="glass-card" data-index="3">
+                    <div class="card-progress-bar"></div>
+                    <div class="flex items-center gap-3 mb-4">
+                        <span class="text-4xl">🎖️</span>
+                        <div class="text-left">
+                            <h3 class="text-xl md:text-2xl font-bold text-yellow-400">Solucionado en Nivel 1 por Ronaldo
+                                Steven Barrera</h3>
+                        </div>
+                    </div>
+                    <p class="text-cyan-400 font-semibold mb-6 tracking-wide">
+                        Cliente: <span class="text-white">IG SERVICES SAS (Leany Sadarriaga)</span>
+                    </p>
+                    <blockquote class="text-lg md:text-xl text-slate-200 italic leading-relaxed mb-8 max-w-2xl">
+                        "Buen servicio, rápida instalación y excelente atención."
+                    </blockquote>
+                    <div
+                        class="mt-auto bg-white/5 border border-white/10 px-6 py-2 rounded-lg text-sm font-mono text-slate-300">
+                        CASO: 131518 — Barranquilla
+                    </div>
+                </div>
+
+                <!-- Tarjeta 5 -->
+                <div class="glass-card" data-index="4">
+                    <div class="card-progress-bar"></div>
+                    <div class="flex items-center gap-3 mb-4">
+                        <span class="text-4xl">🎖️</span>
+                        <div class="text-left">
+                            <h3 class="text-xl md:text-2xl font-bold text-yellow-400">Solucionado en Nivel 1 por Sabina
+                                Álvarez Monsalve</h3>
+                        </div>
+                    </div>
+                    <p class="text-cyan-400 font-semibold mb-6 tracking-wide">
+                        Cliente: <span class="text-white">FEELING COMPANY SAS (Carlos Augusto Castaño)</span>
+                    </p>
+                    <blockquote class="text-lg md:text-xl text-slate-200 italic leading-relaxed mb-8 max-w-2xl">
+                        "Mil gracias, excelente servicio."
+                    </blockquote>
+                    <div
+                        class="mt-auto bg-white/5 border border-white/10 px-6 py-2 rounded-lg text-sm font-mono text-slate-300">
+                        CASO: 129423 — Bucaramanga
+                    </div>
+                </div>
+
+            </div>
+
+            <button class="nav-btn nav-next" onclick="nextCard()" aria-label="Siguiente">
+                <i class="fa-solid fa-chevron-right"></i>
+            </button>
+
+        </div>
+
+        <!-- Puntos Indicadores Inferiores -->
+        <div class="dots-wrapper" id="dotsContainer">
+            <div class="dot active" onclick="jumpTo(0)"></div>
+            <div class="dot" onclick="jumpTo(1)"></div>
+            <div class="dot" onclick="jumpTo(2)"></div>
+            <div class="dot" onclick="jumpTo(3)"></div>
+            <div class="dot" onclick="jumpTo(4)"></div>
+        </div>
+
+        <p class="text-center mt-8 text-xs text-slate-500 tracking-widest uppercase">
+            Mesa de Servicio Milenio PC — Experiencia XLA 2026
+        </p>
+
+    </div>
+
+    <script>
+        /* --- 1. LÓGICA DEL CARRUSEL --- */
+        const cards = document.querySelectorAll('.glass-card');
+        const dots = document.querySelectorAll('.dot');
+        const container = document.getElementById('cardContainer');
+
+        let currentIndex = 0;
+        let progress = 0;
+        let isHovered = false;
+        let animationInterval;
+        const DURATION = 6000; // 6 Segundos por tarjeta
+        const UPDATE_SPEED = 20; // Actualizar cada 20ms
+
+        function updateUI(index) {
+            cards.forEach(c => {
+                c.classList.remove('active');
+                c.style.transform = 'translateZ(-100px) scale(0.9)'; // Reset 3D
+                c.querySelector('.card-progress-bar').style.width = '0%';
+            });
+            dots.forEach(d => d.classList.remove('active'));
+
+            cards[index].classList.add('active');
+            dots[index].classList.add('active');
+            progress = 0;
+            currentIndex = index;
+        }
+
+        function nextCard() {
+            let next = (currentIndex + 1) % cards.length;
+            updateUI(next);
+        }
+
+        function prevCard() {
+            let prev = (currentIndex - 1 + cards.length) % cards.length;
+            updateUI(prev);
+        }
+
+        function jumpTo(index) {
+            updateUI(index);
+        }
+
+        /* Ciclo de animación automático de la barra */
+        function startCarouselLoop() {
+            animationInterval = setInterval(() => {
+                if (!isHovered) {
+                    progress += (UPDATE_SPEED / DURATION) * 100;
+                    if (progress >= 100) {
+                        nextCard();
+                    } else {
+                        const activeBar = cards[currentIndex].querySelector('.card-progress-bar');
+                        if (activeBar) activeBar.style.width = `${progress}%`;
+                    }
+                }
+            }, UPDATE_SPEED);
+        }
+
+        /* --- 2. INTERACTIVIDAD 3D (TILT) --- */
+        container.addEventListener('mousemove', (e) => {
+            isHovered = true; // Pausar carrusel
+
+            const activeCard = cards[currentIndex];
+            const rect = activeCard.getBoundingClientRect();
+
+            // Coordenadas relativas al centro de la tarjeta
+            const x = e.clientX - rect.left - (rect.width / 2);
+            const y = e.clientY - rect.top - (rect.height / 2);
+
+            // Calculamos ángulo (Max 8 grados)
+            const rotateY = (x / (rect.width / 2)) * 8;
+            const rotateX = -(y / (rect.height / 2)) * 8;
+
+            activeCard.style.transform = `translateZ(20px) rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
+        });
+
+        container.addEventListener('mouseleave', () => {
+            isHovered = false; // Reanudar
+            const activeCard = cards[currentIndex];
+            activeCard.style.transform = 'translateZ(0) rotateX(0) rotateY(0)'; // Reset Suave
+        });
+
+
+        /* --- 3. EFECTO PARTÍCULAS EN EL FONDO --- */
+        const canvas = document.getElementById('particle-canvas');
+        const ctx = canvas.getContext('2d');
+        let particles = [];
+
+        function resize() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+
+        window.addEventListener('resize', resize);
+        resize();
+
+        class Particle {
+            constructor() {
+                this.x = Math.random() * canvas.width;
+                this.y = Math.random() * canvas.height;
+                this.vx = (Math.random() - 0.5) * 0.5;
+                this.vy = (Math.random() - 0.5) * 0.5;
+                this.radius = Math.random() * 1.5;
+            }
+            update() {
+                this.x += this.vx;
+                this.y += this.vy;
+                if (this.x < 0 || this.x > canvas.width) this.vx *= -1;
+                if (this.y < 0 || this.y > canvas.height) this.vy *= -1;
+            }
+            draw() {
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+                ctx.fillStyle = 'rgba(0, 240, 255, 0.3)';
+                ctx.fill();
+            }
+        }
+
+        for (let i = 0; i < 80; i++) particles.push(new Particle());
+
+        function animateParticles() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            particles.forEach(p => {
+                p.update();
+                p.draw();
+            });
+
+            // Dibujar lineas de conexión
+            for (let i = 0; i < particles.length; i++) {
+                for (let j = i + 1; j < particles.length; j++) {
+                    const dx = particles[i].x - particles[j].x;
+                    const dy = particles[i].y - particles[j].y;
+                    const dist = Math.sqrt(dx * dx + dy * dy);
+
+                    if (dist < 120) {
+                        ctx.beginPath();
+                        ctx.strokeStyle = `rgba(0, 86, 179, ${1 - dist / 120})`; // Azul corporativo
+                        ctx.lineWidth = 0.5;
+                        ctx.moveTo(particles[i].x, particles[i].y);
+                        ctx.lineTo(particles[j].x, particles[j].y);
+                        ctx.stroke();
+                    }
+                }
+            }
+            requestAnimationFrame(animateParticles);
+        }
+
+        /* --- 4. ARRANQUE DEL DASHBOARD --- */
+        function startApp() {
+            const intro = document.getElementById('intro-screen');
+            const dashboard = document.getElementById('dashboard-content');
+
+            // Audio Feedback (Sutil y corporativo)
+            try {
+                const AudioContext = window.AudioContext || window.webkitAudioContext;
+                const audioCtx = new AudioContext();
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(400, audioCtx.currentTime);
+                osc.frequency.exponentialRampToValueAtTime(800, audioCtx.currentTime + 0.5);
+
+                gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.5);
+
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                osc.start();
+                osc.stop(audioCtx.currentTime + 0.5);
+            } catch (e) { /* Ignorar si no soporta audio */ }
+
+            // Transición Visual
+            intro.style.opacity = '0';
+            intro.style.visibility = 'hidden';
+
+            setTimeout(() => {
+                dashboard.style.visibility = 'visible';
+                dashboard.style.opacity = '1';
+                dashboard.style.transform = 'scale(1)';
+
+                startCarouselLoop();
+            }, 400);
+        }
+
+        // Iniciar partículas al cargar
+        animateParticles();
+    </script>
+</body>
+
+</html>
