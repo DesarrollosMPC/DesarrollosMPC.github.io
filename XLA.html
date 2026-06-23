@@ -1,631 +1,484 @@
 <!DOCTYPE html>
 <html lang="es">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Top 5 Experiencias - Milenio PC</title>
-
-    <!-- Cargando Tailwind CSS -->
+    <title>Experiencias XLA - Milenio PC</title>
+    
+    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-
-    <!-- Fuentes corporativas e iconos -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-
+    
+    <!-- Fuentes Premium -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&family=Playfair+Display:ital,wght@0,600;1,400&display=swap" rel="stylesheet">
+    
     <style>
-        /* --- VARIABLES CORPORATIVAS MILENIO PC --- */
         :root {
-            --milenio-blue: #0056b3;
-            --milenio-cyan: #00f0ff;
-            --milenio-gold: #d4af37;
-            --bg-dark: #070b19;
-            /* Azul noche súper elegante */
+            --navy-bg: #070b19;
+            --gold: #d4af37;
+            --cyan: #00d2ff;
+            --card-bg: rgba(16, 24, 48, 0.7);
         }
 
         body {
-            background-color: var(--bg-dark);
+            background-color: var(--navy-bg);
+            color: #f8f9fa;
             font-family: 'Inter', sans-serif;
-            color: #ffffff;
+            overflow-x: hidden;
             margin: 0;
-            overflow: hidden;
-            /* Evita cualquier barra de desplazamiento indeseada */
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
+            height: 100vh;
         }
 
-        /* --- FONDO DE PARTÍCULAS (CIBERNÉTICO) --- */
-        #particle-canvas {
-            position: absolute;
+        /* Canvas de Estrellas */
+        #starfield {
+            position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
             z-index: 0;
             pointer-events: none;
-            /* Crucial: no bloquea los clics de las tarjetas */
         }
 
         /* --- PANTALLA DE INTRODUCCIÓN --- */
         #intro-screen {
-            position: absolute;
-            inset: 0;
-            background: radial-gradient(circle at center, #0a1329 0%, var(--bg-dark) 80%);
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            z-index: 50;
-            /* Por encima de todo */
-            transition: opacity 0.8s ease, visibility 0.8s ease;
-        }
-
-        .btn-intro {
-            background: linear-gradient(135deg, var(--milenio-cyan) 0%, var(--milenio-blue) 100%);
-            border: none;
-            padding: 16px 40px;
-            color: white;
-            font-size: 1.1rem;
-            font-weight: bold;
-            border-radius: 50px;
-            cursor: pointer;
-            text-transform: uppercase;
-            letter-spacing: 2px;
-            box-shadow: 0 10px 30px rgba(0, 240, 255, 0.4);
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-        }
-
-        .btn-intro:hover {
-            transform: scale(1.05) translateY(-3px);
-            box-shadow: 0 15px 40px rgba(0, 240, 255, 0.6);
-        }
-
-        /* --- CONTENEDOR PRINCIPAL DEL DASHBOARD --- */
-        #dashboard-content {
-            position: relative;
-            z-index: 10;
-            width: 100%;
-            max-width: 900px;
-            padding: 20px;
-            opacity: 0;
-            visibility: hidden;
-            transform: scale(0.95);
-            transition: all 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-        }
-
-        /* --- CÁPSULA DEL LOGO --- */
-        .logo-capsule {
-            background: white;
-            /* Forzamos blanco para que se lea el texto oscuro del SVG */
-            padding: 12px 30px;
-            border-radius: 50px;
-            display: inline-flex;
-            justify-content: center;
-            align-items: center;
-            box-shadow: 0 0 20px rgba(255, 255, 255, 0.1), inset 0 0 10px rgba(0, 240, 255, 0.1);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            margin-bottom: 20px;
-        }
-
-        /* --- TARJETAS TIPO GLASSMORPHISM --- */
-        .carousel-viewport {
-            position: relative;
-            height: 380px;
-            width: 100%;
-            margin: 0 auto;
-            perspective: 1200px;
-            /* Profundidad para el efecto Tilt */
-        }
-
-        .glass-card {
-            position: absolute;
+            position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            /* Estilo Cristal Premium */
-            background: rgba(10, 20, 42, 0.7);
-            backdrop-filter: blur(16px);
-            -webkit-backdrop-filter: blur(16px);
-            border: 1px solid rgba(255, 255, 255, 0.05);
-            border-left: 4px solid var(--milenio-cyan);
-            border-radius: 20px;
-            padding: 40px;
-            box-sizing: border-box;
-
+            background: radial-gradient(circle at center, #0b132b 0%, #03050a 100%);
             display: flex;
             flex-direction: column;
-            justify-content: center;
             align-items: center;
-            text-align: center;
+            justify-content: center;
+            z-index: 9999;
+            transition: opacity 1s ease-in-out, visibility 1s;
+        }
 
+        .logo-capsule {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 15px 40px;
+            border-radius: 50px;
+            box-shadow: 0 0 30px rgba(255, 255, 255, 0.15), inset 0 0 10px rgba(0, 210, 255, 0.2);
+            margin-bottom: 40px;
+            animation: floatLogo 4s ease-in-out infinite;
+        }
+
+        .intro-btn {
+            background: transparent;
+            border: 2px solid var(--gold);
+            color: var(--gold);
+            padding: 15px 50px;
+            font-size: 20px;
+            font-weight: 800;
+            letter-spacing: 5px;
+            text-transform: uppercase;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.4s ease;
+            box-shadow: 0 0 15px rgba(212, 175, 55, 0.2);
+        }
+
+        .intro-btn:hover {
+            background: var(--gold);
+            color: var(--navy-bg);
+            box-shadow: 0 0 40px rgba(212, 175, 55, 0.6);
+            transform: scale(1.05);
+        }
+
+        /* --- CONTENIDO PRINCIPAL (GRID) --- */
+        #main-content {
+            position: relative;
+            z-index: 10;
             opacity: 0;
+            transform: scale(0.9);
+            transition: all 1s cubic-bezier(0.25, 1, 0.5, 1);
             visibility: hidden;
-            pointer-events: none;
-            transform: translateZ(-100px) scale(0.9);
-            transition: opacity 0.6s ease, transform 0.6s cubic-bezier(0.2, 0.8, 0.2, 1), visibility 0.6s;
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
         }
 
-        /* Alternamos el borde dorado para darle vida */
-        .glass-card:nth-child(even) {
-            border-left-color: var(--milenio-gold);
+        .grid-container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 20px;
+            max-width: 1200px;
+            width: 100%;
         }
 
-        .glass-card.active {
-            opacity: 1;
-            visibility: visible;
-            pointer-events: auto;
-            /* Solo la tarjeta activa recibe clics o hovers */
-            transform: translateZ(0) scale(1);
-            z-index: 5;
+        /* --- TARJETAS GRID --- */
+        .card-grid {
+            background: var(--card-bg);
+            border: 1px solid rgba(212, 175, 55, 0.3);
+            border-radius: 12px;
+            padding: 30px 25px 25px;
+            width: calc(33.333% - 20px);
+            min-width: 300px;
+            backdrop-filter: blur(10px);
+            cursor: pointer;
+            transition: all 0.4s cubic-bezier(0.25, 1, 0.5, 1);
+            text-align: center;
+            position: relative;
+            overflow: hidden;
         }
 
-        /* Barra de progreso de carga individual por tarjeta */
-        .card-progress-bar {
-            position: absolute;
+        .card-grid:hover {
+            transform: translateY(-10px) scale(1.02);
+            border-color: var(--cyan);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.6), inset 0 0 20px rgba(0, 210, 255, 0.1);
+        }
+
+        /* --- MODAL EXPANDIDO (MAGIA 3D) --- */
+        #expand-modal {
+            position: fixed;
             top: 0;
             left: 0;
-            height: 3px;
-            background: linear-gradient(90deg, var(--milenio-cyan), var(--milenio-gold));
-            width: 0%;
-            border-top-left-radius: 20px;
-            transition: width 0.1s linear;
-        }
-
-        /* --- BOTONES DE NAVEGACIÓN MANUAL (< >) --- */
-        .nav-btn {
-            position: absolute;
-            top: 50%;
-            transform: translateY(-50%);
-            width: 50px;
-            height: 50px;
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 50%;
-            color: var(--milenio-cyan);
-            font-size: 1.2rem;
+            width: 100%;
+            height: 100%;
+            background: rgba(3, 5, 10, 0.85);
+            backdrop-filter: blur(15px);
+            z-index: 10000;
             display: flex;
-            justify-content: center;
             align-items: center;
-            cursor: pointer;
-            z-index: 20;
-            backdrop-filter: blur(5px);
-            transition: all 0.3s ease;
-        }
-
-        .nav-btn:hover {
-            background: var(--milenio-cyan);
-            color: var(--bg-dark);
-            box-shadow: 0 0 20px rgba(0, 240, 255, 0.5);
-            transform: translateY(-50%) scale(1.1);
-        }
-
-        .nav-prev {
-            left: -70px;
-        }
-
-        .nav-next {
-            right: -70px;
-        }
-
-        /* Ajuste responsivo para pantallas pequeñas */
-        @media (max-width: 1024px) {
-            .nav-prev {
-                left: -20px;
-            }
-
-            .nav-next {
-                right: -20px;
-            }
-
-            .glass-card {
-                padding: 30px;
-            }
-        }
-
-        /* --- PUNTOS (DOTS) --- */
-        .dots-wrapper {
-            display: flex;
             justify-content: center;
-            gap: 12px;
-            margin-top: 30px;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.5s ease;
         }
 
-        .dot {
-            width: 10px;
-            height: 10px;
+        #expand-modal.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .expanded-card {
+            background: linear-gradient(145deg, #101830, #0a0f1d);
+            border: 2px solid var(--gold);
+            border-radius: 20px;
+            padding: 50px 40px;
+            max-width: 700px;
+            width: 90%;
+            text-align: center;
+            transform: scale(0.5) translateY(100px);
+            opacity: 0;
+            transition: all 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+            box-shadow: 0 0 60px rgba(212, 175, 55, 0.3), 0 0 100px rgba(0, 210, 255, 0.1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        #expand-modal.active .expanded-card {
+            transform: scale(1) translateY(0);
+            opacity: 1;
+        }
+
+        .close-btn {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: rgba(255,255,255,0.1);
+            border: none;
+            color: white;
+            width: 40px;
+            height: 40px;
             border-radius: 50%;
-            background: rgba(255, 255, 255, 0.2);
+            font-size: 20px;
             cursor: pointer;
             transition: all 0.3s;
+            z-index: 50;
         }
+        .close-btn:hover { background: var(--gold); color: black; transform: rotate(90deg); }
 
-        .dot.active {
-            background: var(--milenio-cyan);
-            transform: scale(1.4);
-            box-shadow: 0 0 10px var(--milenio-cyan);
+        /* Animaciones base */
+        @keyframes floatLogo {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-15px); }
         }
-
-        /* Correcciones de Títulos */
-        .title-text {
-            background: linear-gradient(90deg, #fff, var(--milenio-cyan));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
+        
+        .medal-icon { font-size: 32px; filter: drop-shadow(0 4px 6px rgba(0,0,0,0.5)); margin-bottom: 5px; display: inline-block; }
+        
+        .five-stars {
+            color: var(--gold);
+            font-size: 22px;
+            letter-spacing: 2px;
+            margin-bottom: 10px;
+            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5));
         }
     </style>
 </head>
-
 <body>
 
-    <!-- Fondo Animado WebGL/Canvas -->
-    <canvas id="particle-canvas"></canvas>
+    <canvas id="starfield"></canvas>
 
-    <!-- Pantalla de Inicio -->
     <div id="intro-screen">
-        <div class="logo-capsule mb-8">
-            <img src="https://www.mileniopc.com/wp-content/uploads/2024/03/MPC_logo.svg" alt="Milenio PC"
-                style="height: 50px;">
+        <div class="logo-capsule">
+            <img src="https://www.mileniopc.com/wp-content/uploads/2024/03/MPC_logo.svg" alt="Milenio PC" class="h-12 w-auto object-contain">
         </div>
-        <h1 class="text-3xl md:text-5xl font-black text-white mb-4 tracking-wider text-center px-4 title-text">
-            MESA DE SERVICIO
-        </h1>
-        <p class="text-slate-400 text-lg mb-12">Experiencias de Usuario XLA</p>
-        <button class="btn-intro" onclick="startApp()">
-            <i class="fa-solid fa-power-off mr-2"></i> Iniciar Dashboard
-        </button>
+        <button class="intro-btn" onclick="startExperience()">Iniciar</button>
     </div>
 
-    <!-- Dashboard Principal -->
-    <div id="dashboard-content">
-
+    <div id="main-content">
+        
         <!-- Cabecera -->
-        <div class="text-center mb-10">
-            <div class="logo-capsule">
-                <img src="https://www.mileniopc.com/wp-content/uploads/2024/03/MPC_logo.svg" alt="Milenio PC"
-                    style="height: 35px;">
-            </div>
-            <!-- TEXTO EXACTO DEL JEFE -->
-            <h2 class="text-2xl md:text-3xl font-black text-white uppercase tracking-wide mb-2">
-                Top 5. Comentarios de XLA experiencia de usuario en Mesa de Servicio.
-            </h2>
-            <p class="text-yellow-400 italic font-medium opacity-90">
-                "El éxito es la suma de pequeños esfuerzos repetidos día tras día"
+        <div class="text-center w-full max-w-5xl mb-10">
+            <h1 class="text-2xl md:text-3xl font-black text-white uppercase tracking-widest mb-3">
+                <span class="text-[#d4af37] mr-2">★</span> 
+                Comentarios de XLA experiencia de usuario en Mesa de Servicio. 
+                <span class="text-[#d4af37] ml-2">★</span>
+            </h1>
+            <p class="text-[#d4af37] italic font-serif text-lg opacity-90">
+                "El éxito es la suma de pequeños esfuerzos repetidos día tras día."
             </p>
         </div>
 
-        <!-- Contenedor del Carrusel + Flechas -->
-        <div class="relative w-full max-w-4xl mx-auto">
-
-            <button class="nav-btn nav-prev" onclick="prevCard()" aria-label="Anterior">
-                <i class="fa-solid fa-chevron-left"></i>
-            </button>
-
-            <div class="carousel-viewport" id="cardContainer">
-
-                <!-- Tarjeta 1 -->
-                <div class="glass-card active" data-index="0">
-                    <div class="card-progress-bar"></div>
-                    <div class="flex items-center gap-3 mb-4">
-                        <span class="text-4xl drop-shadow-[0_0_8px_rgba(255,215,0,0.8)]">🥇</span>
-                        <div class="text-left">
-                            <h3 class="text-xl md:text-2xl font-bold text-yellow-400">Solucionado en Nivel 1 por Andrés
-                                Felipe Barrios.</h3>
-                        </div>
-                    </div>
-                    <p class="text-cyan-400 font-semibold mb-6 tracking-wide">
-                        Cliente: <span class="text-white">ACTIVOS POR COLOMBIA SAS (Jhonny Flórez)</span>
-                    </p>
-                    <blockquote class="text-lg md:text-xl text-slate-200 italic leading-relaxed mb-8 max-w-2xl">
-                        "Buen trabajo solucionando la falla del equipo; demostración de rapidez, coordinación y
-                        eficacia."
-                    </blockquote>
-                    <div
-                        class="mt-auto bg-white/5 border border-white/10 px-6 py-2 rounded-lg text-sm font-mono text-slate-300">
-                        CASO: 126698 — Bogotá
-                    </div>
-                </div>
-
-                <!-- Tarjeta 2 -->
-                <div class="glass-card" data-index="1">
-                    <div class="card-progress-bar"></div>
-                    <div class="flex items-center gap-3 mb-4">
-                        <span class="text-4xl drop-shadow-[0_0_8px_rgba(192,192,192,0.8)]">🥈</span>
-                        <div class="text-left">
-                            <h3 class="text-xl md:text-2xl font-bold text-yellow-400">Atendido por nivel 1 + Soporte en
-                                sitio Medellin Sebastian Zapata Zapata</h3>
-                        </div>
-                    </div>
-                    <p class="text-cyan-400 font-semibold mb-6 tracking-wide">
-                        Cliente: <span class="text-white">LYNKUS SOLUTIONS SAS (Gustavo Muñoz)</span>
-                    </p>
-                    <blockquote class="text-lg md:text-xl text-slate-200 italic leading-relaxed mb-8 max-w-2xl">
-                        "El soporte fue muy bueno. La atención fue clara y la solución se brindó de manera rápida."
-                    </blockquote>
-                    <div
-                        class="mt-auto bg-white/5 border border-white/10 px-6 py-2 rounded-lg text-sm font-mono text-slate-300">
-                        CASO: 130394 — Medellín
-                    </div>
-                </div>
-
-                <!-- Tarjeta 3 -->
-                <div class="glass-card" data-index="2">
-                    <div class="card-progress-bar"></div>
-                    <div class="flex items-center gap-3 mb-4">
-                        <span class="text-4xl drop-shadow-[0_0_8px_rgba(205,127,50,0.8)]">🥉</span>
-                        <div class="text-left">
-                            <h3 class="text-xl md:text-2xl font-bold text-yellow-400">Solucionado en Nivel 1 por Joseph
-                                Alexander Parra</h3>
-                        </div>
-                    </div>
-                    <p class="text-cyan-400 font-semibold mb-6 tracking-wide">
-                        Cliente: <span class="text-white">NUTRITEC SAS (Iván Fdo Pinto)</span>
-                    </p>
-                    <blockquote class="text-lg md:text-xl text-slate-200 italic leading-relaxed mb-8 max-w-2xl">
-                        "Muchas gracias. Excelente atención y respuesta oportuna."
-                    </blockquote>
-                    <div
-                        class="mt-auto bg-white/5 border border-white/10 px-6 py-2 rounded-lg text-sm font-mono text-slate-300">
-                        CASO: 132753 — Cali
-                    </div>
-                </div>
-
-                <!-- Tarjeta 4 -->
-                <div class="glass-card" data-index="3">
-                    <div class="card-progress-bar"></div>
-                    <div class="flex items-center gap-3 mb-4">
-                        <span class="text-4xl">🎖️</span>
-                        <div class="text-left">
-                            <h3 class="text-xl md:text-2xl font-bold text-yellow-400">Solucionado en Nivel 1 por Ronaldo
-                                Steven Barrera</h3>
-                        </div>
-                    </div>
-                    <p class="text-cyan-400 font-semibold mb-6 tracking-wide">
-                        Cliente: <span class="text-white">IG SERVICES SAS (Leany Sadarriaga)</span>
-                    </p>
-                    <blockquote class="text-lg md:text-xl text-slate-200 italic leading-relaxed mb-8 max-w-2xl">
-                        "Buen servicio, rápida instalación y excelente atención."
-                    </blockquote>
-                    <div
-                        class="mt-auto bg-white/5 border border-white/10 px-6 py-2 rounded-lg text-sm font-mono text-slate-300">
-                        CASO: 131518 — Barranquilla
-                    </div>
-                </div>
-
-                <!-- Tarjeta 5 -->
-                <div class="glass-card" data-index="4">
-                    <div class="card-progress-bar"></div>
-                    <div class="flex items-center gap-3 mb-4">
-                        <span class="text-4xl">🎖️</span>
-                        <div class="text-left">
-                            <h3 class="text-xl md:text-2xl font-bold text-yellow-400">Solucionado en Nivel 1 por Sabina
-                                Álvarez Monsalve</h3>
-                        </div>
-                    </div>
-                    <p class="text-cyan-400 font-semibold mb-6 tracking-wide">
-                        Cliente: <span class="text-white">FEELING COMPANY SAS (Carlos Augusto Castaño)</span>
-                    </p>
-                    <blockquote class="text-lg md:text-xl text-slate-200 italic leading-relaxed mb-8 max-w-2xl">
-                        "Mil gracias, excelente servicio."
-                    </blockquote>
-                    <div
-                        class="mt-auto bg-white/5 border border-white/10 px-6 py-2 rounded-lg text-sm font-mono text-slate-300">
-                        CASO: 129423 — Bucaramanga
-                    </div>
-                </div>
-
+        <!-- Grid de Tarjetas -->
+        <div class="grid-container">
+            
+            <!-- TARJETA 1 -->
+            <div class="card-grid" onclick="expandCard(this)">
+                <div class="five-stars">★★★★★</div>
+                <span class="medal-icon">🎖️</span>
+                <h2 class="text-lg font-bold text-[#d4af37] mb-2 leading-snug">Solucionado en Nivel 1 por Andrés Felipe Barrios.</h2>
+                <p class="text-[13px] text-gray-400 font-semibold mb-3">
+                    <span class="text-gray-300">Cliente:</span> ACTIVOS POR COLOMBIA SAS (Jhonny Flórez)
+                </p>
+                <blockquote class="text-sm italic text-gray-200 mb-4 leading-relaxed font-serif">
+                    "Buen trabajo solucionando la falla del equipo; demostración de rapidez, coordinación y eficacia."
+                </blockquote>
+                <span class="text-xs font-mono text-[#00d2ff] bg-black/40 px-3 py-1 rounded border border-[#00d2ff]/30">CASO: 126698</span>
             </div>
 
-            <button class="nav-btn nav-next" onclick="nextCard()" aria-label="Siguiente">
-                <i class="fa-solid fa-chevron-right"></i>
-            </button>
+            <!-- TARJETA 2 -->
+            <div class="card-grid" onclick="expandCard(this)">
+                <div class="five-stars">★★★★★</div>
+                <span class="medal-icon">🎖️</span>
+                <h2 class="text-lg font-bold text-[#d4af37] mb-2 leading-snug">Atendido por nivel 1 + Soporte en sitio Medellin Sebastian Zapata Zapata</h2>
+                <p class="text-[13px] text-gray-400 font-semibold mb-3">
+                    <span class="text-gray-300">Cliente:</span> LYNKUS SOLUTIONS SAS (Gustavo Muñoz)
+                </p>
+                <blockquote class="text-sm italic text-gray-200 mb-4 leading-relaxed font-serif">
+                    "El soporte fue muy bueno. La atención fue clara y la solución se brindó de manera rápida."
+                </blockquote>
+                <span class="text-xs font-mono text-[#00d2ff] bg-black/40 px-3 py-1 rounded border border-[#00d2ff]/30">CASO: 130394</span>
+            </div>
+
+            <!-- TARJETA 3 -->
+            <div class="card-grid" onclick="expandCard(this)">
+                <div class="five-stars">★★★★★</div>
+                <span class="medal-icon">🎖️</span>
+                <h2 class="text-lg font-bold text-[#d4af37] mb-2 leading-snug">Solucionado en Nivel 1 por Joseph Alexander Parra</h2>
+                <p class="text-[13px] text-gray-400 font-semibold mb-3">
+                    <span class="text-gray-300">Cliente:</span> NUTRITEC SAS (Iván Fdo Pinto)
+                </p>
+                <blockquote class="text-sm italic text-gray-200 mb-4 leading-relaxed font-serif">
+                    "Muchas gracias, Excelente atención y respuesta oportuna."
+                </blockquote>
+                <span class="text-xs font-mono text-[#00d2ff] bg-black/40 px-3 py-1 rounded border border-[#00d2ff]/30">CASO: 132753</span>
+            </div>
+
+            <!-- TARJETA 4 (Abajo centrada) -->
+            <div class="card-grid" onclick="expandCard(this)">
+                <div class="five-stars">★★★★★</div>
+                <span class="medal-icon">🎖️</span>
+                <h2 class="text-lg font-bold text-[#d4af37] mb-2 leading-snug">Solucionado en Nivel 1 por Ronaldo Steven Barrera</h2>
+                <p class="text-[13px] text-gray-400 font-semibold mb-3">
+                    <span class="text-gray-300">Cliente:</span> IG SERVICES SAS (Leany Sadarriaga)
+                </p>
+                <blockquote class="text-sm italic text-gray-200 mb-4 leading-relaxed font-serif">
+                    "Buen servicio, rápida instalación y excelente servicio."
+                </blockquote>
+                <span class="text-xs font-mono text-[#00d2ff] bg-black/40 px-3 py-1 rounded border border-[#00d2ff]/30">CASO: 131518</span>
+            </div>
+
+            <!-- TARJETA 5 (Abajo centrada) -->
+            <div class="card-grid" onclick="expandCard(this)">
+                <div class="five-stars">★★★★★</div>
+                <span class="medal-icon">🎖️</span>
+                <h2 class="text-lg font-bold text-[#d4af37] mb-2 leading-snug">Solucionado en Nivel 1 por Sabina Álvarez Monsalve</h2>
+                <p class="text-[13px] text-gray-400 font-semibold mb-3">
+                    <span class="text-gray-300">Cliente:</span> FEELING COMPANY SAS (Carlos Augusto Castaño)
+                </p>
+                <blockquote class="text-sm italic text-gray-200 mb-4 leading-relaxed font-serif">
+                    "Mil gracias, excelente servicio."
+                </blockquote>
+                <span class="text-xs font-mono text-[#00d2ff] bg-black/40 px-3 py-1 rounded border border-[#00d2ff]/30">CASO: 129423</span>
+            </div>
 
         </div>
 
-        <!-- Puntos Indicadores Inferiores -->
-        <div class="dots-wrapper" id="dotsContainer">
-            <div class="dot active" onclick="jumpTo(0)"></div>
-            <div class="dot" onclick="jumpTo(1)"></div>
-            <div class="dot" onclick="jumpTo(2)"></div>
-            <div class="dot" onclick="jumpTo(3)"></div>
-            <div class="dot" onclick="jumpTo(4)"></div>
-        </div>
-
-        <p class="text-center mt-8 text-xs text-slate-500 tracking-widest uppercase">
-            Mesa de Servicio Milenio PC — Experiencia XLA 2026
+        <p class="mt-10 text-xs text-gray-500 uppercase tracking-[0.3em] font-semibold">
+            Mesa de Servicio — Marzo, Abril y Mayo 2026
         </p>
+    </div>
 
+    <div id="expand-modal" onclick="closeModal(event)">
+        <div class="expanded-card" id="expanded-content" onclick="event.stopPropagation()">
+            <!-- El contenido se inyecta por JS -->
+        </div>
     </div>
 
     <script>
-        /* --- 1. LÓGICA DEL CARRUSEL --- */
-        const cards = document.querySelectorAll('.glass-card');
-        const dots = document.querySelectorAll('.dot');
-        const container = document.getElementById('cardContainer');
+        // --- MOTOR DE AUDIO SINTETIZADO ---
+        const AudioContext = window.AudioContext || window.webkitAudioContext;
+        let audioCtx;
 
-        let currentIndex = 0;
-        let progress = 0;
-        let isHovered = false;
-        let animationInterval;
-        const DURATION = 6000; // 6 Segundos por tarjeta
-        const UPDATE_SPEED = 20; // Actualizar cada 20ms
+        function playSound(type) {
+            if (!audioCtx) audioCtx = new AudioContext();
+            if (audioCtx.state === 'suspended') audioCtx.resume();
+            
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
 
-        function updateUI(index) {
-            cards.forEach(c => {
-                c.classList.remove('active');
-                c.style.transform = 'translateZ(-100px) scale(0.9)'; // Reset 3D
-                c.querySelector('.card-progress-bar').style.width = '0%';
-            });
-            dots.forEach(d => d.classList.remove('active'));
-
-            cards[index].classList.add('active');
-            dots[index].classList.add('active');
-            progress = 0;
-            currentIndex = index;
+            const now = audioCtx.currentTime;
+            
+            if (type === 'intro') {
+                // Sonido de inicio "Warp Drive"
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(150, now);
+                osc.frequency.exponentialRampToValueAtTime(800, now + 1);
+                gain.gain.setValueAtTime(0, now);
+                gain.gain.linearRampToValueAtTime(0.3, now + 0.2);
+                gain.gain.exponentialRampToValueAtTime(0.01, now + 1.5);
+                osc.start(now);
+                osc.stop(now + 1.5);
+            } else if (type === 'click') {
+                // Sonido de expansión (cristalino/campana)
+                osc.type = 'triangle';
+                osc.frequency.setValueAtTime(600, now);
+                osc.frequency.exponentialRampToValueAtTime(1200, now + 0.1);
+                gain.gain.setValueAtTime(0, now);
+                gain.gain.linearRampToValueAtTime(0.2, now + 0.05);
+                gain.gain.exponentialRampToValueAtTime(0.01, now + 0.5);
+                osc.start(now);
+                osc.stop(now + 0.5);
+            }
         }
 
-        function nextCard() {
-            let next = (currentIndex + 1) % cards.length;
-            updateUI(next);
-        }
-
-        function prevCard() {
-            let prev = (currentIndex - 1 + cards.length) % cards.length;
-            updateUI(prev);
-        }
-
-        function jumpTo(index) {
-            updateUI(index);
-        }
-
-        /* Ciclo de animación automático de la barra */
-        function startCarouselLoop() {
-            animationInterval = setInterval(() => {
-                if (!isHovered) {
-                    progress += (UPDATE_SPEED / DURATION) * 100;
-                    if (progress >= 100) {
-                        nextCard();
-                    } else {
-                        const activeBar = cards[currentIndex].querySelector('.card-progress-bar');
-                        if (activeBar) activeBar.style.width = `${progress}%`;
-                    }
-                }
-            }, UPDATE_SPEED);
-        }
-
-        /* --- 2. INTERACTIVIDAD 3D (TILT) --- */
-        container.addEventListener('mousemove', (e) => {
-            isHovered = true; // Pausar carrusel
-
-            const activeCard = cards[currentIndex];
-            const rect = activeCard.getBoundingClientRect();
-
-            // Coordenadas relativas al centro de la tarjeta
-            const x = e.clientX - rect.left - (rect.width / 2);
-            const y = e.clientY - rect.top - (rect.height / 2);
-
-            // Calculamos ángulo (Max 8 grados)
-            const rotateY = (x / (rect.width / 2)) * 8;
-            const rotateX = -(y / (rect.height / 2)) * 8;
-
-            activeCard.style.transform = `translateZ(20px) rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
-        });
-
-        container.addEventListener('mouseleave', () => {
-            isHovered = false; // Reanudar
-            const activeCard = cards[currentIndex];
-            activeCard.style.transform = 'translateZ(0) rotateX(0) rotateY(0)'; // Reset Suave
-        });
-
-
-        /* --- 3. EFECTO PARTÍCULAS EN EL FONDO --- */
-        const canvas = document.getElementById('particle-canvas');
+        // --- SISTEMA DE ESTRELLAS CANVAS (AHORA CON FORMA REAL DE ESTRELLAS) ---
+        const canvas = document.getElementById('starfield');
         const ctx = canvas.getContext('2d');
-        let particles = [];
+        let stars = [];
+        let warpSpeed = 0.5; // Velocidad normal
 
-        function resize() {
+        function resizeCanvas() {
             canvas.width = window.innerWidth;
             canvas.height = window.innerHeight;
         }
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
 
-        window.addEventListener('resize', resize);
-        resize();
-
-        class Particle {
+        class Star {
             constructor() {
-                this.x = Math.random() * canvas.width;
-                this.y = Math.random() * canvas.height;
-                this.vx = (Math.random() - 0.5) * 0.5;
-                this.vy = (Math.random() - 0.5) * 0.5;
-                this.radius = Math.random() * 1.5;
+                this.reset();
+                this.z = Math.random() * canvas.width; 
+            }
+            reset() {
+                this.x = (Math.random() - 0.5) * canvas.width * 2;
+                this.y = (Math.random() - 0.5) * canvas.height * 2;
+                this.z = canvas.width;
+                this.isGold = Math.random() > 0.8; 
             }
             update() {
-                this.x += this.vx;
-                this.y += this.vy;
-                if (this.x < 0 || this.x > canvas.width) this.vx *= -1;
-                if (this.y < 0 || this.y > canvas.height) this.vy *= -1;
+                this.z -= warpSpeed;
+                if (this.z <= 0) this.reset();
             }
             draw() {
+                let x = (this.x / this.z) * canvas.width + canvas.width / 2;
+                let y = (this.y / this.z) * canvas.height + canvas.height / 2;
+                let radius = (canvas.width / this.z) * 1.5;
+
+                let opacity = 1 - (this.z / canvas.width);
+                ctx.fillStyle = this.isGold ? `rgba(212, 175, 55, ${opacity})` : `rgba(255, 255, 255, ${opacity})`;
+
+                // Renderizar estrella real de 5 puntas en el espacio
+                ctx.save();
+                ctx.translate(x, y);
                 ctx.beginPath();
-                ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
-                ctx.fillStyle = 'rgba(0, 240, 255, 0.3)';
-                ctx.fill();
-            }
-        }
-
-        for (let i = 0; i < 80; i++) particles.push(new Particle());
-
-        function animateParticles() {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-            particles.forEach(p => {
-                p.update();
-                p.draw();
-            });
-
-            // Dibujar lineas de conexión
-            for (let i = 0; i < particles.length; i++) {
-                for (let j = i + 1; j < particles.length; j++) {
-                    const dx = particles[i].x - particles[j].x;
-                    const dy = particles[i].y - particles[j].y;
-                    const dist = Math.sqrt(dx * dx + dy * dy);
-
-                    if (dist < 120) {
-                        ctx.beginPath();
-                        ctx.strokeStyle = `rgba(0, 86, 179, ${1 - dist / 120})`; // Azul corporativo
-                        ctx.lineWidth = 0.5;
-                        ctx.moveTo(particles[i].x, particles[i].y);
-                        ctx.lineTo(particles[j].x, particles[j].y);
-                        ctx.stroke();
-                    }
+                for (let i = 0; i < 5; i++) {
+                    ctx.lineTo(Math.cos((18 + i * 72) / 180 * Math.PI) * radius, -Math.sin((18 + i * 72) / 180 * Math.PI) * radius);
+                    ctx.lineTo(Math.cos((54 + i * 72) / 180 * Math.PI) * (radius * 0.4), -Math.sin((54 + i * 72) / 180 * Math.PI) * (radius * 0.4));
                 }
+                ctx.closePath();
+                ctx.fill();
+                ctx.restore();
             }
-            requestAnimationFrame(animateParticles);
         }
 
-        /* --- 4. ARRANQUE DEL DASHBOARD --- */
-        function startApp() {
-            const intro = document.getElementById('intro-screen');
-            const dashboard = document.getElementById('dashboard-content');
+        for (let i = 0; i < 400; i++) stars.push(new Star());
 
-            // Audio Feedback (Sutil y corporativo)
-            try {
-                const AudioContext = window.AudioContext || window.webkitAudioContext;
-                const audioCtx = new AudioContext();
-                const osc = audioCtx.createOscillator();
-                const gain = audioCtx.createGain();
+        function animateStars() {
+            ctx.fillStyle = 'rgba(7, 11, 25, 0.4)'; // Estela espacial
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            stars.forEach(star => {
+                star.update();
+                star.draw();
+            });
+            requestAnimationFrame(animateStars);
+        }
+        animateStars();
 
-                osc.type = 'sine';
-                osc.frequency.setValueAtTime(400, audioCtx.currentTime);
-                osc.frequency.exponentialRampToValueAtTime(800, audioCtx.currentTime + 0.5);
-
-                gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
-                gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.5);
-
-                osc.connect(gain);
-                gain.connect(audioCtx.destination);
-                osc.start();
-                osc.stop(audioCtx.currentTime + 0.5);
-            } catch (e) { /* Ignorar si no soporta audio */ }
-
-            // Transición Visual
-            intro.style.opacity = '0';
-            intro.style.visibility = 'hidden';
-
+        // --- INTERACCIONES DE PANTALLA ---
+        function startExperience() {
+            playSound('intro');
+            
+            // Efecto Warp (acelera las estrellas y luego las desacelera)
+            warpSpeed = 40; 
             setTimeout(() => {
-                dashboard.style.visibility = 'visible';
-                dashboard.style.opacity = '1';
-                dashboard.style.transform = 'scale(1)';
+                let slowDown = setInterval(() => {
+                    warpSpeed -= 1;
+                    if (warpSpeed <= 1) {
+                        warpSpeed = 1;
+                        clearInterval(slowDown);
+                    }
+                }, 50);
+            }, 500);
 
-                startCarouselLoop();
-            }, 400);
+            // Ocultar Intro y mostrar Grid
+            const intro = document.getElementById('intro-screen');
+            const main = document.getElementById('main-content');
+            
+            intro.style.opacity = '0';
+            setTimeout(() => {
+                intro.style.visibility = 'hidden';
+                main.style.visibility = 'visible';
+                main.style.opacity = '1';
+                main.style.transform = 'scale(1)';
+            }, 800);
         }
 
-        // Iniciar partículas al cargar
-        animateParticles();
+        // --- MODAL DE EXPANSIÓN ---
+        function expandCard(cardElement) {
+            playSound('click');
+            const modal = document.getElementById('expand-modal');
+            const modalContent = document.getElementById('expanded-content');
+            
+            let cardHTML = cardElement.innerHTML;
+            
+            // Inyectar HTML + Botón de cerrar
+            modalContent.innerHTML = `
+                <button class="close-btn" onclick="closeModal(event)">✕</button>
+                <div class="transform scale-[1.15] origin-center pt-6 pb-2 px-2">
+                    ${cardHTML}
+                </div>
+            `;
+            
+            modal.classList.add('active');
+        }
+
+        function closeModal(e) {
+            // Evitar cerrar si se hace clic dentro del texto de la tarjeta
+            if (e && e.target.id === 'expanded-content') return;
+            
+            const modal = document.getElementById('expand-modal');
+            modal.classList.remove('active');
+        }
     </script>
 </body>
-
 </html>
