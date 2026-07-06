@@ -13,6 +13,8 @@
         rel="stylesheet">
     <!-- Escáner QR -->
     <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
+    <!-- OCR: Tesseract.js para escanear texto de escarapelas cuyo QR no trae datos legibles -->
+    <script src="https://unpkg.com/tesseract.js@5/dist/tesseract.min.js"></script>
     <!-- Iconos -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
@@ -118,6 +120,30 @@
         .play-btn.selected .check-ring {
             opacity: 1;
             transform: scale(1) rotate(0);
+        }
+
+        /* BOTONES DE CALIFICACIÓN COMERCIAL */
+        .rating-btn {
+            transition: all 0.3s ease;
+        }
+        .rating-btn:hover {
+            background: rgba(255, 255, 255, 0.1);
+            transform: translateY(-2px);
+        }
+        .rating-btn.selected-bajo {
+            background: linear-gradient(135deg, rgba(59, 130, 246, 0.3), rgba(59, 130, 246, 0.15));
+            border-color: #3b82f6 !important;
+            box-shadow: 0 0 20px rgba(59, 130, 246, 0.3);
+        }
+        .rating-btn.selected-medio {
+            background: linear-gradient(135deg, rgba(16, 185, 129, 0.3), rgba(16, 185, 129, 0.15));
+            border-color: #10b981 !important;
+            box-shadow: 0 0 20px rgba(16, 185, 129, 0.3);
+        }
+        .rating-btn.selected-alto {
+            background: linear-gradient(135deg, rgba(250, 204, 21, 0.3), rgba(250, 204, 21, 0.15));
+            border-color: #facc15 !important;
+            box-shadow: 0 0 20px rgba(250, 204, 21, 0.3);
         }
 
         /* ESCÁNER */
@@ -238,44 +264,25 @@
                     </button>
                 </div>
 
-                <!-- Herramientas Independientes -->
-                <h3 class="text-sm font-bold text-gray-500 uppercase tracking-wider mb-4">Herramientas Disponibles</h3>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
+                <!-- Herramienta Principal -->
+                <h3 class="text-sm font-bold text-gray-500 uppercase tracking-wider mb-4">Herramienta del Stand</h3>
+                <div class="mb-8">
 
-                    <!-- Botón Juego -->
+                    <!-- Botón Técnica de Apertura -->
                     <div onclick="goToScreen('screen-game')"
-                        class="group cursor-pointer bg-white border-2 border-gray-100 hover:border-milenio-teal p-5 rounded-2xl shadow-sm hover:shadow-lg transition-all flex flex-col justify-between h-full">
+                        class="group cursor-pointer bg-white border-2 border-gray-100 hover:border-milenio-teal p-6 rounded-2xl shadow-sm hover:shadow-lg transition-all flex flex-col justify-between h-full">
                         <div class="flex justify-between items-start mb-4">
                             <div
-                                class="w-12 h-12 rounded-xl bg-milenio-teal/10 flex items-center justify-center text-milenio-teal text-xl group-hover:scale-110 transition-transform">
-                                <i class="fa-solid fa-gamepad"></i>
+                                class="w-14 h-14 rounded-xl bg-milenio-teal/10 flex items-center justify-center text-milenio-teal text-2xl group-hover:scale-110 transition-transform">
+                                <i class="fa-solid fa-comments"></i>
                             </div>
                             <span id="badge-game"
                                 class="bg-gray-200 text-gray-600 text-[10px] font-bold px-2 py-1 rounded uppercase tracking-wide">Sin
                                 Iniciar</span>
                         </div>
                         <div>
-                            <h4 class="font-bold text-lg text-milenio-dark mb-1">Rompehielos (Dolores)</h4>
-                            <p class="text-sm text-gray-500">Juego interactivo para que el cliente seleccione sus retos
-                                TI.</p>
-                        </div>
-                    </div>
-
-                    <!-- Botón Calculadora -->
-                    <div onclick="goToScreen('screen-calc')"
-                        class="group cursor-pointer bg-white border-2 border-gray-100 hover:border-milenio-lightblue p-5 rounded-2xl shadow-sm hover:shadow-lg transition-all flex flex-col justify-between h-full">
-                        <div class="flex justify-between items-start mb-4">
-                            <div
-                                class="w-12 h-12 rounded-xl bg-milenio-lightblue/10 flex items-center justify-center text-milenio-lightblue text-xl group-hover:scale-110 transition-transform">
-                                <i class="fa-solid fa-calculator"></i>
-                            </div>
-                            <span id="badge-calc"
-                                class="bg-gray-200 text-gray-600 text-[10px] font-bold px-2 py-1 rounded uppercase tracking-wide">Sin
-                                Iniciar</span>
-                        </div>
-                        <div>
-                            <h4 class="font-bold text-lg text-milenio-dark mb-1">Calculadora Impacto</h4>
-                            <p class="text-sm text-gray-500">Estime las pérdidas económicas por ineficiencia TI.</p>
+                            <h4 class="font-bold text-xl text-milenio-dark mb-1">Técnica de Apertura</h4>
+                            <p class="text-sm text-gray-500">Pregunta única para abrir la conversación con el visitante.</p>
                         </div>
                     </div>
 
@@ -300,10 +307,129 @@
                         class="fa-solid fa-arrow-left text-xl"></i></button>
                 <h2 class="text-2xl font-extrabold text-milenio-dark mb-6 mt-4">Captura de Lead</h2>
                 <div id="reader" class="mb-6 shadow-inner bg-gray-50 border-2 border-dashed border-gray-300"></div>
-                <button onclick="goToScreen('screen-manual')"
-                    class="w-full bg-white text-milenio-blue border-2 border-milenio-blue font-bold py-3 rounded-xl text-lg hover:bg-blue-50 transition-all flex justify-center items-center gap-2">
-                    <i class="fa-solid fa-keyboard"></i> Ingresar Manualmente
+
+                <!-- Aviso cuando el QR no trae datos legibles -->
+                <div id="qr-useless-notice" class="hidden bg-amber-50 border-2 border-amber-300 rounded-xl p-4 mb-4 text-left">
+                    <p class="text-sm font-bold text-amber-800 mb-1">
+                        <i class="fa-solid fa-triangle-exclamation mr-2"></i>QR del organizador detectado
+                    </p>
+                    <p class="text-xs text-amber-700 mb-2">Este QR solo contiene un ID interno de Andicom (<span id="qr-useless-id" class="font-mono font-bold"></span>). No trae datos del asistente.</p>
+                    <p class="text-xs text-amber-700">Usa una de las opciones de abajo para capturar los datos.</p>
+                </div>
+
+                <div class="grid grid-cols-1 gap-2">
+                    <button onclick="openOCRScanner()"
+                        class="w-full bg-milenio-teal text-white border-2 border-milenio-teal font-bold py-3 rounded-xl text-base hover:bg-teal-600 transition-all flex justify-center items-center gap-2">
+                        <i class="fa-solid fa-camera"></i> Escanear con foto (OCR)
+                    </button>
+                    <button onclick="goToScreen('screen-manual')"
+                        class="w-full bg-white text-milenio-blue border-2 border-milenio-blue font-bold py-3 rounded-xl text-base hover:bg-blue-50 transition-all flex justify-center items-center gap-2">
+                        <i class="fa-solid fa-keyboard"></i> Ingresar Manualmente
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- ==========================================
+             PANTALLA OCR: leer texto de la escarapela con foto
+             (para cuando el QR de Andicom solo trae un ID interno)
+             ========================================== -->
+        <section id="screen-ocr" class="screen flex-col items-center justify-center w-full max-w-lg">
+            <div class="glass-panel rounded-3xl p-6 md:p-8 w-full shadow-2xl relative">
+                <button onclick="closeOCRScanner()" class="absolute top-4 left-4 text-gray-400 hover:text-gray-700 z-10">
+                    <i class="fa-solid fa-arrow-left text-xl"></i>
                 </button>
+
+                <div class="text-center mb-5 mt-4">
+                    <span class="inline-block bg-milenio-teal/10 text-milenio-teal px-3 py-1 rounded-full text-xs font-black uppercase tracking-widest mb-2">
+                        <i class="fa-solid fa-wand-magic-sparkles mr-1"></i>Modo OCR
+                    </span>
+                    <h2 class="text-2xl font-black text-milenio-dark leading-tight">Escanear escarapela con foto</h2>
+                    <p class="text-sm text-gray-500 mt-2">Enfoca la escarapela completa: se leerá el texto impreso.</p>
+                </div>
+
+                <!-- Fase 1: vista de cámara + botón capturar -->
+                <div id="ocr-phase-camera" class="space-y-4">
+                    <div class="relative rounded-2xl overflow-hidden bg-slate-900 shadow-inner">
+                        <video id="ocr-video" autoplay playsinline muted class="w-full h-auto min-h-[280px] bg-black"></video>
+                        <div class="absolute inset-6 border-4 border-white/50 rounded-2xl pointer-events-none"></div>
+                    </div>
+                    <button onclick="capturePhotoForOCR()"
+                        class="w-full bg-milenio-teal text-white font-black py-4 rounded-xl text-lg hover:bg-teal-600 transition-all shadow-lg flex justify-center items-center gap-2">
+                        <i class="fa-solid fa-camera-retro"></i> Capturar foto
+                    </button>
+                </div>
+
+                <!-- Fase 2: preview + procesar -->
+                <div id="ocr-phase-preview" class="space-y-4 hidden">
+                    <img id="ocr-preview" class="w-full rounded-2xl shadow-lg" alt="Preview escarapela">
+                    <div class="grid grid-cols-2 gap-3">
+                        <button onclick="retakePhoto()"
+                            class="bg-white border-2 border-gray-200 text-gray-700 font-bold py-3 rounded-xl hover:bg-gray-50 transition-all flex justify-center items-center gap-2">
+                            <i class="fa-solid fa-rotate-left"></i> Retomar
+                        </button>
+                        <button onclick="processOCR()"
+                            class="bg-milenio-teal text-white font-black py-3 rounded-xl hover:bg-teal-600 transition-all shadow-lg flex justify-center items-center gap-2">
+                            <i class="fa-solid fa-wand-magic-sparkles"></i> Procesar
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Fase 3: procesando (loading) -->
+                <div id="ocr-phase-processing" class="space-y-4 hidden text-center py-8">
+                    <div class="inline-block w-16 h-16 border-4 border-milenio-teal/20 border-t-milenio-teal rounded-full animate-spin mb-4"></div>
+                    <p id="ocr-progress-text" class="text-milenio-dark font-bold">Leyendo texto...</p>
+                    <div class="w-full bg-gray-200 rounded-full h-2 overflow-hidden">
+                        <div id="ocr-progress-bar" class="bg-milenio-teal h-2 transition-all" style="width: 0%"></div>
+                    </div>
+                    <p class="text-xs text-gray-500 mt-2">La primera vez tarda un poco más mientras se descarga el motor OCR</p>
+                </div>
+
+                <!-- Fase 4: resultado editable -->
+                <div id="ocr-phase-result" class="space-y-3 hidden">
+                    <div class="bg-emerald-50 border-2 border-emerald-200 rounded-xl p-3 text-center">
+                        <p class="text-xs font-bold text-emerald-700 uppercase tracking-widest">
+                            <i class="fa-solid fa-circle-check mr-1"></i>Texto detectado - Revisa y ajusta si es necesario
+                        </p>
+                    </div>
+
+                    <div class="relative">
+                        <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none"><i class="fa-solid fa-user text-gray-400"></i></div>
+                        <input type="text" id="ocr-name"
+                            class="w-full pl-12 pr-4 py-3 text-base border-2 border-gray-200 rounded-xl focus:border-milenio-teal outline-none transition-all bg-white font-semibold"
+                            placeholder="Nombre completo">
+                    </div>
+                    <div class="relative">
+                        <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none"><i class="fa-solid fa-building text-gray-400"></i></div>
+                        <input type="text" id="ocr-company"
+                            class="w-full pl-12 pr-4 py-3 text-base border-2 border-gray-200 rounded-xl focus:border-milenio-teal outline-none transition-all bg-white font-semibold"
+                            placeholder="Empresa">
+                    </div>
+                    <div class="relative">
+                        <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none"><i class="fa-solid fa-briefcase text-gray-400"></i></div>
+                        <input type="text" id="ocr-role"
+                            class="w-full pl-12 pr-4 py-3 text-base border-2 border-gray-200 rounded-xl focus:border-milenio-teal outline-none transition-all bg-white font-semibold"
+                            placeholder="Cargo (opcional)">
+                    </div>
+
+                    <details class="mt-3">
+                        <summary class="text-xs text-gray-500 cursor-pointer hover:text-milenio-blue">Ver texto crudo detectado</summary>
+                        <pre id="ocr-raw-text" class="mt-2 text-[10px] text-gray-500 bg-gray-50 p-3 rounded-lg max-h-32 overflow-auto whitespace-pre-wrap"></pre>
+                    </details>
+
+                    <div class="grid grid-cols-2 gap-3 pt-2">
+                        <button onclick="retakePhoto()"
+                            class="bg-white border-2 border-gray-200 text-gray-700 font-bold py-3 rounded-xl hover:bg-gray-50 transition-all flex justify-center items-center gap-2">
+                            <i class="fa-solid fa-camera"></i> Otra foto
+                        </button>
+                        <button onclick="saveOCRResult()"
+                            class="bg-milenio-dark text-white font-black py-3 rounded-xl hover:bg-black transition-all shadow-lg flex justify-center items-center gap-2">
+                            <i class="fa-solid fa-check"></i> Guardar
+                        </button>
+                    </div>
+                </div>
+
+                <canvas id="ocr-canvas" class="hidden"></canvas>
             </div>
         </section>
 
@@ -348,6 +474,13 @@
                             class="w-full pl-12 pr-4 py-3 text-base border-2 border-gray-200 rounded-xl focus:border-milenio-blue outline-none transition-all bg-white font-semibold"
                             placeholder="Correo (Opcional)">
                     </div>
+                    <div class="relative">
+                        <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none"><i
+                                class="fa-solid fa-phone text-gray-400"></i></div>
+                        <input type="tel" id="manual-phone"
+                            class="w-full pl-12 pr-4 py-3 text-base border-2 border-gray-200 rounded-xl focus:border-milenio-blue outline-none transition-all bg-white font-semibold"
+                            placeholder="Teléfono / Celular (Opcional)">
+                    </div>
 
                     <button type="submit"
                         class="w-full bg-milenio-blue text-white font-bold py-4 rounded-xl text-lg hover:bg-blue-800 transition-all shadow-md mt-4 flex justify-center items-center gap-2">
@@ -376,18 +509,35 @@
                     </span>
                 </div>
 
-                <h1 class="text-3xl md:text-4xl font-black text-center text-milenio-dark mb-2">¿Qué le duele hoy a su
-                    empresa?</h1>
-                <p class="text-center text-gray-500 mb-8 font-medium text-lg">Seleccione los mayores retos tecnológicos
-                    que enfrenta actualmente.</p>
+                <!-- Etiqueta contextual -->
+                <div class="text-center mb-3">
+                    <span class="inline-block text-xs font-black text-milenio-blue uppercase tracking-[0.3em]">
+                        Durante el evento · Técnica de apertura
+                    </span>
+                </div>
 
-                <!-- Tablero del Juego (Inyectado por JS) -->
-                <div id="game-board" class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10"></div>
+                <h1 class="text-2xl md:text-4xl font-black text-center text-milenio-dark mb-6 leading-tight">
+                    Te invito a responder una pregunta
+                </h1>
+
+                <!-- Pregunta principal destacada -->
+                <div class="bg-gradient-to-r from-milenio-blue to-milenio-dark text-white rounded-2xl p-6 md:p-8 mb-6 shadow-xl">
+                    <p class="text-lg md:text-2xl font-bold text-center leading-snug">
+                        ¿Qué aspecto consideras más importante para que la tecnología acompañe el crecimiento de tu empresa?
+                    </p>
+                </div>
+
+                <p class="text-center text-gray-500 mb-6 font-medium text-sm md:text-base italic">
+                    Elige el aspecto que consideras más relevante y abriremos la conversación.
+                </p>
+
+                <!-- Tablero (6 opciones - inyectado por JS) -->
+                <div id="game-board" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-10"></div>
 
                 <div class="flex justify-center">
                     <button onclick="saveGame()"
                         class="group relative overflow-hidden bg-milenio-dark text-white font-black py-4 px-12 rounded-2xl text-xl transition-all hover:scale-105 shadow-[0_10px_30px_rgba(14,29,44,0.3)]">
-                        <span class="relative z-10 flex items-center gap-3">¡Guardar Selección! <i
+                        <span class="relative z-10 flex items-center gap-3">¡Guardar Respuesta! <i
                                 class="fa-solid fa-check"></i></span>
                         <div
                             class="absolute inset-0 bg-gradient-to-r from-milenio-teal to-milenio-lightblue opacity-0 group-hover:opacity-100 transition-opacity duration-300">
@@ -398,66 +548,46 @@
         </section>
 
         <!-- ==========================================
-             PANTALLA: CALCULADORA COMERCIAL
+             PANTALLA: IMAGEN ALUSIVA DEL SERVICIO
+             (aparece tras seleccionar una opción en la técnica de apertura)
              ========================================== -->
-        <section id="screen-calc" class="screen flex-col items-center justify-center w-full max-w-2xl">
-            <div class="glass-panel rounded-3xl p-6 md:p-8 w-full shadow-2xl relative">
+        <section id="screen-service-image" class="screen flex-col items-center justify-center w-full max-w-4xl">
+            <div class="glass-panel rounded-[2.5rem] p-6 md:p-10 w-full shadow-2xl relative overflow-hidden">
 
-                <button onclick="goToScreen('screen-dashboard')"
-                    class="absolute top-6 left-6 text-gray-400 hover:text-milenio-teal transition-colors flex items-center gap-2 font-bold text-sm">
-                    <i class="fa-solid fa-chevron-left"></i> Volver
-                </button>
+                <!-- Etiqueta -->
+                <div class="text-center mb-4">
+                    <span class="inline-block bg-milenio-teal/10 text-milenio-teal px-4 py-1 rounded-full text-xs font-bold uppercase tracking-widest">
+                        <i class="fa-solid fa-lightbulb mr-2"></i>Milenio PC responde
+                    </span>
+                </div>
 
-                <h3 class="text-milenio-teal font-black text-sm tracking-widest uppercase mb-1 mt-8 text-center"><i
-                        class="fa-solid fa-user-tie mr-2"></i>Vista Comercial</h3>
-                <h2 class="text-2xl md:text-3xl font-extrabold text-milenio-dark mb-2 text-center">Calculadora de
-                    Impacto</h2>
-                <p class="text-gray-500 mb-8 font-medium text-center text-sm md:text-base">Ingrese los datos para
-                    estimar la pérdida oculta.</p>
+                <h2 class="text-xl md:text-2xl font-black text-center text-milenio-dark mb-2 leading-tight" id="service-intro">
+                    Para tu prioridad, en Milenio PC te ofrecemos:
+                </h2>
 
-                <form id="calc-form" class="space-y-4" onsubmit="event.preventDefault(); saveCalc();">
+                <!-- Contenedor de imagen (real o placeholder) -->
+                <div id="service-image-container" class="my-6 rounded-3xl overflow-hidden shadow-xl min-h-[280px] md:min-h-[380px] flex items-center justify-center relative">
+                    <!-- El contenido se inyecta desde JS -->
+                </div>
 
-                    <div class="relative">
-                        <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none"><i
-                                class="fa-solid fa-users text-gray-400"></i></div>
-                        <input type="number" id="calc-users" min="1"
-                            class="w-full pl-12 pr-4 py-3 text-lg border-2 border-gray-200 rounded-xl focus:border-milenio-teal outline-none transition-all bg-white font-semibold"
-                            placeholder="Número de Usuarios">
-                    </div>
+                <!-- Bloque descriptivo -->
+                <div class="bg-white border-2 border-milenio-teal/20 rounded-2xl p-4 md:p-5 mb-6 text-center">
+                    <p class="text-xs uppercase tracking-widest text-milenio-teal font-black mb-2">Servicio destacado</p>
+                    <p id="service-name" class="text-lg md:text-2xl font-black text-milenio-dark mb-2">—</p>
+                    <p id="service-description" class="text-sm md:text-base text-gray-600 leading-relaxed italic">—</p>
+                </div>
 
-                    <div class="relative">
-                        <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none"><i
-                                class="fa-solid fa-money-bill-wave text-gray-400"></i></div>
-                        <input type="number" id="calc-cost" min="1"
-                            class="w-full pl-12 pr-4 py-3 text-lg border-2 border-gray-200 rounded-xl focus:border-milenio-teal outline-none transition-all bg-white font-semibold"
-                            placeholder="Costo promedio empleado/hora (COP)">
-                    </div>
-
-                    <div class="relative">
-                        <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none"><i
-                                class="fa-solid fa-clock text-gray-400"></i></div>
-                        <input type="number" id="calc-hours" min="0" step="0.5"
-                            class="w-full pl-12 pr-4 py-3 text-lg border-2 border-gray-200 rounded-xl focus:border-milenio-teal outline-none transition-all bg-white font-semibold"
-                            placeholder="Horas caída sistema (Mensual)">
-                    </div>
-
-                    <div class="relative">
-                        <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none"><i
-                                class="fa-solid fa-network-wired text-gray-400"></i></div>
-                        <select id="calc-complexity"
-                            class="w-full pl-12 pr-4 py-3 text-lg border-2 border-gray-200 rounded-xl focus:border-milenio-teal outline-none transition-all bg-white font-semibold text-gray-600 appearance-none">
-                            <option value="" disabled selected>Nivel Complejidad TI...</option>
-                            <option value="Baja">Baja (Ofimática)</option>
-                            <option value="Media">Media (Software específico)</option>
-                            <option value="Alta">Alta (Misión crítica 24/7)</option>
-                        </select>
-                    </div>
-
-                    <button type="submit"
-                        class="w-full bg-milenio-teal text-white font-bold py-4 rounded-xl text-lg hover:bg-teal-600 transition-all shadow-md mt-4 flex justify-center items-center gap-2">
-                        <i class="fa-solid fa-floppy-disk"></i> Guardar Cálculos
+                <!-- Botones -->
+                <div class="flex flex-col md:flex-row gap-3 justify-center">
+                    <button onclick="goToScreen('screen-game')"
+                        class="bg-white border-2 border-gray-200 text-gray-600 font-bold py-3 px-6 rounded-xl hover:bg-gray-50 transition-all flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-arrow-left"></i> Cambiar respuesta
                     </button>
-                </form>
+                    <button onclick="goToScreen('screen-dashboard')"
+                        class="bg-milenio-dark text-white font-bold py-3 px-8 rounded-xl hover:bg-black transition-all shadow-lg flex items-center justify-center gap-2">
+                        Continuar <i class="fa-solid fa-arrow-right"></i>
+                    </button>
+                </div>
             </div>
         </section>
 
@@ -479,45 +609,52 @@
                     <p class="text-gray-300 font-medium break-words w-full px-4" id="cv-qr-data"></p>
                 </div>
 
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                <div class="grid grid-cols-1 gap-6 mb-8">
 
-                    <!-- Scoring del Lead -->
+                    <!-- Respuesta de Apertura + tip comercial (más protagonismo ahora) -->
                     <div
-                        class="md:col-span-3 bg-white/10 rounded-2xl p-6 border border-white/20 flex flex-col md:flex-row items-center justify-between gap-6">
-                        <div>
-                            <h3 class="text-sm uppercase tracking-widest text-milenio-lightblue font-bold mb-1">
-                                Clasificación Automática</h3>
-                            <div id="cv-score-title" class="text-2xl md:text-3xl font-black text-white">Evaluando...
-                            </div>
-                            <p id="cv-score-desc" class="text-gray-300 text-sm mt-1"></p>
-                        </div>
-                        <div id="cv-score-icon" class="text-6xl drop-shadow-[0_0_15px_rgba(255,255,255,0.5)]">🎯</div>
-                    </div>
-
-                    <!-- Pérdida Financiera -->
-                    <div
-                        class="md:col-span-1 bg-white/5 rounded-2xl p-6 border border-white/10 flex flex-col justify-center items-center text-center relative overflow-hidden">
-                        <div class="absolute top-0 right-0 p-2 opacity-10 text-5xl"><i
-                                class="fa-solid fa-calculator"></i></div>
-                        <i class="fa-solid fa-money-bill-trend-up text-3xl text-red-400 mb-3 relative z-10"></i>
-                        <h3 class="text-xs uppercase tracking-widest text-gray-400 font-bold mb-2 relative z-10">Pérdida
-                            Mensual</h3>
-                        <div id="cv-loss" class="text-2xl md:text-3xl font-black text-white relative z-10">Sin datos
-                        </div>
-                    </div>
-
-                    <!-- Dolores Seleccionados -->
-                    <div
-                        class="md:col-span-2 bg-white/5 rounded-2xl p-6 border border-white/10 relative overflow-hidden">
-                        <div class="absolute top-0 right-0 p-2 opacity-10 text-5xl"><i class="fa-solid fa-gamepad"></i>
+                        class="bg-white/5 rounded-2xl p-6 border border-white/10 relative overflow-hidden">
+                        <div class="absolute top-0 right-0 p-2 opacity-10 text-5xl"><i class="fa-solid fa-comments"></i>
                         </div>
                         <h3
                             class="text-xs uppercase tracking-widest text-milenio-teal font-bold mb-4 flex items-center gap-2 relative z-10">
-                            <i class="fa-solid fa-briefcase-medical"></i> Dolores Detectados
-                        </h3>
+                            <i class="fa-solid fa-comments"></i> Respuesta de Apertura</h3>
                         <div id="cv-pains" class="flex flex-wrap gap-2 relative z-10">
-                            <span class="text-gray-400 text-sm italic">No se utilizó el juego interactivo.</span>
+                            <span class="text-gray-400 text-sm italic">Técnica de apertura no utilizada.</span>
                         </div>
+                    </div>
+
+                    <!-- Calificación MANUAL de la comercial -->
+                    <div class="bg-white/10 rounded-2xl p-6 border border-white/20 relative overflow-hidden">
+                        <h3 class="text-xs uppercase tracking-widest text-milenio-lightblue font-bold mb-2 flex items-center gap-2">
+                            <i class="fa-solid fa-user-tie"></i> Calificación del comercial
+                        </h3>
+                        <p class="text-gray-300 text-sm mb-5">Después de conversar con el cliente, califícalo:</p>
+
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+                            <button type="button" onclick="setRating('bajo')" data-rating="bajo"
+                                class="rating-btn bg-white/5 border-2 border-white/10 hover:border-blue-400 text-white font-bold py-4 px-4 rounded-xl transition-all flex flex-col items-center gap-2">
+                                <i class="fa-solid fa-eye text-2xl text-blue-400"></i>
+                                <span class="text-base">Bajo potencial</span>
+                                <span class="text-xs text-gray-400 font-normal">Solo curioseó / mantener en base</span>
+                            </button>
+                            <button type="button" onclick="setRating('medio')" data-rating="medio"
+                                class="rating-btn bg-white/5 border-2 border-white/10 hover:border-emerald-400 text-white font-bold py-4 px-4 rounded-xl transition-all flex flex-col items-center gap-2">
+                                <i class="fa-solid fa-rocket text-2xl text-emerald-400"></i>
+                                <span class="text-base">Medio potencial</span>
+                                <span class="text-xs text-gray-400 font-normal">Interés real / seguimiento</span>
+                            </button>
+                            <button type="button" onclick="setRating('alto')" data-rating="alto"
+                                class="rating-btn bg-white/5 border-2 border-white/10 hover:border-yellow-400 text-white font-bold py-4 px-4 rounded-xl transition-all flex flex-col items-center gap-2">
+                                <i class="fa-solid fa-gem text-2xl text-yellow-400"></i>
+                                <span class="text-base">Alto potencial</span>
+                                <span class="text-xs text-gray-400 font-normal">Cliente Diamante / prioridad</span>
+                            </button>
+                        </div>
+
+                        <p id="rating-warning" class="text-xs text-amber-300 font-medium mt-3 hidden">
+                            <i class="fa-solid fa-triangle-exclamation"></i> Selecciona una calificación antes de enviar.
+                        </p>
                     </div>
                 </div>
 
@@ -535,20 +672,18 @@
             </div>
         </section>
 
-
+    
         <!-- ==========================================
              PANTALLA NUEVA: ÉXITO POST-ENVÍO
              ========================================== -->
         <section id="screen-success" class="screen flex-col items-center justify-center w-full max-w-2xl">
-            <div
-                class="glass-panel rounded-[2.5rem] p-8 md:p-12 w-full shadow-2xl text-center relative overflow-hidden">
+            <div class="glass-panel rounded-[2.5rem] p-8 md:p-12 w-full shadow-2xl text-center relative overflow-hidden">
                 <div class="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-emerald-500 to-green-600"></div>
 
                 <div class="flex justify-center mb-6">
                     <div class="relative">
                         <div class="absolute inset-0 bg-emerald-400 rounded-full animate-ping opacity-20"></div>
-                        <div
-                            class="relative w-28 h-28 md:w-32 md:h-32 rounded-full bg-gradient-to-br from-emerald-500 to-green-600 flex items-center justify-center shadow-2xl">
+                        <div class="relative w-28 h-28 md:w-32 md:h-32 rounded-full bg-gradient-to-br from-emerald-500 to-green-600 flex items-center justify-center shadow-2xl">
                             <i class="fa-solid fa-check text-white text-5xl md:text-6xl"></i>
                         </div>
                     </div>
@@ -556,23 +691,20 @@
 
                 <h2 class="text-3xl md:text-4xl font-black text-milenio-dark mb-3">¡Lead Registrado!</h2>
                 <p class="text-gray-600 text-base md:text-lg mb-2 font-medium leading-relaxed">
-                    La información llegó al equipo comercial de <span class="text-milenio-blue font-bold">Milenio
-                        PC</span>.
+                    La información llegó al equipo comercial de <span class="text-milenio-blue font-bold">Milenio PC</span>.
                 </p>
                 <p class="text-gray-500 text-sm md:text-base mb-8">
                     Un consultor estratégico se contactará en las próximas horas.
                 </p>
 
-                <div id="success-classification"
-                    class="inline-block bg-gray-50 border border-gray-200 rounded-2xl px-6 py-3 mb-8">
+                <div id="success-classification" class="inline-block bg-gray-50 border border-gray-200 rounded-2xl px-6 py-3 mb-8">
                     <p class="text-xs uppercase tracking-widest text-gray-500 font-bold mb-1">Clasificación enviada</p>
                     <p id="success-tier" class="text-xl font-black text-milenio-dark">—</p>
                 </div>
 
                 <div id="success-status" class="text-xs text-gray-500 mb-6 font-medium"></div>
 
-                <button onclick="resetApp()"
-                    class="bg-milenio-dark text-white font-bold py-3 px-8 rounded-xl hover:bg-black transition-all shadow-lg flex items-center justify-center gap-2 mx-auto">
+                <button onclick="resetApp()" class="bg-milenio-dark text-white font-bold py-3 px-8 rounded-xl hover:bg-black transition-all shadow-lg flex items-center justify-center gap-2 mx-auto">
                     <i class="fa-solid fa-rotate-right"></i> Atender nuevo cliente
                 </button>
 
@@ -600,7 +732,7 @@
         const CONFIG = {
             // URL del Google Apps Script desplegado como Web App
             // (ver README para los pasos)
-            APPS_SCRIPT_URL: 'https://script.google.com/macros/s/AKfycbxf9YgVcvv5jDuM8Q6tFLcp1wUOGZGk8E0ZfUs5MDpeMeUW7OJEx649ZZVW-V4S6lrk/exec',
+            APPS_SCRIPT_URL: 'PEGAR_AQUI_LA_URL_DE_APPS_SCRIPT',
 
             // Segundos antes de reiniciar la app automáticamente
             // después de un envío exitoso (modo kiosko / tablet)
@@ -619,48 +751,82 @@
            ========================================================== */
         let appState = {
             lead: { name: "", company: "", role: "", email: "", phone: "", qr_raw: "" },
-            pains: [],
-            calc: null,
-            score: null,
+            opening: null,              // ID de la opción elegida en la técnica de apertura
+            commercialRating: null,     // 'alto' | 'medio' | 'bajo' — asignado por la comercial
             autoResetTimer: null,
             countdownInterval: null
         };
 
-        const boardConfig = [
+        /* ==========================================================
+           TÉCNICA DE APERTURA — Definida por el equipo comercial
+           6 opciones. El visitante elige UNA sola.
+           Cada opción mapea a un servicio Milenio PC + tip accionable
+           + imagen alusiva que se muestra tras seleccionar.
+           ==========================================================
+           NOTA: los `imageUrl` están vacíos por ahora. Cuando
+           Comunicaciones envíe las imágenes definitivas, solo hay
+           que pegar el URL (o path relativo) en cada opción.
+           ========================================================== */
+        const openingOptions = [
             {
-                title: "Infraestructura", icon: "fa-server", color: "text-milenio-blue",
-                items: [
-                    { id: "i1", text: "Equipos obsoletos y lentos", icon: "fa-desktop" },
-                    { id: "i2", text: "Caídas de internet y red", icon: "fa-wifi" },
-                    { id: "i3", text: "Falta capacidad en servidores", icon: "fa-database" },
-                    { id: "i4", text: "Dificultad para trabajo remoto", icon: "fa-laptop-house" }
-                ]
+                id: 'op1',
+                text: 'Mantener los equipos siempre actualizados',
+                icon: 'fa-arrows-rotate',
+                serviceFocus: 'Renting Tecnológico',
+                serviceDescription: 'Con nuestro Modelo Renting tienes equipos siempre a la vanguardia, con renovación automática cada 36 meses y sin obsolescencia tecnológica.',
+                commercialTip: 'Cliente prioriza modernización continua. Presentar Renting con renovación automática, sin CAPEX ni obsolescencia.',
+                imageUrl: ''
             },
             {
-                title: "Soporte y Gestión", icon: "fa-headset", color: "text-milenio-teal",
-                items: [
-                    { id: "s1", text: "Soporte técnico muy lento", icon: "fa-clock-rotate-left" },
-                    { id: "s2", text: "Poco personal de sistemas", icon: "fa-users-slash" },
-                    { id: "s3", text: "Descontrol de inventarios", icon: "fa-boxes-stacked" },
-                    { id: "s4", text: "Problemas con garantías", icon: "fa-file-signature" }
-                ]
+                id: 'op2',
+                text: 'Mantener la operación sin interrupciones',
+                icon: 'fa-shield-heart',
+                serviceFocus: 'Mesa de Ayuda 24/7 + Continuidad',
+                serviceDescription: 'Nuestra Mesa de Ayuda especializada y monitoreo proactivo mantienen tu operación funcionando sin sobresaltos. SLA garantizado.',
+                commercialTip: 'Cliente busca estabilidad. Ofrecer Mesa de Ayuda con SLA garantizado + monitoreo proactivo 24/7.',
+                imageUrl: ''
             },
             {
-                title: "Costos y Seguridad", icon: "fa-shield-halved", color: "text-blue-900",
-                items: [
-                    { id: "c1", text: "Gastos de TI descontrolados", icon: "fa-money-bill-trend-up" },
-                    { id: "c2", text: "Miedo a pérdida de datos", icon: "fa-triangle-exclamation" },
-                    { id: "c3", text: "Vulnerabilidad a virus/hackers", icon: "fa-user-ninja" },
-                    { id: "c4", text: "Descapitalización por compras", icon: "fa-money-bill-wave" }
-                ]
+                id: 'op3',
+                text: 'Evitar grandes inversiones',
+                icon: 'fa-piggy-bank',
+                serviceFocus: 'Modelo DaaS (OPEX)',
+                serviceDescription: 'Con nuestro Modelo DaaS conviertes grandes inversiones en una cuota mensual predecible. Sin desembolsos grandes, sin depreciación.',
+                commercialTip: 'Cliente quiere convertir CAPEX en OPEX. Presentar DaaS con cuota mensual predecible.',
+                imageUrl: ''
+            },
+            {
+                id: 'op4',
+                text: 'Contar con soporte rápido cuando se necesita',
+                icon: 'fa-headset',
+                serviceFocus: 'Mesa de Ayuda Especializada',
+                serviceDescription: 'Nuestro equipo de soporte responde con SLA de 4 horas y equipo dedicado. Nunca más esperar días por una respuesta.',
+                commercialTip: 'Cliente frustrado por tiempos de respuesta. Enfocar en SLA de 4 horas y equipo dedicado.',
+                imageUrl: ''
+            },
+            {
+                id: 'op5',
+                text: 'Escalar o reducir equipos fácilmente',
+                icon: 'fa-arrow-up-right-dots',
+                serviceFocus: 'Renting Flexible',
+                serviceDescription: 'Con nuestro Renting flexible, aumentas o reduces tu inventario tecnológico según lo necesites. Perfecto para empresas en crecimiento o con estacionalidad.',
+                commercialTip: 'Cliente en crecimiento o con estacionalidad. Ofrecer contrato flexible sin penalidades.',
+                imageUrl: ''
+            },
+            {
+                id: 'op6',
+                text: 'Fortalecer la gestión tecnológica con un aliado experto',
+                icon: 'fa-handshake-simple',
+                serviceFocus: 'Alianza Estratégica Integral',
+                serviceDescription: 'Nos convertimos en tu aliado tecnológico integral: consultoría estratégica, ejecución y acompañamiento continuo. Un partner, no un proveedor.',
+                commercialTip: 'SEÑAL DE ALTO INTERÉS: cliente busca partnership, no proveedor. Presentar propuesta integral y agendar reunión con Gerencia Comercial.',
+                imageUrl: ''
             }
         ];
 
-        // Mapa rápido: dolor -> categoría (para análisis y scoring)
-        const painToCategory = {};
-        boardConfig.forEach(cat => {
-            cat.items.forEach(it => { painToCategory[it.text] = cat.title; });
-        });
+        // Mapa rápido: id -> opción completa
+        const openingById = {};
+        openingOptions.forEach(o => { openingById[o.id] = o; });
 
         /* ==========================================================
            2. NAVEGACIÓN Y UTILIDADES
@@ -707,24 +873,14 @@
             // Lead actual
             document.getElementById('dash-lead-data').innerText = leadDisplayString();
 
-            // Badge Juego
+            // Badge Apertura
             const badgeGame = document.getElementById('badge-game');
-            if (appState.pains.length > 0) {
-                badgeGame.innerText = `${appState.pains.length} Seleccionados`;
+            if (appState.opening) {
+                badgeGame.innerText = "Respondida";
                 badgeGame.className = "bg-green-100 text-green-700 text-[10px] font-bold px-2 py-1 rounded uppercase tracking-wide";
             } else {
                 badgeGame.innerText = "Sin Iniciar";
                 badgeGame.className = "bg-gray-200 text-gray-600 text-[10px] font-bold px-2 py-1 rounded uppercase tracking-wide";
-            }
-
-            // Badge Calculadora
-            const badgeCalc = document.getElementById('badge-calc');
-            if (appState.calc) {
-                badgeCalc.innerText = "Completada";
-                badgeCalc.className = "bg-green-100 text-green-700 text-[10px] font-bold px-2 py-1 rounded uppercase tracking-wide";
-            } else {
-                badgeCalc.innerText = "Sin Iniciar";
-                badgeCalc.className = "bg-gray-200 text-gray-600 text-[10px] font-bold px-2 py-1 rounded uppercase tracking-wide";
             }
 
             // Indicador de leads pendientes (offline)
@@ -735,18 +891,21 @@
            3. PARSER DE QR (acepta JSON, vCard, correo, URL, texto)
            ========================================================== */
         function parseQRContent(raw) {
-            const result = { name: "", company: "", role: "", email: "", phone: "", qr_raw: raw };
+            const result = { name: "", company: "", role: "", email: "", phone: "", qr_raw: raw, isUseful: false };
             if (!raw) return result;
 
             // 1) JSON puro
             try {
                 const d = JSON.parse(raw);
-                result.name = d.name || d.nombre || d.fullName || "";
+                result.name    = d.name    || d.nombre  || d.fullName     || "";
                 result.company = d.company || d.empresa || d.organization || "";
-                result.role = d.role || d.cargo || d.title || "";
-                result.email = d.email || d.correo || d.mail || "";
-                result.phone = d.phone || d.tel || d.telefono || "";
-                if (result.name || result.email) return result;
+                result.role    = d.role    || d.cargo   || d.title        || "";
+                result.email   = d.email   || d.correo  || d.mail         || "";
+                result.phone   = d.phone   || d.tel     || d.telefono     || "";
+                if (result.name || result.email) {
+                    result.isUseful = true;
+                    return result;
+                }
             } catch (e) { /* no era JSON */ }
 
             // 2) vCard
@@ -768,6 +927,7 @@
                         result.phone = line.substring(line.indexOf(':') + 1).trim();
                     }
                 });
+                if (result.name || result.email) result.isUseful = true;
                 return result;
             }
 
@@ -775,16 +935,28 @@
             const emailMatch = raw.match(/[\w.+-]+@[\w-]+\.[\w.-]+/);
             if (emailMatch) {
                 result.email = emailMatch[0];
+                result.isUseful = true;
                 return result;
             }
 
-            // 4) URL (probablemente del organizador, dejar campos vacíos para llenar manual)
+            // 4) ID numérico solo (típico QR de Andicom que apunta a su BD interna)
+            // Ejemplos: "37103", "*37103*", "12345678"
+            if (/^\*?\d{3,}\*?$/.test(raw.trim())) {
+                // QR inútil: solo ID interno del organizador
+                return result;
+            }
+
+            // 5) URL (probablemente del organizador, dejar campos vacíos)
             if (/^https?:\/\//i.test(raw)) {
                 return result;
             }
 
-            // 5) Texto plano: asumir nombre o ID
-            result.name = raw.substring(0, 100).trim();
+            // 6) Texto plano largo: asumir nombre
+            const clean = raw.trim();
+            if (clean.length >= 4 && /[a-zA-Z]/.test(clean)) {
+                result.name = clean.substring(0, 100);
+                result.isUseful = true;
+            }
             return result;
         }
 
@@ -796,13 +968,13 @@
         function openScanner() {
             goToScreen('screen-scanner');
 
-            // Esperar a que la pantalla esté visible antes de inicializar
-            // (html5-qrcode necesita que el div #reader exista y sea visible)
+            // Ocultar aviso de QR inútil por si venía de un intento anterior
+            const notice = document.getElementById('qr-useless-notice');
+            if (notice) notice.classList.add('hidden');
+
             setTimeout(() => {
                 const readerDiv = document.getElementById('reader');
                 if (!readerDiv) return;
-
-                // Limpiar contenido previo del div por si quedó algo de un intento anterior
                 readerDiv.innerHTML = '';
 
                 try {
@@ -819,27 +991,46 @@
                     );
 
                     scanner.render(
-                        // Éxito al leer un QR
                         (text) => {
                             const parsed = parseQRContent(text);
-                            appState.lead = {
-                                name: parsed.name || appState.lead.name,
-                                company: parsed.company || appState.lead.company,
-                                role: parsed.role || appState.lead.role,
-                                email: parsed.email || appState.lead.email,
-                                phone: parsed.phone || appState.lead.phone,
-                                qr_raw: text
-                            };
-                            try { navigator.vibrate(200); } catch (e) { }
-                            closeScanner();
-                            if (parsed.name || parsed.email) {
+
+                            if (parsed.isUseful) {
+                                // QR trae datos legibles → guardar y salir
+                                appState.lead = {
+                                    name: parsed.name || appState.lead.name,
+                                    company: parsed.company || appState.lead.company,
+                                    role: parsed.role || appState.lead.role,
+                                    email: parsed.email || appState.lead.email,
+                                    phone: parsed.phone || appState.lead.phone,
+                                    qr_raw: text
+                                };
+                                try { navigator.vibrate(200); } catch (e) { }
+                                closeScanner();
                                 showToast("Escarapela escaneada: " + (parsed.name || parsed.email));
                             } else {
-                                showToast("QR detectado sin datos legibles. Use ingreso manual.");
+                                // QR inútil (ID interno del organizador) → guardar el raw
+                                // y mostrar aviso con opciones OCR / manual
+                                appState.lead.qr_raw = text;
+                                try { navigator.vibrate([100, 50, 100]); } catch (e) { }
+
+                                // Detener el escáner (ya no lo necesitamos)
+                                if (scanner) {
+                                    scanner.clear().catch(e => { });
+                                    scanner = null;
+                                }
+                                const rd = document.getElementById('reader');
+                                if (rd) rd.innerHTML = '';
+
+                                // Mostrar aviso ámbar con el ID detectado
+                                const noticeEl = document.getElementById('qr-useless-notice');
+                                const idEl = document.getElementById('qr-useless-id');
+                                if (noticeEl && idEl) {
+                                    idEl.innerText = text.replace(/\*/g, '');
+                                    noticeEl.classList.remove('hidden');
+                                }
                             }
                         },
-                        // Error de lectura (silencioso, sigue intentando)
-                        (errorMessage) => { /* no hacer ruido */ }
+                        (errorMessage) => { /* silencioso */ }
                     );
                 } catch (e) {
                     console.error('Error inicializando escáner:', e);
@@ -855,6 +1046,8 @@
             }
             const readerDiv = document.getElementById('reader');
             if (readerDiv) readerDiv.innerHTML = '';
+            const notice = document.getElementById('qr-useless-notice');
+            if (notice) notice.classList.add('hidden');
             goToScreen('screen-dashboard');
         }
 
@@ -863,6 +1056,7 @@
             const company = document.getElementById('manual-company').value.trim();
             const role = document.getElementById('manual-role').value.trim();
             const email = document.getElementById('manual-email').value.trim();
+            const phone = document.getElementById('manual-phone').value.trim();
 
             if (!name || !company) {
                 showToast("Por favor, ingrese al menos Nombre y Empresa.");
@@ -879,7 +1073,7 @@
                 company: company,
                 role: role || "",
                 email: email || "",
-                phone: appState.lead.phone || "",
+                phone: phone || appState.lead.phone || "",
                 qr_raw: appState.lead.qr_raw || ""
             };
 
@@ -891,47 +1085,332 @@
         }
 
         /* ==========================================================
+           4.5 OCR: leer texto de la escarapela con foto
+           Usa Tesseract.js para cuando el QR de Andicom solo trae
+           un ID interno del organizador (ej: "37103").
+           ========================================================== */
+        let ocrStream = null;
+        let ocrLastImageData = null;
+
+        function openOCRScanner() {
+            // Cerrar el scanner QR si estaba activo
+            if (scanner) {
+                scanner.clear().catch(e => { });
+                scanner = null;
+            }
+            const readerDiv = document.getElementById('reader');
+            if (readerDiv) readerDiv.innerHTML = '';
+
+            goToScreen('screen-ocr');
+            resetOCRPhases('camera');
+
+            // Iniciar cámara trasera para escanear escarapela
+            setTimeout(() => {
+                const video = document.getElementById('ocr-video');
+                if (!video) return;
+
+                navigator.mediaDevices.getUserMedia({
+                    video: { facingMode: 'environment' }
+                })
+                .then(stream => {
+                    ocrStream = stream;
+                    video.srcObject = stream;
+                })
+                .catch(err => {
+                    console.error('Error acceso cámara OCR:', err);
+                    showToast("No se pudo acceder a la cámara. Usa ingreso manual.");
+                    closeOCRScanner();
+                });
+            }, 200);
+        }
+
+        function closeOCRScanner() {
+            stopOCRCamera();
+            ocrLastImageData = null;
+            goToScreen('screen-dashboard');
+        }
+
+        function stopOCRCamera() {
+            if (ocrStream) {
+                ocrStream.getTracks().forEach(t => t.stop());
+                ocrStream = null;
+            }
+            const video = document.getElementById('ocr-video');
+            if (video) video.srcObject = null;
+        }
+
+        // Muestra la fase actual del flujo OCR: camera | preview | processing | result
+        function resetOCRPhases(activePhase) {
+            ['camera', 'preview', 'processing', 'result'].forEach(p => {
+                const el = document.getElementById('ocr-phase-' + p);
+                if (el) el.classList.toggle('hidden', p !== activePhase);
+            });
+        }
+
+        function capturePhotoForOCR() {
+            const video = document.getElementById('ocr-video');
+            const canvas = document.getElementById('ocr-canvas');
+            if (!video || !canvas || !video.videoWidth) {
+                showToast("La cámara aún no está lista. Espera un momento.");
+                return;
+            }
+
+            // Capturar frame actual
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+            ocrLastImageData = canvas.toDataURL('image/jpeg', 0.85);
+
+            // Mostrar preview
+            const preview = document.getElementById('ocr-preview');
+            if (preview) preview.src = ocrLastImageData;
+            resetOCRPhases('preview');
+
+            // Detener cámara mientras se decide procesar o retomar
+            stopOCRCamera();
+        }
+
+        function retakePhoto() {
+            resetOCRPhases('camera');
+            setTimeout(() => {
+                const video = document.getElementById('ocr-video');
+                if (!video) return;
+                navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } })
+                    .then(stream => { ocrStream = stream; video.srcObject = stream; })
+                    .catch(err => showToast("No se pudo reabrir la cámara"));
+            }, 200);
+        }
+
+        async function processOCR() {
+            if (!ocrLastImageData) {
+                showToast("No hay foto capturada. Toma una primero.");
+                return;
+            }
+            if (typeof Tesseract === 'undefined') {
+                showToast("Motor OCR no cargado. Revisa tu conexión a internet.");
+                return;
+            }
+
+            resetOCRPhases('processing');
+            const progressBar = document.getElementById('ocr-progress-bar');
+            const progressText = document.getElementById('ocr-progress-text');
+
+            try {
+                const { data: { text } } = await Tesseract.recognize(
+                    ocrLastImageData,
+                    'spa+eng',
+                    {
+                        logger: m => {
+                            if (progressText) {
+                                if (m.status === 'loading tesseract core') progressText.innerText = "Cargando motor...";
+                                else if (m.status === 'initializing tesseract') progressText.innerText = "Inicializando...";
+                                else if (m.status === 'loading language traineddata') progressText.innerText = "Cargando idioma...";
+                                else if (m.status === 'initializing api') progressText.innerText = "Preparando análisis...";
+                                else if (m.status === 'recognizing text') progressText.innerText = "Leyendo texto...";
+                            }
+                            if (progressBar && typeof m.progress === 'number') {
+                                progressBar.style.width = Math.round(m.progress * 100) + '%';
+                            }
+                        }
+                    }
+                );
+
+                const parsed = parseEscarapelaText(text);
+                showOCRResult(parsed, text);
+            } catch (err) {
+                console.error('Error OCR:', err);
+                showToast("Error al procesar la foto. Intenta de nuevo o usa manual.");
+                resetOCRPhases('preview');
+            }
+        }
+
+        // Parser inteligente del texto OCR de una escarapela de feria.
+        // Filtra ruido (títulos del evento, fechas, IDs) y detecta
+        // nombre / empresa / cargo por patrones típicos.
+        function parseEscarapelaText(rawText) {
+            const lines = rawText.split(/\n+/)
+                .map(l => l.trim())
+                .filter(l => l.length >= 3);
+
+            // Patrones de ruido conocidos (texto del evento, no del asistente)
+            const noisePatterns = [
+                /^ANDICOM/i,
+                /UNLOCKING|DIGITAL\s*FUTURE/i,
+                /CONGRESO\s*INTERNACIONAL/i,
+                /^CINTEL$/i,
+                /^ORGANIZA/i,
+                /PRE-?CONGRESO/i,
+                /^SEPTIEMBRE|^OCTUBRE|^NOVIEMBRE|^AGOSTO/i,
+                /^\d{4}$/,                       // año solo
+                /^[\d\s\-\/\.]+$/,               // solo números/separadores
+                /^\*+\d+\*+$/,                   // ID formato *37103*
+                /^\d{2}\s?[,.]?\s?\d{2}\s?[&y]/i, // fechas tipo "03,04 & 05"
+                /^de TIC|^TIC$/i,
+                /^\d+$/                          // solo números
+            ];
+
+            const isNoise = line => noisePatterns.some(p => p.test(line));
+            const filtered = lines.filter(l => !isNoise(l));
+
+            // Patrones para identificar empresa y cargo
+            const companyKeywords = /S\.?\s*A\.?\s*S?\.?$|LTDA\.?|COMPA[NÑ]IA|GRUPO|CORP|INC\.?|COLOMBIA|BANCO/i;
+            const roleKeywords = /PARTICIPANTE|ASISTENTE|GERENTE|DIRECTOR|CEO|CTO|JEFE|COORDINADOR|COMERCIAL|VENTAS|PONENTE|EXPOSITOR|CONFERENCISTA/i;
+
+            let name = '', company = '', role = '';
+            const remaining = [];
+
+            filtered.forEach(line => {
+                if (!company && companyKeywords.test(line)) {
+                    company = line;
+                } else if (!role && roleKeywords.test(line)) {
+                    role = line;
+                } else {
+                    remaining.push(line);
+                }
+            });
+
+            // Lo que queda es el nombre (las primeras 1-2 líneas usualmente)
+            // Muchos OCR separan "CLAUDIA" en una línea y "VARGAS RODRIGUEZ" en otra
+            name = remaining.slice(0, 2).join(' ')
+                .replace(/\s+/g, ' ')
+                .trim();
+
+            return { name, company, role };
+        }
+
+        function showOCRResult(parsed, rawText) {
+            document.getElementById('ocr-name').value = parsed.name || '';
+            document.getElementById('ocr-company').value = parsed.company || '';
+            document.getElementById('ocr-role').value = parsed.role || '';
+            document.getElementById('ocr-raw-text').innerText = rawText || '(sin texto detectado)';
+            resetOCRPhases('result');
+        }
+
+        function saveOCRResult() {
+            const name = document.getElementById('ocr-name').value.trim();
+            const company = document.getElementById('ocr-company').value.trim();
+            const role = document.getElementById('ocr-role').value.trim();
+
+            if (!name) {
+                showToast("Al menos el nombre es necesario. Edítalo si no lo detectó.");
+                return;
+            }
+
+            appState.lead = {
+                name: name,
+                company: company || appState.lead.company || '',
+                role: role || appState.lead.role || '',
+                email: appState.lead.email || '',
+                phone: appState.lead.phone || '',
+                qr_raw: appState.lead.qr_raw || ''
+            };
+
+            showToast("Datos capturados por OCR: " + name);
+            closeOCRScanner();
+        }
+
+        /* ==========================================================
            5. JUEGO ROMPEHIELOS
            ========================================================== */
         function renderGame() {
             const container = document.getElementById('game-board');
             if (container.innerHTML !== '') return;
 
-            boardConfig.forEach(cat => {
-                const col = document.createElement('div');
-                col.className = "flex flex-col gap-3";
-                col.innerHTML = `<h3 class="text-lg md:text-xl font-bold ${cat.color} mb-2 text-center uppercase tracking-wide"><i class="fa-solid ${cat.icon}"></i> ${cat.title}</h3>`;
+            openingOptions.forEach(opt => {
+                const btn = document.createElement('button');
+                const isSelected = appState.opening === opt.id;
+                btn.className = `play-btn opening-btn bg-white border-2 border-gray-100 text-gray-700 font-semibold p-4 md:p-5 rounded-2xl shadow-sm flex items-center gap-3 w-full text-left ${isSelected ? 'selected' : ''}`;
+                btn.dataset.optionId = opt.id;
 
-                cat.items.forEach(item => {
-                    const btn = document.createElement('button');
-                    const isSelected = appState.pains.includes(item.text);
-                    btn.className = `play-btn bg-white border-2 border-gray-100 text-gray-600 font-semibold p-3 md:p-4 rounded-2xl shadow-sm flex items-center justify-between w-full text-left ${isSelected ? 'selected' : ''}`;
+                btn.innerHTML = `
+                    <div class="w-12 h-12 rounded-full ${isSelected ? 'bg-white/20 text-white' : 'bg-milenio-blue/10 text-milenio-blue'} flex shrink-0 items-center justify-center btn-icon transition-colors">
+                        <i class="fa-solid ${opt.icon} text-xl"></i>
+                    </div>
+                    <span class="flex-1 leading-snug text-sm md:text-base">${opt.text}</span>
+                    <div class="check-ring w-8 h-8 rounded-full bg-white text-milenio-teal flex shrink-0 items-center justify-center text-xl shadow-inner"><i class="fa-solid fa-check"></i></div>
+                `;
 
-                    btn.innerHTML = `
-                        <span class="flex items-center gap-3 text-[14px] leading-tight">
-                            <div class="w-10 h-10 rounded-full ${isSelected ? 'bg-white/20 text-white' : 'bg-gray-50 text-gray-400'} flex shrink-0 items-center justify-center btn-icon transition-colors"><i class="fa-solid ${item.icon}"></i></div>
-                            ${item.text}
-                        </span>
-                        <div class="check-ring w-8 h-8 rounded-full bg-white text-milenio-teal flex shrink-0 items-center justify-center text-xl shadow-inner"><i class="fa-solid fa-check"></i></div>
-                    `;
-
-                    btn.onclick = () => {
-                        btn.classList.toggle('selected');
-                        const iconBg = btn.querySelector('.btn-icon');
-                        if (btn.classList.contains('selected')) {
-                            iconBg.classList.replace('bg-gray-50', 'bg-white/20');
-                            iconBg.classList.replace('text-gray-400', 'text-white');
-                            if (!appState.pains.includes(item.text)) appState.pains.push(item.text);
-                        } else {
-                            iconBg.classList.replace('bg-white/20', 'bg-gray-50');
-                            iconBg.classList.replace('text-white', 'text-gray-400');
-                            appState.pains = appState.pains.filter(p => p !== item.text);
-                        }
-                    };
-                    col.appendChild(btn);
-                });
-                container.appendChild(col);
+                btn.onclick = () => selectOpeningOption(opt.id);
+                container.appendChild(btn);
             });
+        }
+
+        // Selección ÚNICA: al elegir una opción, deselecciona las demás
+        // y navega a la pantalla de imagen alusiva del servicio.
+        function selectOpeningOption(optId) {
+            document.querySelectorAll('.opening-btn').forEach(b => {
+                const iconBg = b.querySelector('.btn-icon');
+                if (b.dataset.optionId === optId) {
+                    b.classList.add('selected');
+                    if (iconBg) {
+                        iconBg.classList.remove('bg-milenio-blue/10', 'text-milenio-blue');
+                        iconBg.classList.add('bg-white/20', 'text-white');
+                    }
+                } else {
+                    b.classList.remove('selected');
+                    if (iconBg) {
+                        iconBg.classList.remove('bg-white/20', 'text-white');
+                        iconBg.classList.add('bg-milenio-blue/10', 'text-milenio-blue');
+                    }
+                }
+            });
+            appState.opening = optId;
+
+            // Mostrar la imagen alusiva del servicio Milenio correspondiente
+            setTimeout(() => showServiceImage(optId), 300);
+        }
+
+        /* ==========================================================
+           IMAGEN ALUSIVA DEL SERVICIO
+           Se muestra tras elegir una opción de la técnica de apertura.
+           Si aún no hay imagen definitiva (opt.imageUrl vacío),
+           renderiza un placeholder con el ícono + gradiente Milenio.
+           ========================================================== */
+        function showServiceImage(optId) {
+            const opt = openingById[optId];
+            if (!opt) return;
+
+            document.getElementById('service-name').innerText = opt.serviceFocus;
+            document.getElementById('service-description').innerText = opt.serviceDescription;
+
+            const container = document.getElementById('service-image-container');
+
+            if (opt.imageUrl && opt.imageUrl.trim() !== '') {
+                // Imagen definitiva enviada por Comunicaciones
+                container.innerHTML = `
+                    <img src="${opt.imageUrl}" alt="${opt.serviceFocus}"
+                         class="w-full h-full object-cover rounded-3xl"
+                         onerror="this.parentNode.innerHTML = buildServicePlaceholder(openingById['${optId}']);">
+                `;
+            } else {
+                // Placeholder decoroso hasta que llegue la imagen real
+                container.innerHTML = buildServicePlaceholder(opt);
+            }
+
+            goToScreen('screen-service-image');
+        }
+
+        function buildServicePlaceholder(opt) {
+            return `
+                <div class="w-full h-full min-h-[280px] md:min-h-[380px] bg-gradient-to-br from-milenio-dark via-milenio-blue to-milenio-teal flex flex-col items-center justify-center text-center p-8 relative">
+                    <div class="absolute inset-0 opacity-10 flex items-center justify-center">
+                        <i class="fa-solid ${opt.icon} text-[280px] text-white"></i>
+                    </div>
+                    <div class="relative z-10 text-white">
+                        <div class="inline-block bg-white/20 backdrop-blur-sm rounded-full px-4 py-1 text-xs font-black uppercase tracking-widest mb-4">
+                            <i class="fa-solid fa-image mr-2"></i>Imagen alusiva
+                        </div>
+                        <div class="w-24 h-24 md:w-32 md:h-32 rounded-full bg-white/15 backdrop-blur-md flex items-center justify-center mx-auto mb-6 shadow-2xl">
+                            <i class="fa-solid ${opt.icon} text-5xl md:text-6xl"></i>
+                        </div>
+                        <h3 class="text-3xl md:text-5xl font-black mb-2 leading-tight drop-shadow-lg">
+                            ${opt.serviceFocus.toUpperCase()}
+                        </h3>
+                        <p class="text-xs md:text-sm opacity-80 font-medium">Milenio PC</p>
+                    </div>
+                </div>
+            `;
         }
 
         window.addEventListener('DOMContentLoaded', () => {
@@ -942,165 +1421,129 @@
         });
 
         function saveGame() {
-            if (appState.pains.length === 0) {
-                showToast("Selecciona al menos un dolor antes de guardar");
+            if (!appState.opening) {
+                showToast("Selecciona una respuesta antes de guardar");
                 return;
             }
-            showToast(`${appState.pains.length} dolores guardados`);
+            const opt = openingById[appState.opening];
+            showToast(`Respuesta guardada: ${opt.text.substring(0, 40)}...`);
             goToScreen('screen-dashboard');
         }
 
         /* ==========================================================
-           6. CALCULADORA
+           6. CALIFICACIÓN MANUAL DE LA COMERCIAL (Alto/Medio/Bajo)
            ========================================================== */
-        function saveCalc() {
-            const users = parseFloat(document.getElementById('calc-users').value) || 0;
-            const cost = parseFloat(document.getElementById('calc-cost').value) || 0;
-            const hours = parseFloat(document.getElementById('calc-hours').value) || 0;
-            const compSelect = document.getElementById('calc-complexity');
-            const complexity = compSelect.value || "No definida";
+        function setRating(rating) {
+            appState.commercialRating = rating;
 
-            // Multiplicador por complejidad
-            const multiplier = complexity === 'Alta' ? 1.5 : (complexity === 'Baja' ? 0.8 : 1);
-            const loss = users * cost * hours * multiplier;
+            // Actualizar visual de los 3 botones
+            document.querySelectorAll('.rating-btn').forEach(b => {
+                b.classList.remove('selected-alto', 'selected-medio', 'selected-bajo');
+                if (b.dataset.rating === rating) {
+                    b.classList.add('selected-' + rating);
+                }
+            });
 
-            if (users <= 0 || cost <= 0) {
-                showToast("Ingrese al menos número de usuarios y costo");
-                return;
-            }
-
-            appState.calc = {
-                users: users,
-                cost: cost,
-                hours: hours,
-                complexity: complexity,
-                multiplier: multiplier,
-                loss: Math.round(loss),
-                yearlyLoss: Math.round(loss * 12)
-            };
-            showToast("Pérdida estimada: " + formatCOP(loss) + " / mes");
-            goToScreen('screen-dashboard');
+            // Ocultar advertencia si estaba visible
+            const warn = document.getElementById('rating-warning');
+            if (warn) warn.classList.add('hidden');
         }
 
         /* ==========================================================
-           7. LEAD SCORING (puntaje numérico + tier)
+           7. CLASIFICACIÓN DEL LEAD
+           Ya no es automática. La comercial la asigna manualmente
+           tras conversar con el cliente (Alto/Medio/Bajo).
            ========================================================== */
         function calculateLeadScore() {
-            let score = 0;
-            const reasons = [];
-
-            // Puntos por dolores seleccionados
-            if (appState.pains.length > 0) {
-                score += appState.pains.length * 10;
-                reasons.push(`${appState.pains.length} dolores marcados (+${appState.pains.length * 10})`);
-
-                // Bonus por diversidad de categorías
-                const cats = {};
-                appState.pains.forEach(p => { if (painToCategory[p]) cats[painToCategory[p]] = true; });
-                const catCount = Object.keys(cats).length;
-                if (catCount > 1) {
-                    score += catCount * 5;
-                    reasons.push(`${catCount} categorías afectadas (+${catCount * 5})`);
-                }
-            }
-
-            // Puntos por pérdida financiera
-            if (appState.calc) {
-                const loss = appState.calc.loss;
-                if (loss >= 10000000) { score += 50; reasons.push(`Pérdida > $10M (+50)`); }
-                else if (loss >= 5000000) { score += 30; reasons.push(`Pérdida > $5M (+30)`); }
-                else if (loss >= 1000000) { score += 15; reasons.push(`Pérdida > $1M (+15)`); }
-
-                if (appState.calc.complexity === 'Alta') {
-                    score += 15;
-                    reasons.push(`Complejidad alta (+15)`);
-                }
-                if (appState.calc.users >= 150) {
-                    score += 10;
-                    reasons.push(`+150 usuarios (+10)`);
-                }
-            }
-
-            // Bonus si el lead tiene datos de contacto completos
-            const l = appState.lead;
-            if (l.email && l.name && l.company) {
-                score += 5;
-                reasons.push(`Datos completos (+5)`);
-            }
-
+            const rating = appState.commercialRating;
             let tier, tierLabel, tierIcon, tierColor, tierDesc;
-            if (score >= 50) {
-                tier = 'HOT';
-                tierLabel = 'Cliente Diamante (Alta Prioridad)';
+
+            if (rating === 'alto') {
+                tier = 'ALTO';
+                tierLabel = 'Cliente Alto Potencial (Diamante)';
                 tierIcon = '💎';
                 tierColor = 'text-yellow-400';
-                tierDesc = 'Impacto crítico detectado. Ofrecer modelo DaaS integral urgente.';
-            } else if (score >= 20) {
-                tier = 'WARM';
-                tierLabel = 'Cliente Potencial (Media)';
+                tierDesc = 'Cliente prioritario. Escalar a Gerencia Comercial y hacer propuesta integral inmediata.';
+            } else if (rating === 'medio') {
+                tier = 'MEDIO';
+                tierLabel = 'Cliente Medio Potencial';
                 tierIcon = '🚀';
                 tierColor = 'text-emerald-400';
-                tierDesc = 'Oportunidad clara de optimización. Ofrecer Renting + Soporte gestionado.';
-            } else if (score > 0) {
-                tier = 'COLD';
-                tierLabel = 'Lead Exploratorio';
+                tierDesc = 'Oportunidad real. Seguimiento comercial en las próximas 48 horas.';
+            } else if (rating === 'bajo') {
+                tier = 'BAJO';
+                tierLabel = 'Cliente Bajo Potencial';
                 tierIcon = '👀';
                 tierColor = 'text-milenio-lightblue';
-                tierDesc = 'Información básica recolectada. Mantener en radar para futuras campañas.';
+                tierDesc = 'Interés exploratorio. Mantener en base para campañas futuras.';
             } else {
-                tier = 'EMPTY';
-                tierLabel = 'Datos Incompletos';
+                tier = 'SIN_CALIFICAR';
+                tierLabel = 'Sin calificar';
                 tierIcon = '❓';
                 tierColor = 'text-gray-400';
-                tierDesc = 'Use el Juego o la Calculadora antes de enviar.';
+                tierDesc = 'La comercial aún no ha asignado calificación.';
             }
 
-            return { score, tier, tierLabel, tierIcon, tierColor, tierDesc, reasons };
+            return { tier, tierLabel, tierIcon, tierColor, tierDesc };
         }
 
         /* ==========================================================
            8. RESULTADO Y HOJA DE VIDA
            ========================================================== */
         function processFinalCV() {
-            // Validar que tenga al menos algo
-            if (appState.pains.length === 0 && !appState.calc) {
-                showToast("Complete el Juego o la Calculadora antes de generar la hoja de vida");
+            // Validar que exista respuesta de apertura
+            if (!appState.opening) {
+                showToast("Complete la Técnica de Apertura antes de generar la hoja de vida");
                 return;
             }
 
-            const scoring = calculateLeadScore();
-            appState.score = scoring;
+            // Fix defensivo: restaurar el botón de envío
+            restoreSendButton();
 
             // Datos del contacto
             document.getElementById('cv-qr-data').innerText = leadDisplayString();
 
-            // Dolores
+            // Respuesta de apertura + tip comercial
             const painsDiv = document.getElementById('cv-pains');
             painsDiv.innerHTML = '';
-            if (appState.pains.length > 0) {
-                appState.pains.forEach(p => {
-                    painsDiv.innerHTML += `<span class="bg-white/10 text-white px-3 py-1 rounded-full text-sm border border-white/20">${p}</span>`;
-                });
+            if (appState.opening) {
+                const opt = openingById[appState.opening];
+                painsDiv.innerHTML = `
+                    <div class="w-full bg-white/10 border border-white/20 rounded-2xl p-4 space-y-3">
+                        <div class="flex items-start gap-3">
+                            <div class="w-10 h-10 rounded-full bg-milenio-teal/30 text-white flex shrink-0 items-center justify-center">
+                                <i class="fa-solid ${opt.icon}"></i>
+                            </div>
+                            <div class="flex-1">
+                                <p class="text-xs uppercase tracking-widest text-milenio-lightblue font-bold mb-1">Interés declarado</p>
+                                <p class="text-white font-bold leading-snug">${opt.text}</p>
+                            </div>
+                        </div>
+                        <div class="pt-3 border-t border-white/10">
+                            <p class="text-xs uppercase tracking-widest text-milenio-teal font-bold mb-1">Servicio Milenio sugerido</p>
+                            <p class="text-white text-sm font-semibold">${opt.serviceFocus}</p>
+                        </div>
+                        <div class="pt-3 border-t border-white/10">
+                            <p class="text-xs uppercase tracking-widest text-amber-300 font-bold mb-1"><i class="fa-solid fa-lightbulb mr-1"></i> Tip para la comercial</p>
+                            <p class="text-gray-200 text-sm leading-relaxed italic">${opt.commercialTip}</p>
+                        </div>
+                    </div>
+                `;
             } else {
-                painsDiv.innerHTML = `<span class="text-gray-400 text-sm italic">Herramienta no utilizada.</span>`;
+                painsDiv.innerHTML = `<span class="text-gray-400 text-sm italic">Técnica de apertura no utilizada.</span>`;
             }
 
-            // Pérdida financiera
-            const lossElem = document.getElementById('cv-loss');
-            if (appState.calc) {
-                lossElem.innerText = formatCOP(appState.calc.loss);
-                lossElem.classList.remove('text-gray-500');
-            } else {
-                lossElem.innerText = "Sin datos";
-                lossElem.classList.add('text-gray-500');
-            }
+            // Sincronizar botones de rating con estado guardado (si volvió de otra pantalla)
+            document.querySelectorAll('.rating-btn').forEach(b => {
+                b.classList.remove('selected-alto', 'selected-medio', 'selected-bajo');
+                if (appState.commercialRating && b.dataset.rating === appState.commercialRating) {
+                    b.classList.add('selected-' + appState.commercialRating);
+                }
+            });
 
-            // Clasificación
-            const st = document.getElementById('cv-score-title');
-            st.innerText = `${scoring.tierIcon} ${scoring.tierLabel}`;
-            st.className = `text-2xl md:text-3xl font-black ${scoring.tierColor}`;
-            document.getElementById('cv-score-desc').innerText = scoring.tierDesc + ` · Puntaje: ${scoring.score}`;
-            document.getElementById('cv-score-icon').innerText = scoring.tierIcon;
+            // Ocultar warning si estaba visible
+            const warn = document.getElementById('rating-warning');
+            if (warn) warn.classList.add('hidden');
 
             goToScreen('screen-cv');
         }
@@ -1109,13 +1552,8 @@
            9. ENVÍO AL BACKEND (Google Apps Script)
            ========================================================== */
         function buildPayload() {
-            const scoring = appState.score || calculateLeadScore();
-            const painsByCategory = {};
-            appState.pains.forEach(p => {
-                const cat = painToCategory[p] || 'Otro';
-                if (!painsByCategory[cat]) painsByCategory[cat] = [];
-                painsByCategory[cat].push(p);
-            });
+            const scoring = calculateLeadScore();
+            const opt = appState.opening ? openingById[appState.opening] : null;
 
             return {
                 timestamp: new Date().toISOString(),
@@ -1128,14 +1566,15 @@
                     phone: appState.lead.phone || ''
                 },
                 qr_raw: appState.lead.qr_raw || '',
-                pains: appState.pains,
-                pains_by_category: painsByCategory,
-                pains_count: appState.pains.length,
-                calc: appState.calc,
+                apertura: opt ? {
+                    id: opt.id,
+                    respuesta: opt.text,
+                    servicio_sugerido: opt.serviceFocus,
+                    tip_comercial: opt.commercialTip
+                } : null,
+                calificacion_comercial: appState.commercialRating || '',
                 lead_score: scoring.tier,
-                lead_score_numeric: scoring.score,
-                lead_label: scoring.tierLabel,
-                scoring_reasons: scoring.reasons
+                lead_label: scoring.tierLabel
             };
         }
 
@@ -1165,20 +1604,34 @@
                 return;
             }
 
+            // Timeout de seguridad: si en 15 segundos no responde, encolamos y seguimos
+            let completed = false;
+            const wrap = (result) => {
+                if (completed) return;
+                completed = true;
+                onComplete(result);
+            };
+            const safetyTimeout = setTimeout(() => {
+                queuePending(payload);
+                wrap({ ok: false, reason: 'timeout' });
+            }, 15000);
+
             fetch(url, {
                 method: 'POST',
                 // text/plain evita preflight CORS en Apps Script
                 headers: { 'Content-Type': 'text/plain;charset=utf-8' },
                 body: JSON.stringify(payload)
             })
-                .then(r => {
-                    if (r.ok) onComplete({ ok: true });
-                    else { queuePending(payload); onComplete({ ok: false, reason: 'http_' + r.status }); }
-                })
-                .catch(err => {
-                    queuePending(payload);
-                    onComplete({ ok: false, reason: 'network' });
-                });
+            .then(r => {
+                clearTimeout(safetyTimeout);
+                if (r.ok) wrap({ ok: true });
+                else { queuePending(payload); wrap({ ok: false, reason: 'http_' + r.status }); }
+            })
+            .catch(err => {
+                clearTimeout(safetyTimeout);
+                queuePending(payload);
+                wrap({ ok: false, reason: 'network' });
+            });
         }
 
         function flushPendingLeads(silent) {
@@ -1205,20 +1658,20 @@
                     headers: { 'Content-Type': 'text/plain;charset=utf-8' },
                     body: JSON.stringify(item)
                 })
-                    .then(r => { if (r.ok) sent++; else remaining.push(item); })
-                    .catch(() => { remaining.push(item); })
-                    .finally(() => {
-                        done++;
-                        if (done === list.length) {
-                            safeSetPending(remaining);
-                            updatePendingIndicator();
-                            if (!silent) {
-                                showToast(`Reenviados: ${sent}. Pendientes: ${remaining.length}.`);
-                            } else if (sent > 0) {
-                                console.log(`Auto-flush: ${sent} leads reenviados`);
-                            }
+                .then(r => { if (r.ok) sent++; else remaining.push(item); })
+                .catch(() => { remaining.push(item); })
+                .finally(() => {
+                    done++;
+                    if (done === list.length) {
+                        safeSetPending(remaining);
+                        updatePendingIndicator();
+                        if (!silent) {
+                            showToast(`Reenviados: ${sent}. Pendientes: ${remaining.length}.`);
+                        } else if (sent > 0) {
+                            console.log(`Auto-flush: ${sent} leads reenviados`);
                         }
-                    });
+                    }
+                });
             });
         }
 
@@ -1259,15 +1712,27 @@
             }
         }
 
+        // Guardamos el HTML original del botón de envío para restaurarlo después
+        let sendBtnOriginalHTML = null;
+
         function sendToCRM() {
-            // Validar puntaje
-            if (appState.score && appState.score.tier === 'EMPTY') {
-                showToast("Complete al menos el juego o la calculadora antes de enviar");
+            // Validar que exista respuesta de apertura
+            if (!appState.opening) {
+                showToast("Falta la respuesta del cliente (Técnica de Apertura)");
                 return;
             }
 
-            const sendBtn = event && event.target ? event.target.closest('button') : null;
+            // Validar que la comercial haya calificado al cliente
+            if (!appState.commercialRating) {
+                showToast("Por favor, califica al cliente (Alto / Medio / Bajo)");
+                const warn = document.getElementById('rating-warning');
+                if (warn) warn.classList.remove('hidden');
+                return;
+            }
+
+            const sendBtn = document.querySelector('button[onclick="sendToCRM()"]');
             if (sendBtn) {
+                if (sendBtnOriginalHTML === null) sendBtnOriginalHTML = sendBtn.innerHTML;
                 sendBtn.disabled = true;
                 sendBtn.innerHTML = '<i class="fa-solid fa-spinner animate-spin"></i> Enviando...';
             }
@@ -1275,10 +1740,18 @@
             const payload = buildPayload();
 
             sendPayload(payload, (result) => {
-                // Mostrar pantalla de éxito sin importar el resultado de red
-                // (porque si falló, ya quedó en cola local)
+                restoreSendButton();
                 showSuccessScreen(payload, result);
             });
+        }
+
+        function restoreSendButton() {
+            const sendBtn = document.querySelector('button[onclick="sendToCRM()"]');
+            if (sendBtn) {
+                sendBtn.disabled = false;
+                // Restaurar SIEMPRE al HTML canónico (más robusto que depender del cache)
+                sendBtn.innerHTML = '<i class="fa-solid fa-paper-plane"></i> Enviar a Correo';
+            }
         }
 
         /* ==========================================================
@@ -1339,25 +1812,35 @@
 
             appState = {
                 lead: { name: "", company: "", role: "", email: "", phone: "", qr_raw: "" },
-                pains: [],
-                calc: null,
-                score: null,
+                opening: null,
+                commercialRating: null,
                 autoResetTimer: null,
                 countdownInterval: null
             };
 
-            document.getElementById('calc-form').reset();
             document.getElementById('manual-form').reset();
 
-            // Reset visual del juego
-            document.querySelectorAll('.play-btn.selected').forEach(b => {
+            // Reset visual del tablero de apertura
+            document.querySelectorAll('.opening-btn').forEach(b => {
                 b.classList.remove('selected');
                 const icon = b.querySelector('.btn-icon');
                 if (icon) {
-                    icon.classList.replace('bg-white/20', 'bg-gray-50');
-                    icon.classList.replace('text-white', 'text-gray-400');
+                    icon.classList.remove('bg-white/20', 'text-white');
+                    icon.classList.add('bg-milenio-blue/10', 'text-milenio-blue');
                 }
             });
+
+            // Reset visual de los botones de calificación
+            document.querySelectorAll('.rating-btn').forEach(b => {
+                b.classList.remove('selected-alto', 'selected-medio', 'selected-bajo');
+            });
+
+            // Ocultar warning de rating
+            const warn = document.getElementById('rating-warning');
+            if (warn) warn.classList.add('hidden');
+
+            // Asegurar que el botón de envío quede restaurado
+            restoreSendButton();
 
             goToScreen('screen-dashboard');
             showToast("Listo para un nuevo cliente");
