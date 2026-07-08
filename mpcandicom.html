@@ -126,24 +126,20 @@
         .rating-btn {
             transition: all 0.3s ease;
         }
-
         .rating-btn:hover {
             background: rgba(255, 255, 255, 0.1);
             transform: translateY(-2px);
         }
-
         .rating-btn.selected-bajo {
             background: linear-gradient(135deg, rgba(59, 130, 246, 0.3), rgba(59, 130, 246, 0.15));
             border-color: #3b82f6 !important;
             box-shadow: 0 0 20px rgba(59, 130, 246, 0.3);
         }
-
         .rating-btn.selected-medio {
             background: linear-gradient(135deg, rgba(16, 185, 129, 0.3), rgba(16, 185, 129, 0.15));
             border-color: #10b981 !important;
             box-shadow: 0 0 20px rgba(16, 185, 129, 0.3);
         }
-
         .rating-btn.selected-alto {
             background: linear-gradient(135deg, rgba(250, 204, 21, 0.3), rgba(250, 204, 21, 0.15));
             border-color: #facc15 !important;
@@ -286,8 +282,7 @@
                         </div>
                         <div>
                             <h4 class="font-bold text-xl text-milenio-dark mb-1">Técnica de Apertura</h4>
-                            <p class="text-sm text-gray-500">Pregunta única para abrir la conversación con el visitante.
-                            </p>
+                            <p class="text-sm text-gray-500">Pregunta única para abrir la conversación con el visitante.</p>
                         </div>
                     </div>
 
@@ -314,13 +309,11 @@
                 <div id="reader" class="mb-6 shadow-inner bg-gray-50 border-2 border-dashed border-gray-300"></div>
 
                 <!-- Aviso cuando el QR no trae datos legibles -->
-                <div id="qr-useless-notice"
-                    class="hidden bg-amber-50 border-2 border-amber-300 rounded-xl p-4 mb-4 text-left">
+                <div id="qr-useless-notice" class="hidden bg-amber-50 border-2 border-amber-300 rounded-xl p-4 mb-4 text-left">
                     <p class="text-sm font-bold text-amber-800 mb-1">
                         <i class="fa-solid fa-triangle-exclamation mr-2"></i>QR del organizador detectado
                     </p>
-                    <p class="text-xs text-amber-700 mb-2">Este QR solo contiene un ID interno de Andicom (<span
-                            id="qr-useless-id" class="font-mono font-bold"></span>). No trae datos del asistente.</p>
+                    <p class="text-xs text-amber-700 mb-2">Este QR solo contiene un ID interno de Andicom (<span id="qr-useless-id" class="font-mono font-bold"></span>). No trae datos del asistente.</p>
                     <p class="text-xs text-amber-700">Usa una de las opciones de abajo para capturar los datos.</p>
                 </div>
 
@@ -343,14 +336,12 @@
              ========================================== -->
         <section id="screen-ocr" class="screen flex-col items-center justify-center w-full max-w-lg">
             <div class="glass-panel rounded-3xl p-6 md:p-8 w-full shadow-2xl relative">
-                <button onclick="closeOCRScanner()"
-                    class="absolute top-4 left-4 text-gray-400 hover:text-gray-700 z-10">
+                <button onclick="closeOCRScanner()" class="absolute top-4 left-4 text-gray-400 hover:text-gray-700 z-10">
                     <i class="fa-solid fa-arrow-left text-xl"></i>
                 </button>
 
                 <div class="text-center mb-5 mt-4">
-                    <span
-                        class="inline-block bg-milenio-teal/10 text-milenio-teal px-3 py-1 rounded-full text-xs font-black uppercase tracking-widest mb-2">
+                    <span class="inline-block bg-milenio-teal/10 text-milenio-teal px-3 py-1 rounded-full text-xs font-black uppercase tracking-widest mb-2">
                         <i class="fa-solid fa-wand-magic-sparkles mr-1"></i>Modo OCR
                     </span>
                     <h2 class="text-2xl font-black text-milenio-dark leading-tight">Escanear escarapela con foto</h2>
@@ -360,21 +351,17 @@
                 <!-- Fase 1: vista de cámara + botón capturar -->
                 <div id="ocr-phase-camera" class="space-y-3">
                     <div class="relative rounded-2xl overflow-hidden bg-slate-900 shadow-inner">
-                        <video id="ocr-video" autoplay playsinline muted
-                            class="w-full h-auto min-h-[320px] bg-black object-cover"></video>
+                        <video id="ocr-video" autoplay playsinline muted class="w-full h-auto min-h-[320px] bg-black object-cover"></video>
                         <!-- Marco guía horizontal — sugiere enfocar el bloque del nombre + empresa -->
-                        <div
-                            class="absolute inset-x-4 top-1/2 -translate-y-1/2 h-40 border-[3px] border-yellow-400 rounded-lg pointer-events-none shadow-[0_0_20px_rgba(0,0,0,0.5)]">
-                            <div
-                                class="absolute -top-6 left-0 bg-yellow-400 text-black text-[10px] font-black px-2 py-0.5 rounded uppercase tracking-widest">
+                        <div class="absolute inset-x-4 top-1/2 -translate-y-1/2 h-40 border-[3px] border-yellow-400 rounded-lg pointer-events-none shadow-[0_0_20px_rgba(0,0,0,0.5)]">
+                            <div class="absolute -top-6 left-0 bg-yellow-400 text-black text-[10px] font-black px-2 py-0.5 rounded uppercase tracking-widest">
                                 Encuadra aquí nombre + empresa
                             </div>
                         </div>
                     </div>
 
                     <!-- Tips rápidos para mejor OCR -->
-                    <div
-                        class="bg-amber-50 border border-amber-200 rounded-lg p-2 text-[11px] text-amber-800 leading-tight">
+                    <div class="bg-amber-50 border border-amber-200 rounded-lg p-2 text-[11px] text-amber-800 leading-tight">
                         <p class="font-bold mb-0.5"><i class="fa-solid fa-lightbulb mr-1"></i>Para mejor lectura:</p>
                         <p>• <b>Enfoca SOLO el bloque blanco</b> (nombre + empresa)</p>
                         <p>• Ignora el logo del evento — acércate más</p>
@@ -404,53 +391,44 @@
 
                 <!-- Fase 3: procesando (loading) -->
                 <div id="ocr-phase-processing" class="space-y-4 hidden text-center py-8">
-                    <div
-                        class="inline-block w-16 h-16 border-4 border-milenio-teal/20 border-t-milenio-teal rounded-full animate-spin mb-4">
-                    </div>
+                    <div class="inline-block w-16 h-16 border-4 border-milenio-teal/20 border-t-milenio-teal rounded-full animate-spin mb-4"></div>
                     <p id="ocr-progress-text" class="text-milenio-dark font-bold">Leyendo texto...</p>
                     <div class="w-full bg-gray-200 rounded-full h-2 overflow-hidden">
                         <div id="ocr-progress-bar" class="bg-milenio-teal h-2 transition-all" style="width: 0%"></div>
                     </div>
-                    <p class="text-xs text-gray-500 mt-2">La primera vez tarda un poco más mientras se descarga el motor
-                        OCR</p>
+                    <p class="text-xs text-gray-500 mt-2">La primera vez tarda un poco más mientras se descarga el motor OCR</p>
                 </div>
 
                 <!-- Fase 4: resultado editable -->
                 <div id="ocr-phase-result" class="space-y-3 hidden">
                     <div class="bg-emerald-50 border-2 border-emerald-200 rounded-xl p-3 text-center">
                         <p class="text-xs font-bold text-emerald-700 uppercase tracking-widest">
-                            <i class="fa-solid fa-circle-check mr-1"></i>Texto detectado - Revisa y ajusta si es
-                            necesario
+                            <i class="fa-solid fa-circle-check mr-1"></i>Texto detectado - Revisa y ajusta si es necesario
                         </p>
                     </div>
 
                     <div class="relative">
-                        <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none"><i
-                                class="fa-solid fa-user text-gray-400"></i></div>
+                        <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none"><i class="fa-solid fa-user text-gray-400"></i></div>
                         <input type="text" id="ocr-name"
                             class="w-full pl-12 pr-4 py-3 text-base border-2 border-gray-200 rounded-xl focus:border-milenio-teal outline-none transition-all bg-white font-semibold"
                             placeholder="Nombre completo">
                     </div>
                     <div class="relative">
-                        <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none"><i
-                                class="fa-solid fa-building text-gray-400"></i></div>
+                        <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none"><i class="fa-solid fa-building text-gray-400"></i></div>
                         <input type="text" id="ocr-company"
                             class="w-full pl-12 pr-4 py-3 text-base border-2 border-gray-200 rounded-xl focus:border-milenio-teal outline-none transition-all bg-white font-semibold"
                             placeholder="Empresa">
                     </div>
                     <div class="relative">
-                        <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none"><i
-                                class="fa-solid fa-briefcase text-gray-400"></i></div>
+                        <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none"><i class="fa-solid fa-briefcase text-gray-400"></i></div>
                         <input type="text" id="ocr-role"
                             class="w-full pl-12 pr-4 py-3 text-base border-2 border-gray-200 rounded-xl focus:border-milenio-teal outline-none transition-all bg-white font-semibold"
                             placeholder="Cargo (opcional)">
                     </div>
 
                     <details class="mt-3">
-                        <summary class="text-xs text-gray-500 cursor-pointer hover:text-milenio-blue">Ver texto crudo
-                            detectado</summary>
-                        <pre id="ocr-raw-text"
-                            class="mt-2 text-[10px] text-gray-500 bg-gray-50 p-3 rounded-lg max-h-32 overflow-auto whitespace-pre-wrap"></pre>
+                        <summary class="text-xs text-gray-500 cursor-pointer hover:text-milenio-blue">Ver texto crudo detectado</summary>
+                        <pre id="ocr-raw-text" class="mt-2 text-[10px] text-gray-500 bg-gray-50 p-3 rounded-lg max-h-32 overflow-auto whitespace-pre-wrap"></pre>
                     </details>
 
                     <div class="grid grid-cols-2 gap-3 pt-2">
@@ -557,11 +535,9 @@
                 </h1>
 
                 <!-- Pregunta principal destacada -->
-                <div
-                    class="bg-gradient-to-r from-milenio-blue to-milenio-dark text-white rounded-2xl p-6 md:p-8 mb-6 shadow-xl">
+                <div class="bg-gradient-to-r from-milenio-blue to-milenio-dark text-white rounded-2xl p-6 md:p-8 mb-6 shadow-xl">
                     <p class="text-lg md:text-2xl font-bold text-center leading-snug">
-                        ¿Qué aspecto consideras más importante para que la tecnología acompañe el crecimiento de tu
-                        empresa?
+                        ¿Qué aspecto consideras más importante para que la tecnología acompañe el crecimiento de tu empresa?
                     </p>
                 </div>
 
@@ -594,26 +570,23 @@
 
                 <!-- Etiqueta -->
                 <div class="text-center mb-4">
-                    <span
-                        class="inline-block bg-milenio-teal/10 text-milenio-teal px-4 py-1 rounded-full text-xs font-bold uppercase tracking-widest">
+                    <span class="inline-block bg-milenio-teal/10 text-milenio-teal px-4 py-1 rounded-full text-xs font-bold uppercase tracking-widest">
                         <i class="fa-solid fa-lightbulb mr-2"></i>Milenio PC responde
                     </span>
                 </div>
 
-                <h2 class="text-xl md:text-2xl font-black text-center text-milenio-dark mb-2 leading-tight"
-                    id="service-intro">
+                <h2 class="text-xl md:text-2xl font-black text-center text-milenio-dark mb-2 leading-tight" id="service-intro">
                     Para tu prioridad, en Milenio PC te ofrecemos:
                 </h2>
 
                 <!-- Contenedor de imagen (real o placeholder) -->
-                <div id="service-image-container"
-                    class="my-6 rounded-3xl overflow-hidden shadow-xl min-h-[280px] md:min-h-[380px] flex items-center justify-center relative">
+                <div id="service-image-container" class="my-6 rounded-3xl overflow-hidden shadow-xl min-h-[280px] md:min-h-[380px] flex items-center justify-center relative">
                     <!-- El contenido se inyecta desde JS -->
                 </div>
 
                 <!-- Bloque descriptivo -->
                 <div class="bg-white border-2 border-milenio-teal/20 rounded-2xl p-4 md:p-5 mb-6 text-center">
-
+                    <p class="text-xs uppercase tracking-widest text-milenio-teal font-black mb-2">Servicio destacado</p>
                     <p id="service-name" class="text-lg md:text-2xl font-black text-milenio-dark mb-2">—</p>
                     <p id="service-description" class="text-sm md:text-base text-gray-600 leading-relaxed italic">—</p>
                 </div>
@@ -653,13 +626,13 @@
                 <div class="grid grid-cols-1 gap-6 mb-8">
 
                     <!-- Respuesta de Apertura + tip comercial (más protagonismo ahora) -->
-                    <div class="bg-white/5 rounded-2xl p-6 border border-white/10 relative overflow-hidden">
+                    <div
+                        class="bg-white/5 rounded-2xl p-6 border border-white/10 relative overflow-hidden">
                         <div class="absolute top-0 right-0 p-2 opacity-10 text-5xl"><i class="fa-solid fa-comments"></i>
                         </div>
                         <h3
                             class="text-xs uppercase tracking-widest text-milenio-teal font-bold mb-4 flex items-center gap-2 relative z-10">
-                            <i class="fa-solid fa-comments"></i> Respuesta de Apertura
-                        </h3>
+                            <i class="fa-solid fa-comments"></i> Respuesta de Apertura</h3>
                         <div id="cv-pains" class="flex flex-wrap gap-2 relative z-10">
                             <span class="text-gray-400 text-sm italic">Técnica de apertura no utilizada.</span>
                         </div>
@@ -667,8 +640,7 @@
 
                     <!-- Calificación MANUAL de la comercial -->
                     <div class="bg-white/10 rounded-2xl p-6 border border-white/20 relative overflow-hidden">
-                        <h3
-                            class="text-xs uppercase tracking-widest text-milenio-lightblue font-bold mb-2 flex items-center gap-2">
+                        <h3 class="text-xs uppercase tracking-widest text-milenio-lightblue font-bold mb-2 flex items-center gap-2">
                             <i class="fa-solid fa-user-tie"></i> Calificación del comercial
                         </h3>
                         <p class="text-gray-300 text-sm mb-5">Después de conversar con el cliente, califícalo:</p>
@@ -695,8 +667,7 @@
                         </div>
 
                         <p id="rating-warning" class="text-xs text-amber-300 font-medium mt-3 hidden">
-                            <i class="fa-solid fa-triangle-exclamation"></i> Selecciona una calificación antes de
-                            enviar.
+                            <i class="fa-solid fa-triangle-exclamation"></i> Selecciona una calificación antes de enviar.
                         </p>
                     </div>
                 </div>
@@ -715,20 +686,18 @@
             </div>
         </section>
 
-
+    
         <!-- ==========================================
              PANTALLA NUEVA: ÉXITO POST-ENVÍO
              ========================================== -->
         <section id="screen-success" class="screen flex-col items-center justify-center w-full max-w-2xl">
-            <div
-                class="glass-panel rounded-[2.5rem] p-8 md:p-12 w-full shadow-2xl text-center relative overflow-hidden">
+            <div class="glass-panel rounded-[2.5rem] p-8 md:p-12 w-full shadow-2xl text-center relative overflow-hidden">
                 <div class="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-emerald-500 to-green-600"></div>
 
                 <div class="flex justify-center mb-6">
                     <div class="relative">
                         <div class="absolute inset-0 bg-emerald-400 rounded-full animate-ping opacity-20"></div>
-                        <div
-                            class="relative w-28 h-28 md:w-32 md:h-32 rounded-full bg-gradient-to-br from-emerald-500 to-green-600 flex items-center justify-center shadow-2xl">
+                        <div class="relative w-28 h-28 md:w-32 md:h-32 rounded-full bg-gradient-to-br from-emerald-500 to-green-600 flex items-center justify-center shadow-2xl">
                             <i class="fa-solid fa-check text-white text-5xl md:text-6xl"></i>
                         </div>
                     </div>
@@ -736,23 +705,20 @@
 
                 <h2 class="text-3xl md:text-4xl font-black text-milenio-dark mb-3">¡Lead Registrado!</h2>
                 <p class="text-gray-600 text-base md:text-lg mb-2 font-medium leading-relaxed">
-                    La información llegó al equipo comercial de <span class="text-milenio-blue font-bold">Milenio
-                        PC</span>.
+                    La información llegó al equipo comercial de <span class="text-milenio-blue font-bold">Milenio PC</span>.
                 </p>
                 <p class="text-gray-500 text-sm md:text-base mb-8">
                     Un consultor estratégico se contactará en las próximas horas.
                 </p>
 
-                <div id="success-classification"
-                    class="inline-block bg-gray-50 border border-gray-200 rounded-2xl px-6 py-3 mb-8">
+                <div id="success-classification" class="inline-block bg-gray-50 border border-gray-200 rounded-2xl px-6 py-3 mb-8">
                     <p class="text-xs uppercase tracking-widest text-gray-500 font-bold mb-1">Clasificación enviada</p>
                     <p id="success-tier" class="text-xl font-black text-milenio-dark">—</p>
                 </div>
 
                 <div id="success-status" class="text-xs text-gray-500 mb-6 font-medium"></div>
 
-                <button onclick="resetApp()"
-                    class="bg-milenio-dark text-white font-bold py-3 px-8 rounded-xl hover:bg-black transition-all shadow-lg flex items-center justify-center gap-2 mx-auto">
+                <button onclick="resetApp()" class="bg-milenio-dark text-white font-bold py-3 px-8 rounded-xl hover:bg-black transition-all shadow-lg flex items-center justify-center gap-2 mx-auto">
                     <i class="fa-solid fa-rotate-right"></i> Atender nuevo cliente
                 </button>
 
@@ -780,7 +746,7 @@
         const CONFIG = {
             // URL del Google Apps Script desplegado como Web App
             // (ver README para los pasos)
-            APPS_SCRIPT_URL: 'PEGAR_AQUI_LA_URL_DE_APPS_SCRIPT',
+            APPS_SCRIPT_URL: 'https://script.google.com/macros/s/AKfycbxf9YgVcvv5jDuM8Q6tFLcp1wUOGZGk8E0ZfUs5MDpeMeUW7OJEx649ZZVW-V4S6lrk/exec',
 
             // Segundos antes de reiniciar la app automáticamente
             // después de un envío exitoso (modo kiosko / tablet)
@@ -820,9 +786,9 @@
                 id: 'op1',
                 text: 'Mantener los equipos siempre actualizados',
                 icon: 'fa-arrows-rotate',
-                serviceFocus: '',
+                serviceFocus: 'Renting Tecnológico',
                 intro: 'Desde nuestra experiencia, podemos decir que la obsolescencia tecnológica comienza mucho antes de que un equipo deje de funcionar.',
-                serviceDescription: '¿Cómo definen hoy en su organización el momento adecuado para renovar los equipos?.',
+                serviceDescription: 'Con nuestro Modelo Renting tienes equipos siempre a la vanguardia, con renovación automática cada 36 meses y sin obsolescencia tecnológica.',
                 commercialTip: 'Cliente prioriza modernización continua. Presentar Renting con renovación automática, sin CAPEX ni obsolescencia.',
                 imageUrl: 'https://github.com/DesarrollosMPC/DesarrollosMPC.github.io/blob/main/imagen%20(7).png?raw=true'
             },
@@ -951,11 +917,11 @@
             // 1) JSON puro
             try {
                 const d = JSON.parse(raw);
-                result.name = d.name || d.nombre || d.fullName || "";
+                result.name    = d.name    || d.nombre  || d.fullName     || "";
                 result.company = d.company || d.empresa || d.organization || "";
-                result.role = d.role || d.cargo || d.title || "";
-                result.email = d.email || d.correo || d.mail || "";
-                result.phone = d.phone || d.tel || d.telefono || "";
+                result.role    = d.role    || d.cargo   || d.title        || "";
+                result.email   = d.email   || d.correo  || d.mail         || "";
+                result.phone   = d.phone   || d.tel     || d.telefono     || "";
                 if (result.name || result.email) {
                     result.isUseful = true;
                     return result;
@@ -1173,15 +1139,15 @@
                         focusMode: 'continuous'
                     }
                 })
-                    .then(stream => {
-                        ocrStream = stream;
-                        video.srcObject = stream;
-                    })
-                    .catch(err => {
-                        console.error('Error acceso cámara OCR:', err);
-                        showToast("No se pudo acceder a la cámara. Usa ingreso manual.");
-                        closeOCRScanner();
-                    });
+                .then(stream => {
+                    ocrStream = stream;
+                    video.srcObject = stream;
+                })
+                .catch(err => {
+                    console.error('Error acceso cámara OCR:', err);
+                    showToast("No se pudo acceder a la cámara. Usa ingreso manual.");
+                    closeOCRScanner();
+                });
             }, 200);
         }
 
@@ -1832,16 +1798,16 @@
                 headers: { 'Content-Type': 'text/plain;charset=utf-8' },
                 body: JSON.stringify(payload)
             })
-                .then(r => {
-                    clearTimeout(safetyTimeout);
-                    if (r.ok) wrap({ ok: true });
-                    else { queuePending(payload); wrap({ ok: false, reason: 'http_' + r.status }); }
-                })
-                .catch(err => {
-                    clearTimeout(safetyTimeout);
-                    queuePending(payload);
-                    wrap({ ok: false, reason: 'network' });
-                });
+            .then(r => {
+                clearTimeout(safetyTimeout);
+                if (r.ok) wrap({ ok: true });
+                else { queuePending(payload); wrap({ ok: false, reason: 'http_' + r.status }); }
+            })
+            .catch(err => {
+                clearTimeout(safetyTimeout);
+                queuePending(payload);
+                wrap({ ok: false, reason: 'network' });
+            });
         }
 
         function flushPendingLeads(silent) {
@@ -1868,20 +1834,20 @@
                     headers: { 'Content-Type': 'text/plain;charset=utf-8' },
                     body: JSON.stringify(item)
                 })
-                    .then(r => { if (r.ok) sent++; else remaining.push(item); })
-                    .catch(() => { remaining.push(item); })
-                    .finally(() => {
-                        done++;
-                        if (done === list.length) {
-                            safeSetPending(remaining);
-                            updatePendingIndicator();
-                            if (!silent) {
-                                showToast(`Reenviados: ${sent}. Pendientes: ${remaining.length}.`);
-                            } else if (sent > 0) {
-                                console.log(`Auto-flush: ${sent} leads reenviados`);
-                            }
+                .then(r => { if (r.ok) sent++; else remaining.push(item); })
+                .catch(() => { remaining.push(item); })
+                .finally(() => {
+                    done++;
+                    if (done === list.length) {
+                        safeSetPending(remaining);
+                        updatePendingIndicator();
+                        if (!silent) {
+                            showToast(`Reenviados: ${sent}. Pendientes: ${remaining.length}.`);
+                        } else if (sent > 0) {
+                            console.log(`Auto-flush: ${sent} leads reenviados`);
                         }
-                    });
+                    }
+                });
             });
         }
 
