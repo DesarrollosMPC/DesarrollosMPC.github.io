@@ -194,6 +194,62 @@
                 transform: none;
             }
         }
+
+        .client-row {
+            cursor: pointer;
+            transition: background .12s ease;
+        }
+
+        .client-row:hover {
+            background: rgba(34, 211, 238, 0.06);
+        }
+
+        @media print {
+            body {
+                background: #ffffff !important;
+                color: #0f172a !important;
+            }
+
+            .no-print {
+                display: none !important;
+            }
+
+            .panel-print {
+                break-inside: avoid;
+                border: 1px solid #cbd5e1 !important;
+                background: #fff !important;
+                margin-bottom: 14px !important;
+            }
+
+            #dashboardContent,
+            #dashboardContent * {
+                color: #0f172a !important;
+            }
+
+            canvas {
+                max-width: 100% !important;
+            }
+
+            .print-order-1 {
+                order: 1;
+            }
+
+            .print-order-2 {
+                order: 2;
+            }
+
+            .print-order-3 {
+                order: 3;
+            }
+
+            .print-order-4 {
+                order: 4;
+            }
+
+            .print-order-5 {
+                order: 5;
+            }
+        }
     </style>
 </head>
 
@@ -201,7 +257,7 @@
 
     <!-- OVERLAY DRAG & DROP -->
     <div id="dragOverlay"
-        class="fixed inset-0 bg-cyan/10 backdrop-blur-sm z-[100] hidden flex-col items-center justify-center border-4 border-cyan border-dashed m-4 rounded-3xl pointer-events-none transition-all">
+        class="fixed inset-0 bg-cyan/10 backdrop-blur-sm z-[100] hidden flex-col items-center justify-center border-4 border-cyan border-dashed m-4 rounded-3xl pointer-events-none transition-all no-print">
         <div class="bg-panel p-6 rounded-full shadow-2xl animate-bounce border border-cyan/40">
             <i data-lucide="download-cloud" class="w-16 h-16 text-cyan"></i>
         </div>
@@ -209,7 +265,7 @@
     </div>
 
     <!-- TOASTS -->
-    <div id="toastHost" class="fixed bottom-6 right-6 z-[90] flex flex-col gap-2 items-end"></div>
+    <div id="toastHost" class="fixed bottom-6 right-6 z-[90] flex flex-col gap-2 items-end no-print"></div>
 
     <div class="p-4 md:p-8 max-w-[1700px] mx-auto">
 
@@ -218,7 +274,7 @@
             class="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 border-b border-line pb-6">
             <div class="flex items-center gap-4">
                 <div class="pulse-wrap flex items-center justify-center">
-                    <div class="pulse-ring"></div>
+                    <div class="pulse-ring no-print"></div>
                     <div
                         class="w-11 h-11 rounded-xl bg-panel2 border border-cyan/40 flex items-center justify-center relative z-10">
                         <i data-lucide="activity" class="text-cyan w-6 h-6"></i>
@@ -227,23 +283,29 @@
                 <div>
                     <h1 class="text-3xl font-bold text-white flex items-center gap-3 tracking-tight display">
                         Nerve Center
-                        <svg width="72" height="20" viewBox="0 0 72 20" class="hidden sm:block opacity-80">
+                        <svg width="72" height="20" viewBox="0 0 72 20" class="hidden sm:block opacity-80 no-print">
                             <polyline class="ekg" points="0,10 14,10 19,3 24,17 29,10 40,10 45,6 50,14 55,10 72,10"
                                 fill="none" stroke="#22d3ee" stroke-width="1.6" stroke-linecap="round"
                                 stroke-linejoin="round" />
                         </svg>
                     </h1>
-                    <p class="text-dim mt-1.5 font-medium text-sm">Plataforma de Telemetría y Gestión de Activos TI
+                    <p class="text-dim mt-1.5 font-medium text-sm">Telemetría, Seguridad y Cumplimiento de Flota
                         &middot; Milenio PC</p>
+                    <p id="printDate" class="hidden text-xs text-dim mt-1"></p>
                 </div>
             </div>
 
             <div class="mt-5 md:mt-0 flex items-center gap-3">
-                <div id="lastLoadInfo" class="hidden sm:flex items-center gap-2 text-xs text-dim mono">
+                <div id="lastLoadInfo" class="hidden sm:flex items-center gap-2 text-xs text-dim mono no-print">
                     <span class="live-dot text-mint"><span class="w-2 h-2 rounded-full bg-mint block"></span></span>
                     <span id="lastLoadText">Sin datos cargados</span>
                 </div>
-                <div class="relative group">
+                <button type="button" onclick="window.print()"
+                    class="no-print bg-panel2 hover:bg-[#182544] border border-line hover:border-cyan/50 text-white px-4 py-2.5 rounded-xl flex items-center gap-2 font-medium transition-all">
+                    <i data-lucide="printer" class="w-4 h-4 text-dim"></i>
+                    <span class="hidden sm:inline">Imprimir / PDF</span>
+                </button>
+                <div class="relative group no-print">
                     <input type="file" id="csvUpload" accept=".csv"
                         class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10">
                     <button type="button"
@@ -270,11 +332,11 @@
         <!-- CONTENEDOR PRINCIPAL -->
         <div id="dashboardContent" class="hidden">
 
-            <div class="mb-5 text-sm text-dim flex items-center justify-between gap-2 flex-wrap">
+            <div class="mb-5 text-sm text-dim flex items-center justify-between gap-2 flex-wrap no-print">
                 <div class="flex items-center gap-2">
                     <i data-lucide="mouse-pointer-click" class="w-4 h-4 text-cyan"></i>
-                    Haz clic en cualquier tarjeta o en cualquier gráfica (dona, barra, segmento) para filtrar el
-                    directorio. Haz clic de nuevo para quitar el filtro.
+                    Haz clic en cualquier tarjeta o en cualquier gráfica (dona, barra, segmento, cliente) para filtrar
+                    el directorio. Haz clic de nuevo para quitar el filtro.
                 </div>
                 <button type="button" onclick="clearAllFilters()"
                     class="flex items-center gap-1.5 text-xs font-semibold text-dim hover:text-cyan border border-line hover:border-cyan/40 px-3 py-1.5 rounded-lg transition-colors">
@@ -283,11 +345,52 @@
             </div>
 
             <!-- KPIs -->
-            <div id="kpiGrid" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3.5 mb-8"></div>
+            <div id="kpiGrid" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3.5 mb-8 panel-print"></div>
+
+            <!-- CLIENTE / SEDE + SALUD (visible siempre que el CSV traiga Ubicación / Estado de salud) -->
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-5 mb-6">
+                <div class="lg:col-span-2 bg-panel border border-line rounded-2xl p-6 shadow-sm panel-print">
+                    <h3 class="text-base font-bold text-white flex items-center gap-2 mb-4 display">
+                        <i data-lucide="building-2" class="text-cyan w-5 h-5"></i>
+                        Equipos por Cliente / Sede
+                    </h3>
+                    <div class="relative w-full h-[260px]"><canvas id="clientChart"></canvas></div>
+                    <p class="text-[10px] text-dim/70 text-center mt-2 no-print">clic en una barra para filtrar por
+                        cliente</p>
+                </div>
+                <div id="healthChartCard"
+                    class="bg-panel border border-line rounded-2xl p-6 shadow-sm flex flex-col panel-print">
+                    <h3 class="text-base font-bold text-white flex items-center gap-2 mb-2 display">
+                        <i data-lucide="heart-pulse" class="text-red w-5 h-5"></i> Salud General
+                    </h3>
+                    <div class="relative flex-1 w-full flex items-center justify-center min-h-[210px]"><canvas
+                            id="healthChart"></canvas></div>
+                    <p class="text-[10px] text-dim/70 text-center mt-2 no-print">clic para filtrar</p>
+                </div>
+            </div>
+
+            <!-- RESUMEN DE CUMPLIMIENTO POR CLIENTE -->
+            <div class="bg-panel border border-line rounded-2xl shadow-sm overflow-hidden mb-8 panel-print">
+                <div class="p-4 border-b border-line bg-panel2/60">
+                    <h3 class="text-base font-bold text-white flex items-center gap-2 display">
+                        <i data-lucide="clipboard-list" class="text-cyan w-5 h-5"></i>
+                        Resumen de Cumplimiento por Cliente
+                    </h3>
+                    <p class="text-xs text-dim mt-1">Cumplimiento = sin salud crítica, firewall activo, disco cifrado,
+                        antivirus activo y Windows vigente (según campos disponibles en el CSV cargado)</p>
+                </div>
+                <div class="overflow-x-auto no-scrollbar scrollbar-thin">
+                    <table class="w-full text-sm text-left">
+                        <thead id="clientTableHead"
+                            class="text-xs text-dim uppercase bg-panel2/60 border-b border-line"></thead>
+                        <tbody id="clientTableBody" class="divide-y divide-line/60"></tbody>
+                    </table>
+                </div>
+            </div>
 
             <!-- ZONA DE GRÁFICOS PRINCIPALES -->
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-5 mb-6">
-                <div class="lg:col-span-2 bg-panel border border-line rounded-2xl p-6 shadow-sm">
+                <div class="lg:col-span-2 bg-panel border border-line rounded-2xl p-6 shadow-sm panel-print">
                     <div class="flex items-center justify-between mb-4">
                         <h3 class="text-base font-bold text-white flex items-center gap-2 display">
                             <i data-lucide="bar-chart-2" class="text-red w-5 h-5"></i>
@@ -298,11 +401,11 @@
                     <div class="relative w-full h-[300px]">
                         <canvas id="barChart"></canvas>
                     </div>
-                    <p class="text-[10px] text-dim/70 text-center mt-2">clic en una barra para ver la ficha del equipo
-                    </p>
+                    <p class="text-[10px] text-dim/70 text-center mt-2 no-print">clic en una barra para ver la ficha del
+                        equipo</p>
                 </div>
 
-                <div class="bg-panel border border-line rounded-2xl p-6 shadow-sm flex flex-col">
+                <div class="bg-panel border border-line rounded-2xl p-6 shadow-sm flex flex-col panel-print">
                     <h3 class="text-base font-bold text-white flex items-center gap-2 mb-2 display">
                         <i data-lucide="pie-chart" class="text-cyan w-5 h-5"></i>
                         Distribución de Marcas
@@ -310,87 +413,116 @@
                     <div class="relative flex-1 w-full flex items-center justify-center min-h-[250px]">
                         <canvas id="donutChart"></canvas>
                     </div>
-                    <p class="text-[10px] text-dim/70 text-center mt-2">clic en una marca para filtrar</p>
+                    <p class="text-[10px] text-dim/70 text-center mt-2 no-print">clic en una marca para filtrar</p>
                 </div>
             </div>
 
             <!-- FILA: SALUD / CUMPLIMIENTO (donas pequeñas) -->
-            <div class="grid grid-cols-2 lg:grid-cols-4 gap-5 mb-6">
-                <div class="bg-panel border border-line rounded-2xl p-5 shadow-sm flex flex-col items-center">
+            <div class="grid grid-cols-2 lg:grid-cols-6 gap-5 mb-6">
+                <div id="fwChartCard"
+                    class="bg-panel border border-line rounded-2xl p-5 shadow-sm flex flex-col items-center panel-print">
+                    <h4 class="text-sm font-semibold text-dim mb-2 flex items-center gap-1.5"><i data-lucide="flame"
+                            class="w-3.5 h-3.5 text-amber"></i> Firewall</h4>
+                    <div class="relative w-full h-[150px]"><canvas id="fwChart"></canvas></div>
+                    <p class="text-[10px] text-dim/70 mt-1 no-print">clic para filtrar</p>
+                </div>
+                <div
+                    class="bg-panel border border-line rounded-2xl p-5 shadow-sm flex flex-col items-center panel-print">
                     <h4 class="text-sm font-semibold text-dim mb-2 flex items-center gap-1.5"><i data-lucide="lock"
                             class="w-3.5 h-3.5 text-violet"></i> Cifrado de Disco</h4>
                     <div class="relative w-full h-[150px]"><canvas id="encChart"></canvas></div>
-                    <p class="text-[10px] text-dim/70 mt-1">clic para filtrar</p>
+                    <p class="text-[10px] text-dim/70 mt-1 no-print">clic para filtrar</p>
                 </div>
-                <div class="bg-panel border border-line rounded-2xl p-5 shadow-sm flex flex-col items-center">
+                <div
+                    class="bg-panel border border-line rounded-2xl p-5 shadow-sm flex flex-col items-center panel-print">
                     <h4 class="text-sm font-semibold text-dim mb-2 flex items-center gap-1.5"><i data-lucide="shield"
                             class="w-3.5 h-3.5 text-mint"></i> Antivirus</h4>
                     <div class="relative w-full h-[150px]"><canvas id="avChart"></canvas></div>
-                    <p class="text-[10px] text-dim/70 mt-1">clic para filtrar</p>
+                    <p class="text-[10px] text-dim/70 mt-1 no-print">clic para filtrar</p>
                 </div>
-                <div class="bg-panel border border-line rounded-2xl p-5 shadow-sm flex flex-col items-center">
+                <div id="connChartCard"
+                    class="bg-panel border border-line rounded-2xl p-5 shadow-sm flex flex-col items-center panel-print">
+                    <h4 class="text-sm font-semibold text-dim mb-2 flex items-center gap-1.5"><i data-lucide="wifi"
+                            class="w-3.5 h-3.5 text-cyan"></i> Conectividad</h4>
+                    <div class="relative w-full h-[150px]"><canvas id="connChart"></canvas></div>
+                    <p class="text-[10px] text-dim/70 mt-1 no-print">clic para filtrar</p>
+                </div>
+                <div
+                    class="bg-panel border border-line rounded-2xl p-5 shadow-sm flex flex-col items-center panel-print">
                     <h4 class="text-sm font-semibold text-dim mb-2 flex items-center gap-1.5"><i data-lucide="rotate-cw"
                             class="w-3.5 h-3.5 text-amber"></i> Reinicio Pendiente</h4>
                     <div class="relative w-full h-[150px]"><canvas id="rebootChart"></canvas></div>
-                    <p class="text-[10px] text-dim/70 mt-1">clic para filtrar</p>
+                    <p class="text-[10px] text-dim/70 mt-1 no-print">clic para filtrar</p>
                 </div>
-                <div class="bg-panel border border-line rounded-2xl p-5 shadow-sm flex flex-col items-center">
+                <div
+                    class="bg-panel border border-line rounded-2xl p-5 shadow-sm flex flex-col items-center panel-print">
                     <h4 class="text-sm font-semibold text-dim mb-2 flex items-center gap-1.5"><i data-lucide="download"
                             class="w-3.5 h-3.5 text-cyan"></i> Actualizaciones</h4>
                     <div class="relative w-full h-[150px]"><canvas id="updChart"></canvas></div>
-                    <p class="text-[10px] text-dim/70 mt-1">clic para filtrar</p>
+                    <p class="text-[10px] text-dim/70 mt-1 no-print">clic para filtrar</p>
                 </div>
+            </div>
+
+            <!-- ANTIVIRUS POR PRODUCTO (solo si el CSV trae "Nombre del antivirus") -->
+            <div id="avProductCard" class="bg-panel border border-line rounded-2xl p-6 shadow-sm mb-6 panel-print">
+                <h3 class="text-base font-bold text-white flex items-center gap-2 mb-1 display">
+                    <i data-lucide="bug" class="text-mint w-5 h-5"></i> Productos de Antivirus en Uso
+                </h3>
+                <p class="text-xs text-dim mb-3">Equipos con más de un agente instalado cuentan en cada producto</p>
+                <div class="relative w-full h-[220px]"><canvas id="avProductChart"></canvas></div>
+                <p class="text-[10px] text-dim/70 text-center mt-2 no-print">clic en una barra para filtrar</p>
             </div>
 
             <!-- FILA: CICLO DE VIDA DE WINDOWS -->
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-5 mb-8">
-                <div class="bg-panel border border-line rounded-2xl p-6 shadow-sm">
+                <div class="bg-panel border border-line rounded-2xl p-6 shadow-sm panel-print">
                     <h3 class="text-base font-bold text-white flex items-center gap-2 mb-1 display">
                         <i data-lucide="shield-x" class="text-rose-400 w-5 h-5"></i> Ciclo de Vida de Windows
                     </h3>
                     <p class="text-xs text-dim mb-3">Según fechas oficiales de fin de servicio de Microsoft (no detecta
                         ESU pagado)</p>
                     <div class="relative w-full h-[190px]"><canvas id="winLcChart"></canvas></div>
-                    <p class="text-[10px] text-dim/70 text-center mt-2">clic para filtrar</p>
+                    <p class="text-[10px] text-dim/70 text-center mt-2 no-print">clic para filtrar</p>
                 </div>
-                <div class="lg:col-span-2 bg-panel border border-line rounded-2xl p-6 shadow-sm">
+                <div class="lg:col-span-2 bg-panel border border-line rounded-2xl p-6 shadow-sm panel-print">
                     <h3 class="text-base font-bold text-white flex items-center gap-2 mb-1 display">
                         <i data-lucide="tag" class="text-violet w-5 h-5"></i> Versión de Windows (Feature Update)
                     </h3>
                     <p class="text-xs text-dim mb-3">25H2, 24H2, 23H2... — separadas por Win10 / Win11 para no confundir
                         versiones homónimas</p>
                     <div class="relative w-full h-[190px]"><canvas id="winVerChart"></canvas></div>
-                    <p class="text-[10px] text-dim/70 text-center mt-2">clic en una barra para filtrar</p>
+                    <p class="text-[10px] text-dim/70 text-center mt-2 no-print">clic en una barra para filtrar</p>
                 </div>
             </div>
 
             <!-- FILA: HISTOGRAMAS -->
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-5 mb-8">
-                <div class="bg-panel border border-line rounded-2xl p-6 shadow-sm">
+                <div class="bg-panel border border-line rounded-2xl p-6 shadow-sm panel-print">
                     <h3 class="text-base font-bold text-white flex items-center gap-2 mb-3 display">
                         <i data-lucide="battery-warning" class="text-amber w-5 h-5"></i> Salud de Batería
                     </h3>
                     <div class="relative w-full h-[220px]"><canvas id="batteryHistChart"></canvas></div>
-                    <p class="text-[10px] text-dim/70 text-center mt-2">clic en una barra para filtrar</p>
+                    <p class="text-[10px] text-dim/70 text-center mt-2 no-print">clic en una barra para filtrar</p>
                 </div>
-                <div class="bg-panel border border-line rounded-2xl p-6 shadow-sm">
+                <div class="bg-panel border border-line rounded-2xl p-6 shadow-sm panel-print">
                     <h3 class="text-base font-bold text-white flex items-center gap-2 mb-3 display">
                         <i data-lucide="hard-drive" class="text-cyan w-5 h-5"></i> Uso de Almacenamiento
                     </h3>
                     <div class="relative w-full h-[220px]"><canvas id="storageHistChart"></canvas></div>
-                    <p class="text-[10px] text-dim/70 text-center mt-2">clic en una barra para filtrar</p>
+                    <p class="text-[10px] text-dim/70 text-center mt-2 no-print">clic en una barra para filtrar</p>
                 </div>
-                <div class="bg-panel border border-line rounded-2xl p-6 shadow-sm">
+                <div class="bg-panel border border-line rounded-2xl p-6 shadow-sm panel-print">
                     <h3 class="text-base font-bold text-white flex items-center gap-2 mb-3 display">
                         <i data-lucide="monitor-cog" class="text-violet w-5 h-5"></i> Sistemas Operativos
                     </h3>
                     <div class="relative w-full h-[220px]"><canvas id="osChart"></canvas></div>
-                    <p class="text-[10px] text-dim/70 text-center mt-2">clic en una barra para filtrar</p>
+                    <p class="text-[10px] text-dim/70 text-center mt-2 no-print">clic en una barra para filtrar</p>
                 </div>
             </div>
 
             <!-- BARRA DE FILTROS Y TABLA -->
-            <div class="bg-panel border border-line rounded-2xl shadow-sm overflow-hidden flex flex-col min-h-[500px]">
+            <div
+                class="bg-panel border border-line rounded-2xl shadow-sm overflow-hidden flex flex-col min-h-[500px] no-print">
 
                 <div
                     class="p-4 border-b border-line bg-panel2/60 flex flex-col md:flex-row gap-4 items-center justify-between">
@@ -399,15 +531,48 @@
                         Directorio <span id="dirCount" class="text-dim font-normal text-sm mono">(0)</span>
                     </h3>
 
-                    <button type="button" onclick="exportToExcel()"
-                        class="flex items-center gap-1.5 text-xs font-semibold text-mint hover:text-white bg-mint/10 hover:bg-mint/20 border border-mint/30 px-3 py-2 rounded-lg transition-colors whitespace-nowrap">
-                        <i data-lucide="file-spreadsheet" class="w-4 h-4"></i> Exportar a Excel
-                    </button>
+                    <div class="flex gap-2 flex-wrap">
+                        <button type="button" onclick="exportToExcel()"
+                            class="flex items-center gap-1.5 text-xs font-semibold text-mint hover:text-white bg-mint/10 hover:bg-mint/20 border border-mint/30 px-3 py-2 rounded-lg transition-colors whitespace-nowrap">
+                            <i data-lucide="file-spreadsheet" class="w-4 h-4"></i> Exportar Detallado
+                        </button>
+                        <button type="button" onclick="exportMonthlyReport()"
+                            class="flex items-center gap-1.5 text-xs font-semibold text-cyan hover:text-white bg-cyan/10 hover:bg-cyan/20 border border-cyan/30 px-3 py-2 rounded-lg transition-colors whitespace-nowrap">
+                            <i data-lucide="calendar-check" class="w-4 h-4"></i> Exportar Informe Mensual
+                        </button>
+                    </div>
 
                     <div class="flex flex-wrap gap-3 w-full md:w-auto md:justify-end">
+                        <select id="filterClient"
+                            class="hidden bg-ink border border-line text-ice text-sm rounded-lg focus:ring-cyan focus:border-cyan block p-2.5 min-w-[150px]">
+                            <option value="all">Todos los clientes</option>
+                        </select>
+
                         <select id="filterManufacturer"
                             class="bg-ink border border-line text-ice text-sm rounded-lg focus:ring-cyan focus:border-cyan block p-2.5 min-w-[140px]">
                             <option value="all">Todas las marcas</option>
+                        </select>
+
+                        <select id="filterHealth"
+                            class="hidden bg-ink border border-line text-ice text-sm rounded-lg focus:ring-cyan focus:border-cyan block p-2.5 min-w-[140px]">
+                            <option value="all">Salud (Todas)</option>
+                            <option value="Critical">Crítica</option>
+                            <option value="Warning">Alerta</option>
+                            <option value="Safe">Óptima</option>
+                        </select>
+
+                        <select id="filterConn"
+                            class="hidden bg-ink border border-line text-ice text-sm rounded-lg focus:ring-cyan focus:border-cyan block p-2.5 min-w-[150px]">
+                            <option value="all">Conectividad (Todas)</option>
+                            <option value="En línea">En línea</option>
+                            <option value="Desconectado">Desconectado</option>
+                        </select>
+
+                        <select id="filterFirewall"
+                            class="hidden bg-ink border border-line text-ice text-sm rounded-lg focus:ring-cyan focus:border-cyan block p-2.5 min-w-[140px]">
+                            <option value="all">Firewall (Todos)</option>
+                            <option value="yes">Activado</option>
+                            <option value="no">Desactivado</option>
                         </select>
 
                         <select id="filterBattery"
@@ -473,16 +638,17 @@
                         <thead class="text-xs text-dim uppercase bg-panel2/60 border-b border-line">
                             <tr>
                                 <th class="px-5 py-4 font-semibold sortable" onclick="setSort('name')">Activo / Serial
-                                    <i data-lucide="chevrons-up-down" class="w-3 h-3 inline"></i>
-                                </th>
+                                    <i data-lucide="chevrons-up-down" class="w-3 h-3 inline"></i></th>
+                                <th id="thClient" class="hidden px-5 py-4 font-semibold">Cliente / Sede</th>
                                 <th class="px-5 py-4 font-semibold">Responsable</th>
+                                <th id="thHealth" class="hidden px-5 py-4 font-semibold text-center">Salud</th>
+                                <th id="thConn" class="hidden px-5 py-4 font-semibold text-center">Conectividad</th>
                                 <th class="px-5 py-4 font-semibold w-32 sortable" onclick="setSort('cpuUsage')">CPU
                                     (30d) <i data-lucide="chevrons-up-down" class="w-3 h-3 inline"></i></th>
                                 <th class="px-5 py-4 font-semibold w-32 sortable" onclick="setSort('ramUsage')">RAM
                                     (30d) <i data-lucide="chevrons-up-down" class="w-3 h-3 inline"></i></th>
                                 <th class="px-5 py-4 font-semibold w-28 sortable" onclick="setSort('storageUsed')">Disco
-                                    <i data-lucide="chevrons-up-down" class="w-3 h-3 inline"></i>
-                                </th>
+                                    <i data-lucide="chevrons-up-down" class="w-3 h-3 inline"></i></th>
                                 <th class="px-5 py-4 font-semibold text-center sortable"
                                     onclick="setSort('batteryHealth')">Batería <i data-lucide="chevrons-up-down"
                                         class="w-3 h-3 inline"></i></th>
@@ -516,9 +682,14 @@
                         <span id="modalStaleTag"
                             class="hidden px-3 py-1 bg-red/10 text-red border border-red/30 rounded-full text-xs font-bold uppercase tracking-wide">Sin
                             Reportar</span>
+                        <span id="modalHealthTag"
+                            class="hidden px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wide">SALUD</span>
                     </div>
                     <p id="modalUser" class="text-dim mt-2 flex items-center gap-2 text-sm"><i data-lucide="user"
                             class="w-4 h-4"></i> Usuario asignado</p>
+                    <p id="modalClientRow" class="hidden text-dim mt-1 flex items-center gap-2 text-sm"><i
+                            data-lucide="building-2" class="w-4 h-4"></i> <span id="modalClientText">Cliente /
+                            Sede</span></p>
                 </div>
                 <button type="button" onclick="closeModal()"
                     class="text-dim hover:text-white bg-panel border border-line hover:border-cyan/40 p-2 rounded-full transition-colors">
@@ -576,6 +747,13 @@
                             <li class="flex justify-between border-b border-line/60 pb-2"><span
                                     class="text-dim">Ubicación:</span><span id="modalLocation"
                                     class="font-medium text-white text-right">---</span></li>
+                            <li id="modalMacRow" class="hidden flex justify-between border-b border-line/60 pb-2"><span
+                                    class="text-dim">MAC:</span><span id="modalMac"
+                                    class="mono font-medium text-white text-right text-xs w-2/3 truncate"
+                                    title="">---</span></li>
+                            <li id="modalLastUserRow" class="hidden flex justify-between border-b border-line/60 pb-2">
+                                <span class="text-dim">Último Usuario:</span><span id="modalLastUser"
+                                    class="font-medium text-white text-right text-xs">---</span></li>
                         </ul>
                     </div>
 
@@ -607,14 +785,22 @@
                                     de Vida Windows:</span><span id="modalWinLc" class="font-medium">---</span></li>
                             <li class="flex justify-between border-b border-line/60 pb-2"><span class="text-dim">Cifrado
                                     de Disco:</span><span id="modalEncrypt" class="font-medium">---</span></li>
-                            <li class="flex justify-between border-b border-line/60 pb-2"><span
-                                    class="text-dim">Antivirus:</span><span id="modalAv" class="font-medium">---</span>
+                            <li id="modalFirewallRow" class="hidden flex justify-between border-b border-line/60 pb-2">
+                                <span class="text-dim">Firewall:</span><span id="modalFirewall"
+                                    class="font-medium">---</span></li>
+                            <li class="flex justify-between items-start border-b border-line/60 pb-2">
+                                <span class="text-dim shrink-0">Antivirus:</span>
+                                <div class="text-right"><span id="modalAv" class="font-medium block">---</span><span
+                                        id="modalAvName" class="hidden text-xs text-dim">---</span></div>
                             </li>
                             <li class="flex justify-between border-b border-line/60 pb-2"><span
                                     class="text-dim">Reinicio Pendiente:</span><span id="modalReboot"
                                     class="font-medium">---</span></li>
                             <li class="flex justify-between border-b border-line/60 pb-2"><span
                                     class="text-dim">Actualizaciones:</span><span id="modalUpdates"
+                                    class="font-medium">---</span></li>
+                            <li id="modalConnRow" class="hidden flex justify-between border-b border-line/60 pb-2"><span
+                                    class="text-dim">Conectividad:</span><span id="modalConn"
                                     class="font-medium">---</span></li>
                             <li class="flex justify-between border-b border-line/60 pb-2"><span class="text-dim">Último
                                     Reporte:</span><span id="modalReport"
@@ -633,14 +819,26 @@
         let encChartInstance = null, avChartInstance = null, rebootChartInstance = null, updChartInstance = null;
         let batteryHistInstance = null, storageHistInstance = null, osChartInstance = null;
         let winLcChartInstance = null, winVerChartInstance = null;
+        let clientChartInstance = null, healthChartInstance = null, fwChartInstance = null, connChartInstance = null, avProductChartInstance = null;
         let globalAssetsData = [];
         let lastFilteredData = [];
         let currentKpiFilter = 'all';
         let sortState = { key: null, dir: 1 };
+        let dataFlags = { hasHealth: false, hasConnectivity: false, hasFirewall: false, hasAvName: false, hasMac: false, hasLastUser: false };
         const NOW = new Date();
 
+        const AV_COLORS = {
+            'CrowdStrike Falcon Sensor': '#f5484d', 'ESET Security': '#38bdf8', 'Bitdefender Endpoint Security Tools Antimalware': '#34d399',
+            'Sophos Intercept X': '#0ea5e9', 'Windows Defender': '#22d3ee', 'Symantec Endpoint Protection': '#eab308',
+            'Kaspersky Endpoint Security para Windows': '#f97316', 'Reason Cybersecurity': '#a78bfa', 'Trellix Endpoint Security': '#f472b6'
+        };
+
         const searchInput = document.getElementById('searchInput');
+        const filterClient = document.getElementById('filterClient');
         const filterManufacturer = document.getElementById('filterManufacturer');
+        const filterHealth = document.getElementById('filterHealth');
+        const filterConn = document.getElementById('filterConn');
+        const filterFirewall = document.getElementById('filterFirewall');
         const filterBattery = document.getElementById('filterBattery');
         const filterEncryption = document.getElementById('filterEncryption');
         const filterAntivirus = document.getElementById('filterAntivirus');
@@ -661,6 +859,10 @@
             { key: 'critical', label: 'Rendimiento Crítico', icon: 'flame', color: '#f5484d', desc: 'CPU o RAM > 80%' },
             { key: 'cpu', label: 'CPU Crítica', icon: 'cpu', color: '#f5484d', desc: 'uso de CPU > 80%' },
             { key: 'ram', label: 'RAM Crítica', icon: 'memory-stick', color: '#fb923c', desc: 'uso de RAM > 80%' },
+            { key: 'healthcritical', label: 'Salud Crítica', icon: 'alert-octagon', color: '#f5484d', desc: 'estado de salud crítico', requires: 'hasHealth' },
+            { key: 'healthwarning', label: 'Salud en Alerta', icon: 'alert-triangle', color: '#f5a623', desc: 'estado de salud en alerta', requires: 'hasHealth' },
+            { key: 'offline', label: 'Desconectados', icon: 'wifi-off', color: '#94a3b8', desc: 'sin conexión reportada', requires: 'hasConnectivity' },
+            { key: 'firewalloff', label: 'Firewall Desactivado', icon: 'flame', color: '#fb923c', desc: 'firewall inactivo', requires: 'hasFirewall' },
             { key: 'battery', label: 'Batería Crítica', icon: 'battery-warning', color: '#f5a623', desc: 'salud < 50%' },
             { key: 'storage', label: 'Disco Crítico', icon: 'hard-drive', color: '#eab308', desc: 'almacenamiento usado > 90%' },
             { key: 'reboots', label: 'Requieren Reinicio', icon: 'rotate-cw', color: '#f5a623', desc: 'reinicio pendiente' },
@@ -674,13 +876,13 @@
         function renderKpiGrid() {
             const grid = document.getElementById('kpiGrid');
             grid.innerHTML = KPI_DEFS.map(k => `
-        <div onclick="setKpiFilter('${k.key}')" id="kpiCard-${k.key}" style="--kpi-color:${k.color}"
+        <div onclick="setKpiFilter('${k.key}')" id="kpiCard-${k.key}" ${k.requires ? `data-requires="${k.requires}"` : ''} style="--kpi-color:${k.color}"
             class="kpi-card cursor-pointer bg-panel rounded-2xl p-4 shadow-sm flex items-center justify-between gap-2">
             <div class="min-w-0">
                 <p class="text-dim text-[11px] font-semibold uppercase tracking-wider mb-1 leading-tight">${k.label}</p>
                 <p id="kpiVal-${k.key}" class="text-2xl font-black mono" style="color:${k.color}">0</p>
             </div>
-            <div class="p-2.5 rounded-xl shrink-0" style="background:${k.color}1a">
+            <div class="p-2.5 rounded-xl shrink-0 no-print" style="background:${k.color}1a">
                 <i data-lucide="${k.icon}" class="w-5 h-5" style="color:${k.color}"></i>
             </div>
         </div>
@@ -688,6 +890,24 @@
             lucide.createIcons();
         }
         renderKpiGrid();
+
+        function applyDataFlagsVisibility() {
+            document.querySelectorAll('[data-requires]').forEach(el => {
+                const need = el.getAttribute('data-requires');
+                el.style.display = dataFlags[need] ? '' : 'none';
+            });
+            document.getElementById('filterClient').classList.toggle('hidden', false);
+            document.getElementById('filterHealth').classList.toggle('hidden', !dataFlags.hasHealth);
+            document.getElementById('filterConn').classList.toggle('hidden', !dataFlags.hasConnectivity);
+            document.getElementById('filterFirewall').classList.toggle('hidden', !dataFlags.hasFirewall);
+            document.getElementById('thClient').classList.toggle('hidden', false);
+            document.getElementById('thHealth').classList.toggle('hidden', !dataFlags.hasHealth);
+            document.getElementById('thConn').classList.toggle('hidden', !dataFlags.hasConnectivity);
+            document.getElementById('healthChartCard').style.display = dataFlags.hasHealth ? '' : 'none';
+            document.getElementById('connChartCard').style.display = dataFlags.hasConnectivity ? '' : 'none';
+            document.getElementById('fwChartCard').style.display = dataFlags.hasFirewall ? '' : 'none';
+            document.getElementById('avProductCard').style.display = dataFlags.hasAvName ? '' : 'none';
+        }
 
         function showToast(msg, color) {
             const host = document.getElementById('toastHost');
@@ -764,43 +984,67 @@
                 try {
                     const rawData = parseCSV(e.target.result);
 
-                    globalAssetsData = rawData.map((item, index) => ({
-                        _index: index,
-                        id: item['ID de activo'],
-                        name: item['Activo'],
-                        user: item['Nombre del responsable'],
-                        location: item['Ubicación'],
-                        manufacturer: item['Fabricante'] || 'Desconocido',
-                        model: item['Modelo'],
-                        os: item['Sistema operativo'],
-                        osFeature: item['Versión del sistema operativo'] || '',
-                        osBuild: item['Versión del sistema operativo (2)'] || '',
-                        bios: item['Versión de BIOS'],
-                        biosDate: item['Fecha de BIOS'],
-                        cpuName: item['Modelo de CPU'] || item['Procesador'],
-                        cpuUsage: parsePercent(item['Uso de CPU (promedio de 30 días)']),
-                        ramUsage: parsePercent(item['Uso de RAM (promedio de 30 días)']),
-                        ramSize: item['Tamaño de RAM'],
-                        storageUsed: parsePercent(item['Almacenamiento (Utilizado %)']),
-                        diskIo: item['E/S de disco (promedio de 30 días)'] || 'N/A',
-                        serial: item['Número de serie (Predeterminado)'],
-                        assetTag: item['Etiqueta de activo SMBIOS'] || '',
-                        rebootPending: parseBool(item['Tiene reinicio pendiente']),
-                        updatesPending: parseBool(item['Tiene actualizaciones pendientes']),
-                        encryption: item['Estado de cifrado'],
-                        antivirus: item['Estado del antivirus'],
-                        batteryHealth: item['Estado de salud de la batería (%)'] ? parsePercent(item['Estado de salud de la batería (%)']) : null,
-                        lastReport: item['Último reporte'],
-                        daysSinceReport: daysSince(item['Último reporte'])
-                    })).filter(a => a.id);
+                    globalAssetsData = rawData.map((item, index) => {
+                        const location = item['Ubicación'] || 'Sin Ubicación';
+                        const client = location.split('>')[0].trim() || 'Sin Ubicación';
+                        return {
+                            _index: index,
+                            id: item['ID de activo'],
+                            name: item['Activo'],
+                            user: item['Nombre del responsable'],
+                            lastUser: item['Último usuario registrado'] || '',
+                            location, client,
+                            mac: item['Direcciones MAC'] || '',
+                            tags: item['Etiquetas'] || '',
+                            manufacturer: item['Fabricante'] || 'Desconocido',
+                            model: item['Modelo'],
+                            os: item['Sistema operativo'],
+                            osFeature: item['Versión del sistema operativo'] || '',
+                            osBuild: item['Versión del sistema operativo (2)'] || item['Modelo del sistema operativo'] || '',
+                            bios: item['Versión de BIOS'],
+                            biosDate: item['Fecha de BIOS'],
+                            cpuName: item['Nombre de CPU'] || item['Modelo de CPU'] || item['Procesador'],
+                            cpuUsage: parsePercent(item['Uso de CPU (promedio de 30 días)']),
+                            ramUsage: parsePercent(item['Uso de RAM (promedio de 30 días)']),
+                            ramSize: item['Tamaño de RAM'] || item['Modelo de RAM'] || '',
+                            storageUsed: parsePercent(item['Almacenamiento (Utilizado %)']),
+                            diskIo: item['E/S de disco (promedio de 30 días)'] || 'N/A',
+                            serial: item['Número de serie (Predeterminado)'],
+                            assetTag: item['Etiqueta de activo SMBIOS'] || '',
+                            rebootPending: parseBool(item['Tiene reinicio pendiente']),
+                            updatesPending: parseBool(item['Tiene actualizaciones pendientes']),
+                            encryption: item['Estado de cifrado'],
+                            antivirus: item['Estado del antivirus'],
+                            antivirusName: item['Nombre del antivirus'] || '',
+                            firewall: item['Estado del Firewall'] || '',
+                            health: item['Estado de salud'] || '',
+                            connectivity: item['Estado de conectividad'] || '',
+                            batteryHealth: item['Estado de salud de la batería (%)'] ? parsePercent(item['Estado de salud de la batería (%)']) : null,
+                            lastReport: item['Último reporte'],
+                            daysSinceReport: daysSince(item['Último reporte'])
+                        };
+                    }).filter(a => a.id);
 
                     // Se calcula aparte porque necesita el objeto ya armado (usa os + osFeature)
+                    dataFlags.hasHealth = globalAssetsData.some(a => a.health);
+                    dataFlags.hasConnectivity = globalAssetsData.some(a => a.connectivity);
+                    dataFlags.hasFirewall = globalAssetsData.some(a => a.firewall);
+                    dataFlags.hasAvName = globalAssetsData.some(a => a.antivirusName);
+                    dataFlags.hasMac = globalAssetsData.some(a => a.mac);
+                    dataFlags.hasLastUser = globalAssetsData.some(a => a.lastUser);
+
                     globalAssetsData.forEach(a => {
                         a.winLifecycle = winLifecycle(a.os, a.osFeature);
                         const prefix = (a.os || '').includes('Windows 10') ? 'Win10 ' : (a.os || '').includes('Windows 11') ? 'Win11 ' : '';
                         a.verLabel = prefix + (a.osFeature || 'N/A');
+                        a.compliant = (!dataFlags.hasHealth || a.health !== 'Critical')
+                            && (!dataFlags.hasFirewall || a.firewall === 'Activado')
+                            && (a.encryption === 'Activado' || a.encryption === 'Cifrado')
+                            && (a.antivirus === 'Activado')
+                            && (a.winLifecycle !== 'Sin Soporte');
                     });
 
+                    applyDataFlagsVisibility();
                     populateFilters();
                     currentKpiFilter = 'all';
                     document.querySelectorAll('.kpi-card').forEach(el => el.classList.remove('kpi-active'));
@@ -809,6 +1053,7 @@
 
                     updateDashboardNumbers();
                     updateCharts();
+                    renderClientTable();
                     applyFilters();
 
                     document.getElementById('emptyState').classList.add('hidden');
@@ -816,8 +1061,12 @@
 
                     const info = document.getElementById('lastLoadInfo');
                     info.classList.remove('hidden');
+                    const nowTs = new Date();
                     document.getElementById('lastLoadText').innerText =
-                        `${globalAssetsData.length} activos · cargado ${new Date().toLocaleTimeString('es-CO')}`;
+                        `${globalAssetsData.length} activos · cargado ${nowTs.toLocaleTimeString('es-CO')}`;
+                    const printDate = document.getElementById('printDate');
+                    printDate.classList.remove('hidden');
+                    printDate.innerText = `Generado el ${nowTs.toLocaleDateString('es-CO', { day: 'numeric', month: 'long', year: 'numeric' })} · ${globalAssetsData.length} equipos`;
 
                     showToast(`Se cargaron ${globalAssetsData.length} activos correctamente`, '#34d399');
                 } catch (err) {
@@ -833,6 +1082,12 @@
             filterManufacturer.innerHTML = '<option value="all">Todas las marcas</option>';
             Array.from(mfgSet).sort().forEach(m => {
                 filterManufacturer.innerHTML += `<option value="${m}">${m}</option>`;
+            });
+
+            const clientSet = new Set(globalAssetsData.map(a => a.client));
+            filterClient.innerHTML = '<option value="all">Todos los clientes</option>';
+            Array.from(clientSet).sort().forEach(c => {
+                filterClient.innerHTML += `<option value="${c}">${c}</option>`;
             });
         }
 
@@ -870,34 +1125,43 @@
                 return;
             }
 
-            const rows = lastFilteredData.map(a => ({
-                'Activo': a.name || '',
-                'Etiqueta SMBIOS': a.assetTag || '',
-                'Número de Serie': a.serial || '',
-                'Responsable': a.user || '',
-                'Ubicación': a.location || '',
-                'Fabricante': a.manufacturer || '',
-                'Modelo': a.model || '',
-                'Procesador': a.cpuName || '',
-                'Uso CPU (30d) %': a.cpuUsage,
-                'Uso RAM (30d) %': a.ramUsage,
-                'Tamaño RAM': a.ramSize || '',
-                'Almacenamiento Usado %': a.storageUsed,
-                'E/S de Disco (30d)': a.diskIo || '',
-                'Salud Batería %': a.batteryHealth === null ? '' : a.batteryHealth,
-                'Sistema Operativo': a.os || '',
-                'Versión Windows': a.osFeature || '',
-                'Build Windows': a.osBuild || '',
-                'Ciclo de Vida Windows': a.winLifecycle || '',
-                'Versión BIOS': a.bios || '',
-                'Fecha BIOS': a.biosDate || '',
-                'Cifrado de Disco': a.encryption || '',
-                'Antivirus': a.antivirus || '',
-                'Reinicio Pendiente': a.rebootPending ? 'Sí' : 'No',
-                'Actualizaciones Pendientes': a.updatesPending ? 'Sí' : 'No',
-                'Último Reporte': a.lastReport || '',
-                'Días Sin Reportar': a.daysSinceReport === null ? '' : a.daysSinceReport
-            }));
+            const rows = lastFilteredData.map(a => {
+                const row = {
+                    'Activo': a.name || '',
+                    'Etiqueta SMBIOS': a.assetTag || '',
+                    'Número de Serie': a.serial || '',
+                    'Cliente / Sede': a.location || '',
+                    'Responsable': a.user || '',
+                    'Fabricante': a.manufacturer || '',
+                    'Modelo': a.model || '',
+                    'Procesador': a.cpuName || '',
+                    'Uso CPU (30d) %': a.cpuUsage,
+                    'Uso RAM (30d) %': a.ramUsage,
+                    'Tamaño RAM': a.ramSize || '',
+                    'Almacenamiento Usado %': a.storageUsed,
+                    'E/S de Disco (30d)': a.diskIo || '',
+                    'Salud Batería %': a.batteryHealth === null ? '' : a.batteryHealth,
+                    'Sistema Operativo': a.os || '',
+                    'Versión Windows': a.osFeature || '',
+                    'Build Windows': a.osBuild || '',
+                    'Ciclo de Vida Windows': a.winLifecycle || '',
+                    'Versión BIOS': a.bios || '',
+                    'Fecha BIOS': a.biosDate || '',
+                    'Cifrado de Disco': a.encryption || '',
+                    'Antivirus Estado': a.antivirus || '',
+                    'Reinicio Pendiente': a.rebootPending ? 'Sí' : 'No',
+                    'Actualizaciones Pendientes': a.updatesPending ? 'Sí' : 'No',
+                    'Último Reporte': a.lastReport || '',
+                    'Días Sin Reportar': a.daysSinceReport === null ? '' : a.daysSinceReport
+                };
+                if (dataFlags.hasHealth) row['Estado de Salud'] = a.health || '';
+                if (dataFlags.hasConnectivity) row['Conectividad'] = a.connectivity || '';
+                if (dataFlags.hasFirewall) row['Firewall'] = a.firewall || '';
+                if (dataFlags.hasAvName) row['Antivirus Producto'] = a.antivirusName || '';
+                if (dataFlags.hasMac) row['MAC'] = a.mac || '';
+                if (dataFlags.hasLastUser) row['Último Usuario'] = a.lastUser || '';
+                return row;
+            });
 
             const wb = XLSX.utils.book_new();
             const ws = XLSX.utils.json_to_sheet(rows);
@@ -907,13 +1171,17 @@
 
             // Hoja con el resumen de qué filtros estaban activos al momento de exportar
             const activeFiltersInfo = [
-                ['Nerve Center — Exportación de Directorio'],
+                ['Nerve Center — Exportación Detallada'],
                 ['Generado', new Date().toLocaleString('es-CO')],
                 ['Equipos exportados', lastFilteredData.length],
                 ['Total en inventario', globalAssetsData.length],
                 [],
                 ['Filtro de tarjeta / gráfica', currentKpiFilter === 'all' ? 'Ninguno' : currentKpiFilter],
+                ['Cliente', filterClient.value],
                 ['Marca', filterManufacturer.value],
+                ['Salud', filterHealth.value],
+                ['Conectividad', filterConn.value],
+                ['Firewall', filterFirewall.value],
                 ['Batería', filterBattery.value],
                 ['Cifrado', filterEncryption.value],
                 ['Antivirus', filterAntivirus.value],
@@ -927,9 +1195,93 @@
             XLSX.utils.book_append_sheet(wb, wsInfo, 'Filtros Aplicados');
 
             const stamp = new Date().toISOString().slice(0, 16).replace(/[-:T]/g, '').replace(/(\d{8})(\d{4})/, '$1_$2');
-            XLSX.writeFile(wb, `nerve-center_export_${stamp}.xlsx`);
+            XLSX.writeFile(wb, `nerve-center_detallado_${stamp}.xlsx`);
 
             showToast(`Exportados ${lastFilteredData.length} equipos a Excel`, '#34d399');
+        };
+
+        // Informe mensual: agrega una hoja de resumen por cliente además del directorio filtrado.
+        // Útil para el corte mensual de flota completa (a diferencia del export "Detallado", pensado para trabajo técnico diario).
+        window.exportMonthlyReport = function () {
+            if (!lastFilteredData || lastFilteredData.length === 0) {
+                showToast('No hay equipos para exportar con los filtros actuales', '#f5484d');
+                return;
+            }
+            if (typeof XLSX === 'undefined') {
+                showToast('No se pudo cargar el motor de Excel. Verifica tu conexión a internet.', '#f5484d');
+                return;
+            }
+
+            const rows = lastFilteredData.map(a => {
+                const row = {
+                    'Activo': a.name || '', 'Etiqueta SMBIOS': a.assetTag || '', 'Número de Serie': a.serial || '',
+                    'Cliente / Sede': a.location || '', 'Responsable': a.user || '',
+                    'Fabricante': a.manufacturer || '', 'Modelo': a.model || '',
+                    'Uso CPU %': a.cpuUsage, 'Uso RAM %': a.ramUsage, 'Almacenamiento Usado %': a.storageUsed,
+                    'Salud Batería %': a.batteryHealth === null ? '' : a.batteryHealth,
+                    'Sistema Operativo': a.os || '', 'Versión Windows': a.osFeature || '', 'Ciclo de Vida Windows': a.winLifecycle || '',
+                    'Cifrado de Disco': a.encryption || '', 'Antivirus Estado': a.antivirus || '',
+                    'Reinicio Pendiente': a.rebootPending ? 'Sí' : 'No', 'Actualizaciones Pendientes': a.updatesPending ? 'Sí' : 'No',
+                    'Cumple Todos los Controles': a.compliant ? 'Sí' : 'No',
+                    'Último Reporte': a.lastReport || '', 'Días Sin Reportar': a.daysSinceReport === null ? '' : a.daysSinceReport
+                };
+                if (dataFlags.hasHealth) row['Estado de Salud'] = a.health || '';
+                if (dataFlags.hasConnectivity) row['Conectividad'] = a.connectivity || '';
+                if (dataFlags.hasFirewall) row['Firewall'] = a.firewall || '';
+                if (dataFlags.hasAvName) row['Antivirus Producto'] = a.antivirusName || '';
+                return row;
+            });
+            const wb = XLSX.utils.book_new();
+            const ws = XLSX.utils.json_to_sheet(rows);
+            ws['!cols'] = Object.keys(rows[0]).map(k => ({ wch: Math.min(Math.max(k.length, 12), 34) }));
+            ws['!freeze'] = { xSplit: 0, ySplit: 1 };
+            XLSX.utils.book_append_sheet(wb, ws, 'Directorio Filtrado');
+
+            const clients = {};
+            globalAssetsData.forEach(a => {
+                if (!clients[a.client]) clients[a.client] = { total: 0, critical: 0, warning: 0, offline: 0, noFw: 0, noEnc: 0, eol: 0, compliant: 0 };
+                const c = clients[a.client]; c.total++;
+                if (a.health === 'Critical') c.critical++;
+                if (a.health === 'Warning') c.warning++;
+                if (a.connectivity === 'Desconectado') c.offline++;
+                if (a.firewall && a.firewall !== 'Activado') c.noFw++;
+                if (!(a.encryption === 'Activado' || a.encryption === 'Cifrado')) c.noEnc++;
+                if (a.winLifecycle === 'Sin Soporte') c.eol++;
+                if (a.compliant) c.compliant++;
+            });
+            const clientRows = Object.entries(clients).sort((a, b) => b[1].total - a[1].total).map(([name, c]) => {
+                const row = { 'Cliente / Sede': name, 'Equipos': c.total };
+                if (dataFlags.hasHealth) { row['Críticos'] = c.critical; row['Alerta'] = c.warning; }
+                if (dataFlags.hasConnectivity) row['Desconectados'] = c.offline;
+                if (dataFlags.hasFirewall) row['Sin Firewall'] = c.noFw;
+                row['Sin Cifrar'] = c.noEnc; row['Windows EOL'] = c.eol;
+                row['% Cumplimiento'] = c.total > 0 ? Math.round((c.compliant / c.total) * 100) : 0;
+                return row;
+            });
+            const wsClients = XLSX.utils.json_to_sheet(clientRows);
+            wsClients['!cols'] = Object.keys(clientRows[0] || {}).map(k => ({ wch: Math.max(k.length, 14) }));
+            XLSX.utils.book_append_sheet(wb, wsClients, 'Resumen por Cliente');
+
+            const activeFiltersInfo = [
+                ['Informe Mensual de Flota — Nerve Center'],
+                ['Generado', new Date().toLocaleString('es-CO')],
+                ['Equipos exportados', lastFilteredData.length],
+                ['Total en inventario', globalAssetsData.length],
+                [],
+                ['Filtro de tarjeta / gráfica', currentKpiFilter === 'all' ? 'Ninguno' : currentKpiFilter],
+                ['Cliente', filterClient.value], ['Marca', filterManufacturer.value],
+                ['Salud', filterHealth.value], ['Conectividad', filterConn.value], ['Firewall', filterFirewall.value],
+                ['Cifrado', filterEncryption.value], ['Antivirus', filterAntivirus.value],
+                ['Reinicio', filterReboot.value], ['Actualizaciones', filterUpdates.value],
+                ['Ciclo de vida Windows', filterWinLc.value], ['Texto buscado', searchInput.value || '(vacío)']
+            ];
+            const wsInfo = XLSX.utils.aoa_to_sheet(activeFiltersInfo);
+            wsInfo['!cols'] = [{ wch: 28 }, { wch: 30 }];
+            XLSX.utils.book_append_sheet(wb, wsInfo, 'Filtros Aplicados');
+
+            const stamp = new Date().toISOString().slice(0, 16).replace(/[-:T]/g, '').replace(/(\d{8})(\d{4})/, '$1_$2');
+            XLSX.writeFile(wb, `informe-mensual-flota_${stamp}.xlsx`);
+            showToast(`Informe mensual exportado con ${lastFilteredData.length} equipos`, '#34d399');
         };
 
         window.setKpiFilter = function (type) {
@@ -951,10 +1303,26 @@
             scrollToDirectory();
         }
 
+        function filterByClient(name) {
+            if (filterClient.value === name) {
+                filterClient.value = 'all';
+                showToast('Filtro de cliente removido', '#7c8aa5');
+            } else {
+                filterClient.value = name;
+                showToast(`Filtrando cliente: <b>${name}</b>`, '#22d3ee');
+            }
+            applyFilters();
+            scrollToDirectory();
+        }
+
         window.clearAllFilters = function () {
             currentKpiFilter = 'all';
             searchInput.value = '';
+            filterClient.value = 'all';
             filterManufacturer.value = 'all';
+            filterHealth.value = 'all';
+            filterConn.value = 'all';
+            filterFirewall.value = 'all';
             filterBattery.value = 'all';
             filterEncryption.value = 'all';
             filterAntivirus.value = 'all';
@@ -973,7 +1341,11 @@
         };
 
         searchInput.addEventListener('input', applyFilters);
+        filterClient.addEventListener('change', applyFilters);
         filterManufacturer.addEventListener('change', applyFilters);
+        filterHealth.addEventListener('change', applyFilters);
+        filterConn.addEventListener('change', applyFilters);
+        filterFirewall.addEventListener('change', applyFilters);
         filterBattery.addEventListener('change', applyFilters);
         filterEncryption.addEventListener('change', applyFilters);
         filterAntivirus.addEventListener('change', applyFilters);
@@ -991,6 +1363,9 @@
             }
             if (type.startsWith('ver-')) {
                 return a.verLabel === type.slice(4);
+            }
+            if (type.startsWith('avproduct-')) {
+                return (a.antivirusName || '').includes(type.slice(10));
             }
             if (type.startsWith('bat-')) {
                 const bucket = type.slice(4);
@@ -1026,13 +1401,24 @@
                 case 'av-good': return a.antivirus === 'Activado';
                 case 'stale': return a.daysSinceReport !== null && a.daysSinceReport > 7;
                 case 'windowseol': return a.winLifecycle === 'Sin Soporte';
+                case 'healthcritical': return a.health === 'Critical';
+                case 'healthwarning': return a.health === 'Warning';
+                case 'healthsafe': return a.health === 'Safe';
+                case 'offline': return a.connectivity === 'Desconectado';
+                case 'online': return a.connectivity === 'En línea';
+                case 'firewalloff': return a.firewall !== '' && a.firewall !== 'Activado';
+                case 'firewallgood': return a.firewall === 'Activado';
                 default: return true;
             }
         }
 
         function applyFilters() {
             const term = searchInput.value.toLowerCase();
+            const cli = filterClient.value;
             const mfg = filterManufacturer.value;
+            const hlt = filterHealth.value;
+            const conn = filterConn.value;
+            const fw = filterFirewall.value;
             const bat = filterBattery.value;
             const enc = filterEncryption.value;
             const av = filterAntivirus.value;
@@ -1042,7 +1428,12 @@
 
             let filteredData = globalAssetsData.filter(a => {
                 if (currentKpiFilter !== 'all' && !matchesKpi(a, currentKpiFilter)) return false;
+                if (cli !== 'all' && a.client !== cli) return false;
                 if (mfg !== 'all' && a.manufacturer !== mfg) return false;
+                if (hlt !== 'all' && a.health !== hlt) return false;
+                if (conn !== 'all' && a.connectivity !== conn) return false;
+                if (fw === 'yes' && a.firewall !== 'Activado') return false;
+                if (fw === 'no' && a.firewall === 'Activado') return false;
                 if (bat === 'bad' && !(a.batteryHealth !== null && a.batteryHealth < 50)) return false;
                 if (bat === 'good' && !(a.batteryHealth !== null && a.batteryHealth >= 50)) return false;
                 if (enc === 'yes' && !(a.encryption === 'Activado' || a.encryption === 'Cifrado')) return false;
@@ -1055,7 +1446,7 @@
                 if (upd === 'no' && a.updatesPending) return false;
                 if (wlc !== 'all' && a.winLifecycle !== wlc) return false;
                 if (term) {
-                    const searchStr = `${a.serial} ${a.name} ${a.user} ${a.model} ${a.assetTag}`.toLowerCase();
+                    const searchStr = `${a.serial} ${a.name} ${a.user} ${a.model} ${a.assetTag} ${a.client}`.toLowerCase();
                     if (!searchStr.includes(term)) return false;
                 }
                 return true;
@@ -1109,6 +1500,75 @@
         }
 
         function updateCharts() {
+            // Clientes / Sedes
+            const clientCounts = {};
+            globalAssetsData.forEach(a => { clientCounts[a.client] = (clientCounts[a.client] || 0) + 1; });
+            const clientArr = Object.entries(clientCounts).sort((a, b) => b[1] - a[1]);
+            const clientLabels = clientArr.map(c => c[0]);
+            if (clientChartInstance) clientChartInstance.destroy();
+            clientChartInstance = new Chart(document.getElementById('clientChart'), {
+                type: 'bar',
+                data: { labels: clientLabels, datasets: [{ data: clientArr.map(c => c[1]), backgroundColor: '#22d3ee', borderRadius: 6 }] },
+                options: {
+                    indexAxis: 'y', responsive: true, maintainAspectRatio: false,
+                    onClick: (evt, els) => { if (els.length > 0) filterByClient(clientLabels[els[0].index]); },
+                    onHover: (evt, els) => { evt.native.target.style.cursor = els.length > 0 ? 'pointer' : 'default'; },
+                    plugins: { legend: { display: false } },
+                    scales: { x: { grid: { color: CHART_GRID }, ticks: { color: CHART_TEXT } }, y: { grid: { display: false }, ticks: { color: CHART_TEXT, font: { size: 10 } } } }
+                }
+            });
+
+            // Salud general (solo si el CSV trae 'Estado de salud')
+            if (dataFlags.hasHealth) {
+                const healthCounts = { 'Safe': 0, 'Warning': 0, 'Critical': 0 };
+                globalAssetsData.forEach(a => { if (healthCounts[a.health] !== undefined) healthCounts[a.health]++; });
+                if (healthChartInstance) healthChartInstance.destroy();
+                healthChartInstance = baseDonut('healthChart', ['Óptima', 'Alerta', 'Crítica'], [healthCounts.Safe, healthCounts.Warning, healthCounts.Critical],
+                    ['#34d399', '#f5a623', '#f5484d'],
+                    (label) => { const map = { 'Óptima': 'healthsafe', 'Alerta': 'healthwarning', 'Crítica': 'healthcritical' }; setKpiFilter(map[label]); });
+            }
+
+            // Firewall (solo si el CSV trae 'Estado del Firewall')
+            if (dataFlags.hasFirewall) {
+                const fwCounts = { ok: 0, bad: 0 };
+                globalAssetsData.forEach(a => a.firewall === 'Activado' ? fwCounts.ok++ : fwCounts.bad++);
+                if (fwChartInstance) fwChartInstance.destroy();
+                fwChartInstance = baseDonut('fwChart', ['Activado', 'Desactivado'], [fwCounts.ok, fwCounts.bad], ['#34d399', '#fb923c'],
+                    (label) => label === 'Activado' ? setFilterKey('firewallgood', 'Firewall Activo', '#34d399') : setFilterKey('firewalloff', 'Firewall Desactivado', '#fb923c'));
+            }
+
+            // Conectividad (solo si el CSV trae 'Estado de conectividad')
+            if (dataFlags.hasConnectivity) {
+                const connCounts = { 'En línea': 0, 'Desconectado': 0 };
+                globalAssetsData.forEach(a => { if (connCounts[a.connectivity] !== undefined) connCounts[a.connectivity]++; });
+                if (connChartInstance) connChartInstance.destroy();
+                connChartInstance = baseDonut('connChart', ['En línea', 'Desconectado'], [connCounts['En línea'], connCounts['Desconectado']], ['#34d399', '#7c8aa5'],
+                    (label) => label === 'En línea' ? setFilterKey('online', 'En Línea', '#34d399') : setFilterKey('offline', 'Desconectados', '#7c8aa5'));
+            }
+
+            // Antivirus por producto (solo si el CSV trae 'Nombre del antivirus'; separa combos por coma)
+            if (dataFlags.hasAvName) {
+                const avProductCounts = {};
+                globalAssetsData.forEach(a => {
+                    if (!a.antivirusName) return;
+                    a.antivirusName.split(',').map(s => s.trim()).filter(Boolean).forEach(p => { avProductCounts[p] = (avProductCounts[p] || 0) + 1; });
+                });
+                const avProdArr = Object.entries(avProductCounts).sort((a, b) => b[1] - a[1]).slice(0, 8);
+                const avProdLabels = avProdArr.map(p => p[0]);
+                if (avProductChartInstance) avProductChartInstance.destroy();
+                avProductChartInstance = new Chart(document.getElementById('avProductChart'), {
+                    type: 'bar',
+                    data: { labels: avProdLabels, datasets: [{ data: avProdArr.map(p => p[1]), backgroundColor: avProdLabels.map(l => AV_COLORS[l] || '#7c8aa5'), borderRadius: 6 }] },
+                    options: {
+                        responsive: true, maintainAspectRatio: false,
+                        onClick: (evt, els) => { if (els.length > 0) setFilterKey('avproduct-' + avProdLabels[els[0].index], avProdLabels[els[0].index], AV_COLORS[avProdLabels[els[0].index]] || '#7c8aa5'); },
+                        onHover: (evt, els) => { evt.native.target.style.cursor = els.length > 0 ? 'pointer' : 'default'; },
+                        plugins: { legend: { display: false } },
+                        scales: { y: { grid: { color: CHART_GRID }, ticks: { color: CHART_TEXT } }, x: { grid: { display: false }, ticks: { color: CHART_TEXT, font: { size: 9 }, maxRotation: 30, minRotation: 20 } } }
+                    }
+                });
+            }
+
             const mfgCounts = {};
             globalAssetsData.forEach(a => { mfgCounts[a.manufacturer] = (mfgCounts[a.manufacturer] || 0) + 1; });
             const mArr = Object.entries(mfgCounts).sort((a, b) => b[1] - a[1]).slice(0, 6);
@@ -1287,11 +1747,73 @@
             });
         }
 
+        function renderClientTable() {
+            const clients = {};
+            globalAssetsData.forEach(a => {
+                if (!clients[a.client]) clients[a.client] = { total: 0, critical: 0, warning: 0, offline: 0, noFw: 0, noEnc: 0, eol: 0, compliant: 0 };
+                const c = clients[a.client];
+                c.total++;
+                if (a.health === 'Critical') c.critical++;
+                if (a.health === 'Warning') c.warning++;
+                if (a.connectivity === 'Desconectado') c.offline++;
+                if (a.firewall && a.firewall !== 'Activado') c.noFw++;
+                if (!(a.encryption === 'Activado' || a.encryption === 'Cifrado')) c.noEnc++;
+                if (a.winLifecycle === 'Sin Soporte') c.eol++;
+                if (a.compliant) c.compliant++;
+            });
+            const arr = Object.entries(clients).sort((a, b) => b[1].total - a[1].total);
+
+            const cols = [
+                { key: 'name', label: 'Cliente / Sede', always: true },
+                { key: 'total', label: 'Equipos', always: true },
+                { key: 'critical', label: 'Críticos', requires: 'hasHealth' },
+                { key: 'warning', label: 'Alerta', requires: 'hasHealth' },
+                { key: 'offline', label: 'Desconectados', requires: 'hasConnectivity' },
+                { key: 'noFw', label: 'Sin Firewall', requires: 'hasFirewall' },
+                { key: 'noEnc', label: 'Sin Cifrar', always: true },
+                { key: 'eol', label: 'Windows EOL', always: true },
+                { key: 'pct', label: 'Cumplimiento', always: true }
+            ].filter(c => c.always || dataFlags[c.requires]);
+
+            const thead = document.getElementById('clientTableHead');
+            thead.innerHTML = `<tr>${cols.map(c => `<th class="px-5 py-3 font-semibold ${c.key === 'name' ? '' : 'text-center'}">${c.label}</th>`).join('')}</tr>`;
+
+            const tbody = document.getElementById('clientTableBody');
+            tbody.innerHTML = arr.map(([name, c]) => {
+                const pct = c.total > 0 ? Math.round((c.compliant / c.total) * 100) : 0;
+                const pctColor = pct >= 80 ? '#34d399' : pct >= 50 ? '#f5a623' : '#f5484d';
+                const cellMap = {
+                    name: `<td class="px-5 py-3 font-bold text-white">${name}</td>`,
+                    total: `<td class="px-5 py-3 text-center mono">${c.total}</td>`,
+                    critical: `<td class="px-5 py-3 text-center mono ${c.critical > 0 ? 'text-red font-bold' : 'text-dim'}">${c.critical}</td>`,
+                    warning: `<td class="px-5 py-3 text-center mono ${c.warning > 0 ? 'text-amber font-bold' : 'text-dim'}">${c.warning}</td>`,
+                    offline: `<td class="px-5 py-3 text-center mono ${c.offline > 0 ? 'text-slate-400' : 'text-dim'}">${c.offline}</td>`,
+                    noFw: `<td class="px-5 py-3 text-center mono ${c.noFw > 0 ? 'text-orange-400 font-bold' : 'text-dim'}">${c.noFw}</td>`,
+                    noEnc: `<td class="px-5 py-3 text-center mono ${c.noEnc > 0 ? 'text-violet font-bold' : 'text-dim'}">${c.noEnc}</td>`,
+                    eol: `<td class="px-5 py-3 text-center mono ${c.eol > 0 ? 'text-rose-400 font-bold' : 'text-dim'}">${c.eol}</td>`,
+                    pct: `<td class="px-5 py-3 text-center"><span class="font-bold mono" style="color:${pctColor}">${pct}%</span></td>`
+                };
+                return `<tr class="client-row" onclick="filterByClient('${name.replace(/'/g, "\\'")}')">${cols.map(col => cellMap[col.key]).join('')}</tr>`;
+            }).join('');
+            lucide.createIcons();
+        }
+
+        function healthBadge(health) {
+            const map = { 'Safe': ['Óptima', '#34d399'], 'Warning': ['Alerta', '#f5a623'], 'Critical': ['Crítica', '#f5484d'] };
+            const [txt, color] = map[health] || ['N/D', '#7c8aa5'];
+            return `<span class="text-xs font-semibold px-2 py-1 rounded-full" style="color:${color}; background:${color}1a">${txt}</span>`;
+        }
+        function connBadge(conn) {
+            const ok = conn === 'En línea';
+            return `<span class="inline-flex items-center gap-1 text-xs font-semibold px-2 py-1 rounded-full" style="color:${ok ? '#34d399' : '#7c8aa5'}; background:${ok ? '#34d39920' : '#7c8aa520'}">
+        <i data-lucide="${ok ? 'wifi' : 'wifi-off'}" class="w-3 h-3"></i>${conn || 'N/D'}</span>`;
+        }
+
         function renderTable(dataToRender) {
             tableBody.innerHTML = '';
 
             if (dataToRender.length === 0) {
-                tableBody.innerHTML = `<tr><td colspan="8" class="px-5 py-14 text-center text-dim">
+                tableBody.innerHTML = `<tr><td colspan="10" class="px-5 py-14 text-center text-dim">
             <i data-lucide="search-x" class="w-8 h-8 mx-auto mb-2 opacity-50"></i>
             No se encontraron equipos con los filtros actuales.
         </td></tr>`;
@@ -1313,6 +1835,7 @@
                 <i data-lucide="${asset.batteryHealth < 50 ? 'battery-warning' : 'battery-charging'}" class="w-3.5 h-3.5"></i>${asset.batteryHealth}%</span>`;
 
                 let alertsHtml = '';
+                if (dataFlags.hasFirewall && asset.firewall && asset.firewall !== 'Activado') alertsHtml += `<span title="Firewall Desactivado" class="inline-flex p-1.5 rounded-md bg-orange-500/10 text-orange-400 mr-1"><i data-lucide="flame" class="w-4 h-4"></i></span>`;
                 if (asset.rebootPending) alertsHtml += `<span title="Reinicio Pendiente" class="inline-flex p-1.5 rounded-md bg-amber/10 text-amber mr-1"><i data-lucide="rotate-cw" class="w-4 h-4"></i></span>`;
                 if (!(asset.encryption === 'Activado' || asset.encryption === 'Cifrado')) alertsHtml += `<span title="Sin Cifrar" class="inline-flex p-1.5 rounded-md bg-violet/10 text-violet mr-1"><i data-lucide="shield-alert" class="w-4 h-4"></i></span>`;
                 if (asset.antivirus !== 'Activado') alertsHtml += `<span title="Antivirus Inactivo" class="inline-flex p-1.5 rounded-md bg-rose-500/10 text-rose-400 mr-1"><i data-lucide="shield-off" class="w-4 h-4"></i></span>`;
@@ -1326,7 +1849,10 @@
                 <div class="text-xs text-dim mono mt-0.5">${asset.serial || 'S/N Desconocido'}</div>
                 ${asset.assetTag ? `<div class="text-[11px] mt-1 inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-cyan/10 text-cyan mono"><i data-lucide="tag" class="w-3 h-3"></i>${asset.assetTag}</div>` : ''}
             </td>
+            <td class="px-5 py-3 text-slate-300 text-sm truncate max-w-[140px]" title="${asset.location}">${asset.client}</td>
             <td class="px-5 py-3 text-slate-300 text-sm truncate max-w-[150px]" title="${asset.user}">${asset.user || 'Sin asignar'}</td>
+            <td class="${dataFlags.hasHealth ? '' : 'hidden'} px-5 py-3 text-center">${healthBadge(asset.health)}</td>
+            <td class="${dataFlags.hasConnectivity ? '' : 'hidden'} px-5 py-3 text-center">${connBadge(asset.connectivity)}</td>
             <td class="px-5 py-3">
                 <div class="flex items-center gap-2">
                     <span class="text-sm font-bold w-10 text-right mono ${asset.cpuUsage > 80 ? 'text-red' : 'text-slate-300'}">${asset.cpuUsage.toFixed(0)}%</span>
@@ -1368,6 +1894,43 @@
             if (asset.assetTag) { modalAssetTag.innerText = asset.assetTag; modalAssetTag.classList.remove('hidden'); }
             else { modalAssetTag.classList.add('hidden'); }
             document.getElementById('modalUser').innerHTML = `<i data-lucide="user" class="w-4 h-4"></i> ${asset.user || 'Usuario no asignado'}`;
+
+            const modalHealthTag = document.getElementById('modalHealthTag');
+            if (dataFlags.hasHealth) {
+                const healthColors = { 'Safe': '#34d399', 'Warning': '#f5a623', 'Critical': '#f5484d' };
+                const healthLabels = { 'Safe': 'Óptima', 'Warning': 'Alerta', 'Critical': 'Crítica' };
+                const hc = healthColors[asset.health] || '#7c8aa5';
+                modalHealthTag.innerText = healthLabels[asset.health] || 'N/D';
+                modalHealthTag.style.color = hc; modalHealthTag.style.background = hc + '1a'; modalHealthTag.style.border = `1px solid ${hc}4d`;
+                modalHealthTag.classList.remove('hidden');
+            } else {
+                modalHealthTag.classList.add('hidden');
+            }
+
+            const modalClientRow = document.getElementById('modalClientRow');
+            if (asset.client && asset.client !== 'Sin Ubicación') {
+                document.getElementById('modalClientText').innerText = asset.location;
+                modalClientRow.classList.remove('hidden');
+            } else {
+                modalClientRow.classList.add('hidden');
+            }
+
+            const modalMacRow = document.getElementById('modalMacRow');
+            if (dataFlags.hasMac && asset.mac) {
+                document.getElementById('modalMac').innerText = asset.mac;
+                document.getElementById('modalMac').title = asset.mac;
+                modalMacRow.classList.remove('hidden');
+            } else {
+                modalMacRow.classList.add('hidden');
+            }
+
+            const modalLastUserRow = document.getElementById('modalLastUserRow');
+            if (dataFlags.hasLastUser && asset.lastUser) {
+                document.getElementById('modalLastUser').innerText = asset.lastUser;
+                modalLastUserRow.classList.remove('hidden');
+            } else {
+                modalLastUserRow.classList.add('hidden');
+            }
 
             const staleTag = document.getElementById('modalStaleTag');
             if (asset.daysSinceReport !== null && asset.daysSinceReport > 7) {
@@ -1418,6 +1981,34 @@
             document.getElementById('modalAv').innerHTML = (asset.antivirus === 'Activado')
                 ? '<span class="text-mint bg-mint/10 px-2 py-1 rounded">Activo</span>'
                 : `<span class="text-red bg-red/10 px-2 py-1 rounded">${asset.antivirus || 'Inactivo'}</span>`;
+
+            const modalAvName = document.getElementById('modalAvName');
+            if (dataFlags.hasAvName && asset.antivirusName) {
+                modalAvName.innerText = asset.antivirusName;
+                modalAvName.classList.remove('hidden');
+            } else {
+                modalAvName.classList.add('hidden');
+            }
+
+            const modalFirewallRow = document.getElementById('modalFirewallRow');
+            if (dataFlags.hasFirewall) {
+                document.getElementById('modalFirewall').innerHTML = asset.firewall === 'Activado'
+                    ? '<span class="text-mint bg-mint/10 px-2 py-1 rounded">Activo</span>'
+                    : `<span class="text-red bg-red/10 px-2 py-1 rounded">${asset.firewall || 'Desactivado'}</span>`;
+                modalFirewallRow.classList.remove('hidden');
+            } else {
+                modalFirewallRow.classList.add('hidden');
+            }
+
+            const modalConnRow = document.getElementById('modalConnRow');
+            if (dataFlags.hasConnectivity) {
+                document.getElementById('modalConn').innerHTML = asset.connectivity === 'En línea'
+                    ? '<span class="text-mint bg-mint/10 px-2 py-1 rounded">En línea</span>'
+                    : '<span class="text-dim bg-panel2 px-2 py-1 rounded">Desconectado</span>';
+                modalConnRow.classList.remove('hidden');
+            } else {
+                modalConnRow.classList.add('hidden');
+            }
 
             document.getElementById('modalReboot').innerHTML = asset.rebootPending
                 ? '<span class="text-amber bg-amber/10 px-2 py-1 rounded">Pendiente</span>'
