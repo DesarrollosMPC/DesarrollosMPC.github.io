@@ -1,0 +1,1473 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nerve Center | Telemetría Avanzada</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        ink: '#050a14',
+                        panel: '#0e1626',
+                        panel2: '#121d33',
+                        line: '#1f2c47',
+                        cyan: '#22d3ee',
+                        mint: '#34d399',
+                        amber: '#f5a623',
+                        red: '#f5484d',
+                        violet: '#a78bfa',
+                        dim: '#7c8aa5',
+                        ice: '#e6edf7'
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'ui-sans-serif', 'system-ui', 'sans-serif'],
+                        mono: ['"JetBrains Mono"', 'ui-monospace', 'SFMono-Regular', 'monospace'],
+                        display: ['"Space Grotesk"', 'Inter', 'sans-serif']
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap');
+
+        * {
+            font-feature-settings: "tnum" 1;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #050a14;
+            background-image:
+                radial-gradient(circle at 15% 0%, rgba(34, 211, 238, 0.09), transparent 45%),
+                radial-gradient(circle at 85% 15%, rgba(167, 139, 250, 0.08), transparent 40%),
+                linear-gradient(rgba(255, 255, 255, 0.025) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255, 255, 255, 0.025) 1px, transparent 1px);
+            background-size: auto, auto, 42px 42px, 42px 42px;
+        }
+
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+
+        .mono {
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .display {
+            font-family: 'Space Grotesk', sans-serif;
+        }
+
+        .kpi-card {
+            transition: all .18s ease;
+            border: 1px solid #1f2c47;
+        }
+
+        .kpi-card:hover {
+            transform: translateY(-3px);
+            border-color: rgba(34, 211, 238, 0.4);
+        }
+
+        .kpi-active {
+            border-color: var(--kpi-color, #22d3ee) !important;
+            background: linear-gradient(180deg, rgba(34, 211, 238, 0.10), rgba(14, 22, 38, 0.4));
+            box-shadow: 0 0 0 1px var(--kpi-color, #22d3ee) inset, 0 8px 24px -8px rgba(34, 211, 238, 0.35);
+        }
+
+        /* Pulso "signature" del header */
+        .pulse-wrap {
+            position: relative;
+            width: 46px;
+            height: 46px;
+        }
+
+        .pulse-ring {
+            position: absolute;
+            inset: 0;
+            border-radius: 9999px;
+            border: 1.5px solid rgba(34, 211, 238, 0.55);
+            animation: pulseRing 2.4s cubic-bezier(.4, 0, .2, 1) infinite;
+        }
+
+        @keyframes pulseRing {
+            0% {
+                transform: scale(0.7);
+                opacity: .9;
+            }
+
+            80% {
+                transform: scale(1.55);
+                opacity: 0;
+            }
+
+            100% {
+                opacity: 0;
+            }
+        }
+
+        .ekg {
+            stroke-dasharray: 210;
+            stroke-dashoffset: 210;
+            animation: draw 3.2s linear infinite;
+        }
+
+        @keyframes draw {
+            to {
+                stroke-dashoffset: -210;
+            }
+        }
+
+        .live-dot {
+            position: relative;
+        }
+
+        .live-dot::after {
+            content: '';
+            position: absolute;
+            inset: -4px;
+            border-radius: 9999px;
+            border: 1px solid currentColor;
+            opacity: .6;
+            animation: liveDot 1.8s ease-out infinite;
+        }
+
+        @keyframes liveDot {
+            0% {
+                transform: scale(0.6);
+                opacity: .7
+            }
+
+            100% {
+                transform: scale(2.1);
+                opacity: 0
+            }
+        }
+
+        .scrollbar-thin::-webkit-scrollbar {
+            height: 6px;
+            width: 6px;
+        }
+
+        .scrollbar-thin::-webkit-scrollbar-thumb {
+            background: #253150;
+            border-radius: 4px;
+        }
+
+        .scrollbar-thin::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        th.sortable {
+            cursor: pointer;
+            user-select: none;
+        }
+
+        th.sortable:hover {
+            color: #e6edf7;
+        }
+
+        .toast-in {
+            animation: toastIn .25s ease forwards;
+        }
+
+        @keyframes toastIn {
+            from {
+                opacity: 0;
+                transform: translateY(8px);
+            }
+
+            to {
+                opacity: 1;
+                transform: none;
+            }
+        }
+    </style>
+</head>
+
+<body class="text-ice min-h-screen relative">
+
+    <!-- OVERLAY DRAG & DROP -->
+    <div id="dragOverlay"
+        class="fixed inset-0 bg-cyan/10 backdrop-blur-sm z-[100] hidden flex-col items-center justify-center border-4 border-cyan border-dashed m-4 rounded-3xl pointer-events-none transition-all">
+        <div class="bg-panel p-6 rounded-full shadow-2xl animate-bounce border border-cyan/40">
+            <i data-lucide="download-cloud" class="w-16 h-16 text-cyan"></i>
+        </div>
+        <h2 class="text-3xl font-bold text-cyan mt-6 drop-shadow-md display">Suelta el CSV de IGAM aquí</h2>
+    </div>
+
+    <!-- TOASTS -->
+    <div id="toastHost" class="fixed bottom-6 right-6 z-[90] flex flex-col gap-2 items-end"></div>
+
+    <div class="p-4 md:p-8 max-w-[1700px] mx-auto">
+
+        <!-- HEADER -->
+        <header
+            class="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 border-b border-line pb-6">
+            <div class="flex items-center gap-4">
+                <div class="pulse-wrap flex items-center justify-center">
+                    <div class="pulse-ring"></div>
+                    <div
+                        class="w-11 h-11 rounded-xl bg-panel2 border border-cyan/40 flex items-center justify-center relative z-10">
+                        <i data-lucide="activity" class="text-cyan w-6 h-6"></i>
+                    </div>
+                </div>
+                <div>
+                    <h1 class="text-3xl font-bold text-white flex items-center gap-3 tracking-tight display">
+                        Nerve Center
+                        <svg width="72" height="20" viewBox="0 0 72 20" class="hidden sm:block opacity-80">
+                            <polyline class="ekg" points="0,10 14,10 19,3 24,17 29,10 40,10 45,6 50,14 55,10 72,10"
+                                fill="none" stroke="#22d3ee" stroke-width="1.6" stroke-linecap="round"
+                                stroke-linejoin="round" />
+                        </svg>
+                    </h1>
+                    <p class="text-dim mt-1.5 font-medium text-sm">Plataforma de Telemetría y Gestión de Activos TI
+                        &middot; Milenio PC</p>
+                </div>
+            </div>
+
+            <div class="mt-5 md:mt-0 flex items-center gap-3">
+                <div id="lastLoadInfo" class="hidden sm:flex items-center gap-2 text-xs text-dim mono">
+                    <span class="live-dot text-mint"><span class="w-2 h-2 rounded-full bg-mint block"></span></span>
+                    <span id="lastLoadText">Sin datos cargados</span>
+                </div>
+                <div class="relative group">
+                    <input type="file" id="csvUpload" accept=".csv"
+                        class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10">
+                    <button type="button"
+                        class="bg-panel2 hover:bg-[#182544] border border-line hover:border-cyan/50 text-white px-6 py-2.5 rounded-xl flex items-center gap-2 font-medium transition-all shadow-lg w-full sm:w-auto">
+                        <i data-lucide="upload" class="w-5 h-5 text-mint"></i>
+                        Cargar Reporte CSV
+                    </button>
+                </div>
+            </div>
+        </header>
+
+        <!-- ESTADO VACÍO -->
+        <div id="emptyState"
+            class="flex flex-col items-center justify-center h-[55vh] border-2 border-dashed border-line rounded-3xl bg-panel/40">
+            <div class="p-5 bg-panel2 rounded-full mb-4 ring-8 ring-cyan/5 border border-line">
+                <i data-lucide="file-spreadsheet" class="w-16 h-16 text-cyan"></i>
+            </div>
+            <h2 class="text-2xl font-bold text-white display">Esperando telemetría</h2>
+            <p class="text-dim mt-2 max-w-md text-center">Arrastra el archivo exportado de InvGate Asset (IGAM) en
+                formato
+                .csv a cualquier parte de esta pantalla, o usa el botón "Cargar Reporte CSV".</p>
+        </div>
+
+        <!-- CONTENEDOR PRINCIPAL -->
+        <div id="dashboardContent" class="hidden">
+
+            <div class="mb-5 text-sm text-dim flex items-center justify-between gap-2 flex-wrap">
+                <div class="flex items-center gap-2">
+                    <i data-lucide="mouse-pointer-click" class="w-4 h-4 text-cyan"></i>
+                    Haz clic en cualquier tarjeta o en cualquier gráfica (dona, barra, segmento) para filtrar el
+                    directorio. Haz clic de nuevo para quitar el filtro.
+                </div>
+                <button type="button" onclick="clearAllFilters()"
+                    class="flex items-center gap-1.5 text-xs font-semibold text-dim hover:text-cyan border border-line hover:border-cyan/40 px-3 py-1.5 rounded-lg transition-colors">
+                    <i data-lucide="filter-x" class="w-3.5 h-3.5"></i> Limpiar filtros
+                </button>
+            </div>
+
+            <!-- KPIs -->
+            <div id="kpiGrid" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3.5 mb-8"></div>
+
+            <!-- ZONA DE GRÁFICOS PRINCIPALES -->
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-5 mb-6">
+                <div class="lg:col-span-2 bg-panel border border-line rounded-2xl p-6 shadow-sm">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="text-base font-bold text-white flex items-center gap-2 display">
+                            <i data-lucide="bar-chart-2" class="text-red w-5 h-5"></i>
+                            Top 10 Equipos Bajo Estrés (CPU / RAM)
+                        </h3>
+                        <span class="text-xs text-dim mono">score = (cpu+ram)/2</span>
+                    </div>
+                    <div class="relative w-full h-[300px]">
+                        <canvas id="barChart"></canvas>
+                    </div>
+                    <p class="text-[10px] text-dim/70 text-center mt-2">clic en una barra para ver la ficha del equipo
+                    </p>
+                </div>
+
+                <div class="bg-panel border border-line rounded-2xl p-6 shadow-sm flex flex-col">
+                    <h3 class="text-base font-bold text-white flex items-center gap-2 mb-2 display">
+                        <i data-lucide="pie-chart" class="text-cyan w-5 h-5"></i>
+                        Distribución de Marcas
+                    </h3>
+                    <div class="relative flex-1 w-full flex items-center justify-center min-h-[250px]">
+                        <canvas id="donutChart"></canvas>
+                    </div>
+                    <p class="text-[10px] text-dim/70 text-center mt-2">clic en una marca para filtrar</p>
+                </div>
+            </div>
+
+            <!-- FILA: SALUD / CUMPLIMIENTO (donas pequeñas) -->
+            <div class="grid grid-cols-2 lg:grid-cols-4 gap-5 mb-6">
+                <div class="bg-panel border border-line rounded-2xl p-5 shadow-sm flex flex-col items-center">
+                    <h4 class="text-sm font-semibold text-dim mb-2 flex items-center gap-1.5"><i data-lucide="lock"
+                            class="w-3.5 h-3.5 text-violet"></i> Cifrado de Disco</h4>
+                    <div class="relative w-full h-[150px]"><canvas id="encChart"></canvas></div>
+                    <p class="text-[10px] text-dim/70 mt-1">clic para filtrar</p>
+                </div>
+                <div class="bg-panel border border-line rounded-2xl p-5 shadow-sm flex flex-col items-center">
+                    <h4 class="text-sm font-semibold text-dim mb-2 flex items-center gap-1.5"><i data-lucide="shield"
+                            class="w-3.5 h-3.5 text-mint"></i> Antivirus</h4>
+                    <div class="relative w-full h-[150px]"><canvas id="avChart"></canvas></div>
+                    <p class="text-[10px] text-dim/70 mt-1">clic para filtrar</p>
+                </div>
+                <div class="bg-panel border border-line rounded-2xl p-5 shadow-sm flex flex-col items-center">
+                    <h4 class="text-sm font-semibold text-dim mb-2 flex items-center gap-1.5"><i data-lucide="rotate-cw"
+                            class="w-3.5 h-3.5 text-amber"></i> Reinicio Pendiente</h4>
+                    <div class="relative w-full h-[150px]"><canvas id="rebootChart"></canvas></div>
+                    <p class="text-[10px] text-dim/70 mt-1">clic para filtrar</p>
+                </div>
+                <div class="bg-panel border border-line rounded-2xl p-5 shadow-sm flex flex-col items-center">
+                    <h4 class="text-sm font-semibold text-dim mb-2 flex items-center gap-1.5"><i data-lucide="download"
+                            class="w-3.5 h-3.5 text-cyan"></i> Actualizaciones</h4>
+                    <div class="relative w-full h-[150px]"><canvas id="updChart"></canvas></div>
+                    <p class="text-[10px] text-dim/70 mt-1">clic para filtrar</p>
+                </div>
+            </div>
+
+            <!-- FILA: CICLO DE VIDA DE WINDOWS -->
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-5 mb-8">
+                <div class="bg-panel border border-line rounded-2xl p-6 shadow-sm">
+                    <h3 class="text-base font-bold text-white flex items-center gap-2 mb-1 display">
+                        <i data-lucide="shield-x" class="text-rose-400 w-5 h-5"></i> Ciclo de Vida de Windows
+                    </h3>
+                    <p class="text-xs text-dim mb-3">Según fechas oficiales de fin de servicio de Microsoft (no detecta
+                        ESU pagado)</p>
+                    <div class="relative w-full h-[190px]"><canvas id="winLcChart"></canvas></div>
+                    <p class="text-[10px] text-dim/70 text-center mt-2">clic para filtrar</p>
+                </div>
+                <div class="lg:col-span-2 bg-panel border border-line rounded-2xl p-6 shadow-sm">
+                    <h3 class="text-base font-bold text-white flex items-center gap-2 mb-1 display">
+                        <i data-lucide="tag" class="text-violet w-5 h-5"></i> Versión de Windows (Feature Update)
+                    </h3>
+                    <p class="text-xs text-dim mb-3">25H2, 24H2, 23H2... — separadas por Win10 / Win11 para no confundir
+                        versiones homónimas</p>
+                    <div class="relative w-full h-[190px]"><canvas id="winVerChart"></canvas></div>
+                    <p class="text-[10px] text-dim/70 text-center mt-2">clic en una barra para filtrar</p>
+                </div>
+            </div>
+
+            <!-- FILA: HISTOGRAMAS -->
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-5 mb-8">
+                <div class="bg-panel border border-line rounded-2xl p-6 shadow-sm">
+                    <h3 class="text-base font-bold text-white flex items-center gap-2 mb-3 display">
+                        <i data-lucide="battery-warning" class="text-amber w-5 h-5"></i> Salud de Batería
+                    </h3>
+                    <div class="relative w-full h-[220px]"><canvas id="batteryHistChart"></canvas></div>
+                    <p class="text-[10px] text-dim/70 text-center mt-2">clic en una barra para filtrar</p>
+                </div>
+                <div class="bg-panel border border-line rounded-2xl p-6 shadow-sm">
+                    <h3 class="text-base font-bold text-white flex items-center gap-2 mb-3 display">
+                        <i data-lucide="hard-drive" class="text-cyan w-5 h-5"></i> Uso de Almacenamiento
+                    </h3>
+                    <div class="relative w-full h-[220px]"><canvas id="storageHistChart"></canvas></div>
+                    <p class="text-[10px] text-dim/70 text-center mt-2">clic en una barra para filtrar</p>
+                </div>
+                <div class="bg-panel border border-line rounded-2xl p-6 shadow-sm">
+                    <h3 class="text-base font-bold text-white flex items-center gap-2 mb-3 display">
+                        <i data-lucide="monitor-cog" class="text-violet w-5 h-5"></i> Sistemas Operativos
+                    </h3>
+                    <div class="relative w-full h-[220px]"><canvas id="osChart"></canvas></div>
+                    <p class="text-[10px] text-dim/70 text-center mt-2">clic en una barra para filtrar</p>
+                </div>
+            </div>
+
+            <!-- BARRA DE FILTROS Y TABLA -->
+            <div class="bg-panel border border-line rounded-2xl shadow-sm overflow-hidden flex flex-col min-h-[500px]">
+
+                <div
+                    class="p-4 border-b border-line bg-panel2/60 flex flex-col md:flex-row gap-4 items-center justify-between">
+                    <h3 class="text-base font-bold text-white flex items-center gap-2 whitespace-nowrap display">
+                        <i data-lucide="list-filter" class="text-dim w-5 h-5"></i>
+                        Directorio <span id="dirCount" class="text-dim font-normal text-sm mono">(0)</span>
+                    </h3>
+
+                    <button type="button" onclick="exportToExcel()"
+                        class="flex items-center gap-1.5 text-xs font-semibold text-mint hover:text-white bg-mint/10 hover:bg-mint/20 border border-mint/30 px-3 py-2 rounded-lg transition-colors whitespace-nowrap">
+                        <i data-lucide="file-spreadsheet" class="w-4 h-4"></i> Exportar a Excel
+                    </button>
+
+                    <div class="flex flex-wrap gap-3 w-full md:w-auto md:justify-end">
+                        <select id="filterManufacturer"
+                            class="bg-ink border border-line text-ice text-sm rounded-lg focus:ring-cyan focus:border-cyan block p-2.5 min-w-[140px]">
+                            <option value="all">Todas las marcas</option>
+                        </select>
+
+                        <select id="filterBattery"
+                            class="bg-ink border border-line text-ice text-sm rounded-lg focus:ring-cyan focus:border-cyan block p-2.5 min-w-[160px]">
+                            <option value="all">Batería (Todas)</option>
+                            <option value="bad">Requiere Reemplazo (&lt; 50%)</option>
+                            <option value="good">Saludable (&gt;= 50%)</option>
+                        </select>
+
+                        <select id="filterEncryption"
+                            class="bg-ink border border-line text-ice text-sm rounded-lg focus:ring-cyan focus:border-cyan block p-2.5 min-w-[150px]">
+                            <option value="all">Cifrado (Todos)</option>
+                            <option value="yes">Cifrado</option>
+                            <option value="no">Sin Cifrar</option>
+                        </select>
+
+                        <select id="filterAntivirus"
+                            class="bg-ink border border-line text-ice text-sm rounded-lg focus:ring-cyan focus:border-cyan block p-2.5 min-w-[150px]">
+                            <option value="all">Antivirus (Todos)</option>
+                            <option value="yes">Activo</option>
+                            <option value="no">Inactivo</option>
+                        </select>
+
+                        <select id="filterReboot"
+                            class="bg-ink border border-line text-ice text-sm rounded-lg focus:ring-cyan focus:border-cyan block p-2.5 min-w-[150px]">
+                            <option value="all">Reinicio (Todos)</option>
+                            <option value="yes">Pendiente</option>
+                            <option value="no">Al día</option>
+                        </select>
+
+                        <select id="filterUpdates"
+                            class="bg-ink border border-line text-ice text-sm rounded-lg focus:ring-cyan focus:border-cyan block p-2.5 min-w-[160px]">
+                            <option value="all">Actualizaciones (Todas)</option>
+                            <option value="yes">Pendiente</option>
+                            <option value="no">Al día</option>
+                        </select>
+
+                        <select id="filterWinLc"
+                            class="bg-ink border border-line text-ice text-sm rounded-lg focus:ring-cyan focus:border-cyan block p-2.5 min-w-[170px]">
+                            <option value="all">Windows (Todos)</option>
+                            <option value="Vigente">Vigente</option>
+                            <option value="Sin Soporte">Sin Soporte (EOL)</option>
+                            <option value="Servidor">Servidor</option>
+                            <option value="N/A">N/D</option>
+                        </select>
+
+                        <div class="relative w-full sm:w-64">
+                            <input type="text" id="searchInput" placeholder="Buscar S/N, usuario, activo..."
+                                class="w-full bg-ink border border-line rounded-lg pl-9 pr-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-cyan/50 text-ice">
+                            <i data-lucide="search" class="absolute left-3 top-3 w-4 h-4 text-dim"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <div
+                    class="px-4 py-2 border-b border-line bg-panel2/30 text-xs text-dim hidden md:flex items-center gap-1.5">
+                    <i data-lucide="info" class="w-3.5 h-3.5"></i> Los selects de arriba se combinan entre sí; los clics
+                    en tarjetas y gráficas usan un filtro adicional independiente.
+                </div>
+
+                <div class="flex-1 overflow-x-auto no-scrollbar scrollbar-thin">
+                    <table class="w-full text-sm text-left">
+                        <thead class="text-xs text-dim uppercase bg-panel2/60 border-b border-line">
+                            <tr>
+                                <th class="px-5 py-4 font-semibold sortable" onclick="setSort('name')">Activo / Serial
+                                    <i data-lucide="chevrons-up-down" class="w-3 h-3 inline"></i>
+                                </th>
+                                <th class="px-5 py-4 font-semibold">Responsable</th>
+                                <th class="px-5 py-4 font-semibold w-32 sortable" onclick="setSort('cpuUsage')">CPU
+                                    (30d) <i data-lucide="chevrons-up-down" class="w-3 h-3 inline"></i></th>
+                                <th class="px-5 py-4 font-semibold w-32 sortable" onclick="setSort('ramUsage')">RAM
+                                    (30d) <i data-lucide="chevrons-up-down" class="w-3 h-3 inline"></i></th>
+                                <th class="px-5 py-4 font-semibold w-28 sortable" onclick="setSort('storageUsed')">Disco
+                                    <i data-lucide="chevrons-up-down" class="w-3 h-3 inline"></i>
+                                </th>
+                                <th class="px-5 py-4 font-semibold text-center sortable"
+                                    onclick="setSort('batteryHealth')">Batería <i data-lucide="chevrons-up-down"
+                                        class="w-3 h-3 inline"></i></th>
+                                <th class="px-5 py-4 font-semibold text-center">Alertas</th>
+                                <th class="px-5 py-4 font-semibold text-right">Acción</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tableBody" class="divide-y divide-line/60"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL DE FICHA TÉCNICA -->
+    <div id="detailsModal"
+        class="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 hidden items-center justify-center p-4 transition-opacity opacity-0">
+        <div class="bg-panel border border-line rounded-2xl max-w-4xl w-full shadow-2xl overflow-hidden transform scale-95 transition-transform duration-300"
+            id="modalContent">
+
+            <div class="bg-panel2 p-6 flex justify-between items-start border-b border-line">
+                <div>
+                    <div class="flex items-center gap-3 flex-wrap">
+                        <div class="p-2 bg-cyan/10 rounded-lg border border-cyan/30"><i data-lucide="laptop"
+                                class="text-cyan w-6 h-6"></i></div>
+                        <h2 id="modalName" class="text-2xl font-bold text-white display">Nombre Activo</h2>
+                        <span id="modalMfgTag"
+                            class="px-3 py-1 bg-cyan/10 text-cyan border border-cyan/30 rounded-full text-xs font-bold uppercase tracking-wide">MARCA</span>
+                        <span id="modalAssetTag"
+                            class="hidden px-3 py-1 bg-panel text-dim border border-line rounded-full text-xs font-bold uppercase tracking-wide"></span>
+                        <span id="modalStaleTag"
+                            class="hidden px-3 py-1 bg-red/10 text-red border border-red/30 rounded-full text-xs font-bold uppercase tracking-wide">Sin
+                            Reportar</span>
+                    </div>
+                    <p id="modalUser" class="text-dim mt-2 flex items-center gap-2 text-sm"><i data-lucide="user"
+                            class="w-4 h-4"></i> Usuario asignado</p>
+                </div>
+                <button type="button" onclick="closeModal()"
+                    class="text-dim hover:text-white bg-panel border border-line hover:border-cyan/40 p-2 rounded-full transition-colors">
+                    <i data-lucide="x" class="w-5 h-5"></i>
+                </button>
+            </div>
+
+            <div class="p-6 overflow-y-auto max-h-[70vh] scrollbar-thin">
+
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+                    <div class="bg-panel2 border border-line p-4 rounded-xl text-center">
+                        <p class="text-xs text-dim uppercase font-semibold mb-1">CPU (30 Días)</p>
+                        <p id="modalCpu" class="text-2xl font-black mono text-white">0%</p>
+                    </div>
+                    <div class="bg-panel2 border border-line p-4 rounded-xl text-center">
+                        <p class="text-xs text-dim uppercase font-semibold mb-1">RAM (30 Días)</p>
+                        <p id="modalRam" class="text-2xl font-black mono text-white">0%</p>
+                    </div>
+                    <div class="bg-panel2 border border-line p-4 rounded-xl text-center">
+                        <p class="text-xs text-dim uppercase font-semibold mb-1">Salud Batería</p>
+                        <p id="modalBattery" class="text-2xl font-black mono text-white">100%</p>
+                    </div>
+                    <div class="bg-panel2 border border-line p-4 rounded-xl text-center">
+                        <p class="text-xs text-dim uppercase font-semibold mb-1">Almacenamiento</p>
+                        <p id="modalStorage" class="text-2xl font-black mono text-white">0%</p>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <div>
+                        <h4
+                            class="text-sm font-bold text-white uppercase tracking-wider mb-4 border-b border-line pb-2 flex items-center gap-2 display">
+                            <i data-lucide="hard-drive" class="w-4 h-4 text-cyan"></i> Hardware
+                        </h4>
+                        <ul class="space-y-3 text-sm">
+                            <li class="flex justify-between border-b border-line/60 pb-2"><span class="text-dim">Número
+                                    de Serie:</span><span id="modalSerial"
+                                    class="mono font-medium text-white text-right">---</span></li>
+                            <li class="flex justify-between border-b border-line/60 pb-2"><span
+                                    class="text-dim">Etiqueta de Activo:</span><span id="modalAssetTagRow"
+                                    class="mono font-medium text-white text-right">---</span></li>
+                            <li class="flex justify-between border-b border-line/60 pb-2"><span
+                                    class="text-dim">Modelo:</span><span id="modalModel"
+                                    class="font-medium text-white text-right">---</span></li>
+                            <li class="flex justify-between border-b border-line/60 pb-2"><span
+                                    class="text-dim">Procesador:</span><span id="modalCpuName"
+                                    class="font-medium text-white text-right text-xs w-2/3 truncate" title="">---</span>
+                            </li>
+                            <li class="flex justify-between border-b border-line/60 pb-2"><span class="text-dim">Memoria
+                                    RAM:</span><span id="modalRamSize"
+                                    class="font-medium text-white text-right">---</span></li>
+                            <li class="flex justify-between border-b border-line/60 pb-2"><span class="text-dim">E/S de
+                                    Disco (30d):</span><span id="modalDiskIo"
+                                    class="font-medium text-white text-right">---</span></li>
+                            <li class="flex justify-between border-b border-line/60 pb-2"><span
+                                    class="text-dim">Ubicación:</span><span id="modalLocation"
+                                    class="font-medium text-white text-right">---</span></li>
+                        </ul>
+                    </div>
+
+                    <div>
+                        <h4
+                            class="text-sm font-bold text-white uppercase tracking-wider mb-4 border-b border-line pb-2 flex items-center gap-2 display">
+                            <i data-lucide="shield-check" class="w-4 h-4 text-mint"></i> Sistema y Seguridad
+                        </h4>
+                        <ul class="space-y-3 text-sm">
+                            <li class="flex justify-between items-center border-b border-line/60 pb-2">
+                                <span class="text-dim">Sistema Operativo:</span>
+                                <div class="text-right"><span id="modalOs"
+                                        class="font-medium text-white block">---</span><span id="modalOsVer"
+                                        class="text-xs text-dim">Ver: ---</span></div>
+                            </li>
+                            <li class="flex justify-between items-center border-b border-line/60 pb-2">
+                                <span class="text-dim">Versión BIOS:</span>
+                                <div class="text-right">
+                                    <span id="modalBios" class="mono font-medium text-white block">---</span>
+                                    <span id="modalBiosDate" class="text-xs text-dim">Fecha: ---</span>
+                                    <a id="modalBiosCheck" href="#" target="_blank" rel="noopener"
+                                        class="text-xs text-cyan hover:underline inline-flex items-center gap-1 mt-1">
+                                        <i data-lucide="external-link" class="w-3 h-3"></i> Verificar última BIOS
+                                        disponible
+                                    </a>
+                                </div>
+                            </li>
+                            <li class="flex justify-between border-b border-line/60 pb-2"><span class="text-dim">Ciclo
+                                    de Vida Windows:</span><span id="modalWinLc" class="font-medium">---</span></li>
+                            <li class="flex justify-between border-b border-line/60 pb-2"><span class="text-dim">Cifrado
+                                    de Disco:</span><span id="modalEncrypt" class="font-medium">---</span></li>
+                            <li class="flex justify-between border-b border-line/60 pb-2"><span
+                                    class="text-dim">Antivirus:</span><span id="modalAv" class="font-medium">---</span>
+                            </li>
+                            <li class="flex justify-between border-b border-line/60 pb-2"><span
+                                    class="text-dim">Reinicio Pendiente:</span><span id="modalReboot"
+                                    class="font-medium">---</span></li>
+                            <li class="flex justify-between border-b border-line/60 pb-2"><span
+                                    class="text-dim">Actualizaciones:</span><span id="modalUpdates"
+                                    class="font-medium">---</span></li>
+                            <li class="flex justify-between border-b border-line/60 pb-2"><span class="text-dim">Último
+                                    Reporte:</span><span id="modalReport"
+                                    class="font-medium text-white text-right">---</span></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        lucide.createIcons();
+
+        let barChartInstance = null, donutChartInstance = null;
+        let encChartInstance = null, avChartInstance = null, rebootChartInstance = null, updChartInstance = null;
+        let batteryHistInstance = null, storageHistInstance = null, osChartInstance = null;
+        let winLcChartInstance = null, winVerChartInstance = null;
+        let globalAssetsData = [];
+        let lastFilteredData = [];
+        let currentKpiFilter = 'all';
+        let sortState = { key: null, dir: 1 };
+        const NOW = new Date();
+
+        const searchInput = document.getElementById('searchInput');
+        const filterManufacturer = document.getElementById('filterManufacturer');
+        const filterBattery = document.getElementById('filterBattery');
+        const filterEncryption = document.getElementById('filterEncryption');
+        const filterAntivirus = document.getElementById('filterAntivirus');
+        const filterReboot = document.getElementById('filterReboot');
+        const filterUpdates = document.getElementById('filterUpdates');
+        const filterWinLc = document.getElementById('filterWinLc');
+        const tableBody = document.getElementById('tableBody');
+        const modal = document.getElementById('detailsModal');
+        const modalContent = document.getElementById('modalContent');
+
+        const CHART_TEXT = '#7c8aa5';
+        const CHART_GRID = 'rgba(255,255,255,0.05)';
+        Chart.defaults.color = CHART_TEXT;
+        Chart.defaults.font.family = "'Inter', sans-serif";
+
+        const KPI_DEFS = [
+            { key: 'all', label: 'Total Activos', icon: 'monitor', color: '#22d3ee', desc: 'todo el inventario' },
+            { key: 'critical', label: 'Rendimiento Crítico', icon: 'flame', color: '#f5484d', desc: 'CPU o RAM > 80%' },
+            { key: 'cpu', label: 'CPU Crítica', icon: 'cpu', color: '#f5484d', desc: 'uso de CPU > 80%' },
+            { key: 'ram', label: 'RAM Crítica', icon: 'memory-stick', color: '#fb923c', desc: 'uso de RAM > 80%' },
+            { key: 'battery', label: 'Batería Crítica', icon: 'battery-warning', color: '#f5a623', desc: 'salud < 50%' },
+            { key: 'storage', label: 'Disco Crítico', icon: 'hard-drive', color: '#eab308', desc: 'almacenamiento usado > 90%' },
+            { key: 'reboots', label: 'Requieren Reinicio', icon: 'rotate-cw', color: '#f5a623', desc: 'reinicio pendiente' },
+            { key: 'updates', label: 'Actualizaciones Pend.', icon: 'download', color: '#38bdf8', desc: 'updates pendientes' },
+            { key: 'security', label: 'Alertas Cifrado', icon: 'shield-off', color: '#a78bfa', desc: 'disco no cifrado' },
+            { key: 'antivirus', label: 'Alertas Antivirus', icon: 'shield-alert', color: '#fb7185', desc: 'antivirus inactivo' },
+            { key: 'stale', label: 'Sin Reportar (7d+)', icon: 'wifi-off', color: '#94a3b8', desc: 'sin telemetría reciente' },
+            { key: 'windowseol', label: 'Windows Sin Soporte', icon: 'shield-x', color: '#fb7185', desc: 'versión de Windows fuera de ciclo de vida (EOL)' },
+        ];
+
+        function renderKpiGrid() {
+            const grid = document.getElementById('kpiGrid');
+            grid.innerHTML = KPI_DEFS.map(k => `
+        <div onclick="setKpiFilter('${k.key}')" id="kpiCard-${k.key}" style="--kpi-color:${k.color}"
+            class="kpi-card cursor-pointer bg-panel rounded-2xl p-4 shadow-sm flex items-center justify-between gap-2">
+            <div class="min-w-0">
+                <p class="text-dim text-[11px] font-semibold uppercase tracking-wider mb-1 leading-tight">${k.label}</p>
+                <p id="kpiVal-${k.key}" class="text-2xl font-black mono" style="color:${k.color}">0</p>
+            </div>
+            <div class="p-2.5 rounded-xl shrink-0" style="background:${k.color}1a">
+                <i data-lucide="${k.icon}" class="w-5 h-5" style="color:${k.color}"></i>
+            </div>
+        </div>
+    `).join('');
+            lucide.createIcons();
+        }
+        renderKpiGrid();
+
+        function showToast(msg, color) {
+            const host = document.getElementById('toastHost');
+            const el = document.createElement('div');
+            el.className = 'toast-in bg-panel2 border rounded-xl px-4 py-3 text-sm shadow-2xl flex items-center gap-2 text-ice';
+            el.style.borderColor = color || '#22d3ee';
+            el.innerHTML = `<i data-lucide="check-circle-2" class="w-4 h-4" style="color:${color || '#22d3ee'}"></i> ${msg}`;
+            host.appendChild(el);
+            lucide.createIcons();
+            setTimeout(() => { el.style.opacity = '0'; el.style.transform = 'translateY(8px)'; el.style.transition = 'all .25s ease'; }, 2200);
+            setTimeout(() => el.remove(), 2500);
+        }
+
+        const parsePercent = (val) => {
+            if (!val) return 0;
+            return parseFloat(val.toString().replace('%', '')) || 0;
+        };
+        const parseBool = (val) => val === 'True' || val === 'Verdadero' || val === true;
+
+        const parseCSV = (csvText) => {
+            const lines = csvText.split(/\r?\n/);
+            if (lines.length === 0) return [];
+            const rawHeaders = lines[0].split(',').map(h => h.trim().replace(/^"|"$/g, ''));
+            // El export de IGAM repite columnas (ej. "Versión del sistema operativo" x2, "Fecha de BIOS" x2).
+            // Sin este ajuste, la segunda pisa a la primera y se pierde información real (25H2, fecha de BIOS real).
+            const seen = {};
+            const headers = rawHeaders.map(h => {
+                seen[h] = (seen[h] || 0) + 1;
+                return seen[h] > 1 ? `${h} (${seen[h]})` : h;
+            });
+            const results = [];
+            for (let i = 1; i < lines.length; i++) {
+                if (!lines[i].trim()) continue;
+                const currentline = lines[i].split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/);
+                const obj = {};
+                headers.forEach((header, j) => {
+                    obj[header] = currentline[j] ? currentline[j].replace(/^"|"$/g, '').trim() : '';
+                });
+                results.push(obj);
+            }
+            return results;
+        };
+
+        // Ciclo de vida de Windows, basado en las fechas oficiales de fin de servicio de Microsoft
+        // (Windows 10: EOL general 2025-10-14 · Win11 22H2: EOL 2024/2025 · Win11 23H2 Home/Pro: EOL 2025-11-11,
+        //  Enterprise/Education: EOL 2026-11-10 · Win11 24H2/25H2: vigentes). No detecta ESU pagado.
+        function winLifecycle(os, feature) {
+            if (!os) return 'N/A';
+            if (os.includes('Windows 10')) return 'Sin Soporte';
+            if (os.includes('Windows Server')) return 'Servidor';
+            if (os.includes('Windows 11')) {
+                if (feature === '25H2' || feature === '24H2') return 'Vigente';
+                if (feature === '23H2') return (os.includes('Enterprise') || os.includes('Education')) ? 'Vigente' : 'Sin Soporte';
+                if (['22H2', '21H2', '21H1', '20H2'].includes(feature)) return 'Sin Soporte';
+                return 'N/A';
+            }
+            return 'N/A';
+        }
+
+        function daysSince(dateStr) {
+            if (!dateStr) return null;
+            const d = new Date(dateStr);
+            if (isNaN(d.getTime())) return null;
+            return Math.floor((NOW - d) / (1000 * 60 * 60 * 24));
+        }
+
+        function processFile(file) {
+            if (!file || !file.name.toLowerCase().endsWith('.csv')) {
+                showToast('Por favor sube un archivo en formato .csv', '#f5484d');
+                return;
+            }
+            const reader = new FileReader();
+            reader.onload = function (e) {
+                try {
+                    const rawData = parseCSV(e.target.result);
+
+                    globalAssetsData = rawData.map((item, index) => ({
+                        _index: index,
+                        id: item['ID de activo'],
+                        name: item['Activo'],
+                        user: item['Nombre del responsable'],
+                        location: item['Ubicación'],
+                        manufacturer: item['Fabricante'] || 'Desconocido',
+                        model: item['Modelo'],
+                        os: item['Sistema operativo'],
+                        osFeature: item['Versión del sistema operativo'] || '',
+                        osBuild: item['Versión del sistema operativo (2)'] || '',
+                        bios: item['Versión de BIOS'],
+                        biosDate: item['Fecha de BIOS'],
+                        cpuName: item['Modelo de CPU'] || item['Procesador'],
+                        cpuUsage: parsePercent(item['Uso de CPU (promedio de 30 días)']),
+                        ramUsage: parsePercent(item['Uso de RAM (promedio de 30 días)']),
+                        ramSize: item['Tamaño de RAM'],
+                        storageUsed: parsePercent(item['Almacenamiento (Utilizado %)']),
+                        diskIo: item['E/S de disco (promedio de 30 días)'] || 'N/A',
+                        serial: item['Número de serie (Predeterminado)'],
+                        assetTag: item['Etiqueta de activo SMBIOS'] || '',
+                        rebootPending: parseBool(item['Tiene reinicio pendiente']),
+                        updatesPending: parseBool(item['Tiene actualizaciones pendientes']),
+                        encryption: item['Estado de cifrado'],
+                        antivirus: item['Estado del antivirus'],
+                        batteryHealth: item['Estado de salud de la batería (%)'] ? parsePercent(item['Estado de salud de la batería (%)']) : null,
+                        lastReport: item['Último reporte'],
+                        daysSinceReport: daysSince(item['Último reporte'])
+                    })).filter(a => a.id);
+
+                    // Se calcula aparte porque necesita el objeto ya armado (usa os + osFeature)
+                    globalAssetsData.forEach(a => {
+                        a.winLifecycle = winLifecycle(a.os, a.osFeature);
+                        const prefix = (a.os || '').includes('Windows 10') ? 'Win10 ' : (a.os || '').includes('Windows 11') ? 'Win11 ' : '';
+                        a.verLabel = prefix + (a.osFeature || 'N/A');
+                    });
+
+                    populateFilters();
+                    currentKpiFilter = 'all';
+                    document.querySelectorAll('.kpi-card').forEach(el => el.classList.remove('kpi-active'));
+                    const allCard = document.getElementById('kpiCard-all');
+                    if (allCard) allCard.classList.add('kpi-active');
+
+                    updateDashboardNumbers();
+                    updateCharts();
+                    applyFilters();
+
+                    document.getElementById('emptyState').classList.add('hidden');
+                    document.getElementById('dashboardContent').classList.remove('hidden');
+
+                    const info = document.getElementById('lastLoadInfo');
+                    info.classList.remove('hidden');
+                    document.getElementById('lastLoadText').innerText =
+                        `${globalAssetsData.length} activos · cargado ${new Date().toLocaleTimeString('es-CO')}`;
+
+                    showToast(`Se cargaron ${globalAssetsData.length} activos correctamente`, '#34d399');
+                } catch (err) {
+                    console.error(err);
+                    showToast('No se pudo procesar el CSV. Revisa el formato.', '#f5484d');
+                }
+            };
+            reader.readAsText(file);
+        }
+
+        function populateFilters() {
+            const mfgSet = new Set(globalAssetsData.map(a => a.manufacturer));
+            filterManufacturer.innerHTML = '<option value="all">Todas las marcas</option>';
+            Array.from(mfgSet).sort().forEach(m => {
+                filterManufacturer.innerHTML += `<option value="${m}">${m}</option>`;
+            });
+        }
+
+        function scrollToDirectory() {
+            document.getElementById('dirCount').scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+
+        // Motor unificado: usado por las tarjetas KPI Y por cualquier segmento/barra de las gráficas.
+        // key: identificador único del filtro (puede no existir como tarjeta KPI, ej. 'enc-good', 'bat-<30%')
+        // label/color: solo para el toast informativo
+        function setFilterKey(key, label, color) {
+            currentKpiFilter = (currentKpiFilter === key) ? 'all' : key;
+
+            document.querySelectorAll('.kpi-card').forEach(el => el.classList.remove('kpi-active'));
+            const activeCard = document.getElementById(`kpiCard-${currentKpiFilter}`);
+            if (activeCard) activeCard.classList.add('kpi-active');
+
+            if (currentKpiFilter === 'all') {
+                showToast('Filtro removido — mostrando todo el inventario', '#7c8aa5');
+            } else {
+                showToast(`Filtrando: <b>${label}</b>`, color || '#22d3ee');
+            }
+
+            applyFilters();
+            scrollToDirectory();
+        }
+
+        window.exportToExcel = function () {
+            if (!lastFilteredData || lastFilteredData.length === 0) {
+                showToast('No hay equipos para exportar con los filtros actuales', '#f5484d');
+                return;
+            }
+            if (typeof XLSX === 'undefined') {
+                showToast('No se pudo cargar el motor de Excel. Verifica tu conexión a internet.', '#f5484d');
+                return;
+            }
+
+            const rows = lastFilteredData.map(a => ({
+                'Activo': a.name || '',
+                'Etiqueta SMBIOS': a.assetTag || '',
+                'Número de Serie': a.serial || '',
+                'Responsable': a.user || '',
+                'Ubicación': a.location || '',
+                'Fabricante': a.manufacturer || '',
+                'Modelo': a.model || '',
+                'Procesador': a.cpuName || '',
+                'Uso CPU (30d) %': a.cpuUsage,
+                'Uso RAM (30d) %': a.ramUsage,
+                'Tamaño RAM': a.ramSize || '',
+                'Almacenamiento Usado %': a.storageUsed,
+                'E/S de Disco (30d)': a.diskIo || '',
+                'Salud Batería %': a.batteryHealth === null ? '' : a.batteryHealth,
+                'Sistema Operativo': a.os || '',
+                'Versión Windows': a.osFeature || '',
+                'Build Windows': a.osBuild || '',
+                'Ciclo de Vida Windows': a.winLifecycle || '',
+                'Versión BIOS': a.bios || '',
+                'Fecha BIOS': a.biosDate || '',
+                'Cifrado de Disco': a.encryption || '',
+                'Antivirus': a.antivirus || '',
+                'Reinicio Pendiente': a.rebootPending ? 'Sí' : 'No',
+                'Actualizaciones Pendientes': a.updatesPending ? 'Sí' : 'No',
+                'Último Reporte': a.lastReport || '',
+                'Días Sin Reportar': a.daysSinceReport === null ? '' : a.daysSinceReport
+            }));
+
+            const wb = XLSX.utils.book_new();
+            const ws = XLSX.utils.json_to_sheet(rows);
+            ws['!cols'] = Object.keys(rows[0]).map(k => ({ wch: Math.min(Math.max(k.length, 12), 34) }));
+            ws['!freeze'] = { xSplit: 0, ySplit: 1 };
+            XLSX.utils.book_append_sheet(wb, ws, 'Directorio Filtrado');
+
+            // Hoja con el resumen de qué filtros estaban activos al momento de exportar
+            const activeFiltersInfo = [
+                ['Nerve Center — Exportación de Directorio'],
+                ['Generado', new Date().toLocaleString('es-CO')],
+                ['Equipos exportados', lastFilteredData.length],
+                ['Total en inventario', globalAssetsData.length],
+                [],
+                ['Filtro de tarjeta / gráfica', currentKpiFilter === 'all' ? 'Ninguno' : currentKpiFilter],
+                ['Marca', filterManufacturer.value],
+                ['Batería', filterBattery.value],
+                ['Cifrado', filterEncryption.value],
+                ['Antivirus', filterAntivirus.value],
+                ['Reinicio', filterReboot.value],
+                ['Actualizaciones', filterUpdates.value],
+                ['Ciclo de vida Windows', filterWinLc.value],
+                ['Texto buscado', searchInput.value || '(vacío)']
+            ];
+            const wsInfo = XLSX.utils.aoa_to_sheet(activeFiltersInfo);
+            wsInfo['!cols'] = [{ wch: 26 }, { wch: 30 }];
+            XLSX.utils.book_append_sheet(wb, wsInfo, 'Filtros Aplicados');
+
+            const stamp = new Date().toISOString().slice(0, 16).replace(/[-:T]/g, '').replace(/(\d{8})(\d{4})/, '$1_$2');
+            XLSX.writeFile(wb, `nerve-center_export_${stamp}.xlsx`);
+
+            showToast(`Exportados ${lastFilteredData.length} equipos a Excel`, '#34d399');
+        };
+
+        window.setKpiFilter = function (type) {
+            const def = KPI_DEFS.find(k => k.key === type);
+            setFilterKey(type, def ? `${def.label} — ${def.desc}` : type, def ? def.color : '#22d3ee');
+        };
+
+        // Filtro por marca disparado desde la dona de fabricantes (independiente del filtro KPI,
+        // reutiliza el mismo <select> de la barra de herramientas para mantener todo sincronizado)
+        function filterByManufacturer(mfg) {
+            if (filterManufacturer.value === mfg) {
+                filterManufacturer.value = 'all';
+                showToast('Filtro de marca removido', '#7c8aa5');
+            } else {
+                filterManufacturer.value = mfg;
+                showToast(`Filtrando marca: <b>${mfg}</b>`, '#22d3ee');
+            }
+            applyFilters();
+            scrollToDirectory();
+        }
+
+        window.clearAllFilters = function () {
+            currentKpiFilter = 'all';
+            searchInput.value = '';
+            filterManufacturer.value = 'all';
+            filterBattery.value = 'all';
+            filterEncryption.value = 'all';
+            filterAntivirus.value = 'all';
+            filterReboot.value = 'all';
+            filterUpdates.value = 'all';
+            filterWinLc.value = 'all';
+            document.querySelectorAll('.kpi-card').forEach(el => el.classList.remove('kpi-active'));
+            const allCard = document.getElementById('kpiCard-all');
+            if (allCard) allCard.classList.add('kpi-active');
+            applyFilters();
+        };
+
+        window.setSort = function (key) {
+            if (sortState.key === key) { sortState.dir *= -1; } else { sortState = { key, dir: 1 }; }
+            applyFilters();
+        };
+
+        searchInput.addEventListener('input', applyFilters);
+        filterManufacturer.addEventListener('change', applyFilters);
+        filterBattery.addEventListener('change', applyFilters);
+        filterEncryption.addEventListener('change', applyFilters);
+        filterAntivirus.addEventListener('change', applyFilters);
+        filterReboot.addEventListener('change', applyFilters);
+        filterUpdates.addEventListener('change', applyFilters);
+        filterWinLc.addEventListener('change', applyFilters);
+
+        function matchesKpi(a, type) {
+            if (type.startsWith('os-')) {
+                const name = type.slice(3);
+                return (a.os || '').includes(name);
+            }
+            if (type.startsWith('winlc-')) {
+                return a.winLifecycle === type.slice(6);
+            }
+            if (type.startsWith('ver-')) {
+                return a.verLabel === type.slice(4);
+            }
+            if (type.startsWith('bat-')) {
+                const bucket = type.slice(4);
+                if (bucket === 'Sin dato') return a.batteryHealth === null;
+                if (a.batteryHealth === null) return false;
+                if (bucket === '<30%') return a.batteryHealth < 30;
+                if (bucket === '30-50%') return a.batteryHealth >= 30 && a.batteryHealth < 50;
+                if (bucket === '50-80%') return a.batteryHealth >= 50 && a.batteryHealth < 80;
+                if (bucket === '80-100%') return a.batteryHealth >= 80;
+                return false;
+            }
+            if (type.startsWith('sto-')) {
+                const bucket = type.slice(4);
+                if (bucket === '<50%') return a.storageUsed < 50;
+                if (bucket === '50-75%') return a.storageUsed >= 50 && a.storageUsed < 75;
+                if (bucket === '75-90%') return a.storageUsed >= 75 && a.storageUsed < 90;
+                if (bucket === '90-100%') return a.storageUsed >= 90;
+                return false;
+            }
+            switch (type) {
+                case 'critical': return a.cpuUsage > 80 || a.ramUsage > 80;
+                case 'cpu': return a.cpuUsage > 80;
+                case 'ram': return a.ramUsage > 80;
+                case 'battery': return a.batteryHealth !== null && a.batteryHealth < 50;
+                case 'storage': return a.storageUsed > 90;
+                case 'reboots': return a.rebootPending;
+                case 'reboot-good': return !a.rebootPending;
+                case 'updates': return a.updatesPending;
+                case 'upd-good': return !a.updatesPending;
+                case 'security': return !(a.encryption === 'Activado' || a.encryption === 'Cifrado');
+                case 'enc-good': return a.encryption === 'Activado' || a.encryption === 'Cifrado';
+                case 'antivirus': return a.antivirus !== 'Activado';
+                case 'av-good': return a.antivirus === 'Activado';
+                case 'stale': return a.daysSinceReport !== null && a.daysSinceReport > 7;
+                case 'windowseol': return a.winLifecycle === 'Sin Soporte';
+                default: return true;
+            }
+        }
+
+        function applyFilters() {
+            const term = searchInput.value.toLowerCase();
+            const mfg = filterManufacturer.value;
+            const bat = filterBattery.value;
+            const enc = filterEncryption.value;
+            const av = filterAntivirus.value;
+            const rb = filterReboot.value;
+            const upd = filterUpdates.value;
+            const wlc = filterWinLc.value;
+
+            let filteredData = globalAssetsData.filter(a => {
+                if (currentKpiFilter !== 'all' && !matchesKpi(a, currentKpiFilter)) return false;
+                if (mfg !== 'all' && a.manufacturer !== mfg) return false;
+                if (bat === 'bad' && !(a.batteryHealth !== null && a.batteryHealth < 50)) return false;
+                if (bat === 'good' && !(a.batteryHealth !== null && a.batteryHealth >= 50)) return false;
+                if (enc === 'yes' && !(a.encryption === 'Activado' || a.encryption === 'Cifrado')) return false;
+                if (enc === 'no' && (a.encryption === 'Activado' || a.encryption === 'Cifrado')) return false;
+                if (av === 'yes' && a.antivirus !== 'Activado') return false;
+                if (av === 'no' && a.antivirus === 'Activado') return false;
+                if (rb === 'yes' && !a.rebootPending) return false;
+                if (rb === 'no' && a.rebootPending) return false;
+                if (upd === 'yes' && !a.updatesPending) return false;
+                if (upd === 'no' && a.updatesPending) return false;
+                if (wlc !== 'all' && a.winLifecycle !== wlc) return false;
+                if (term) {
+                    const searchStr = `${a.serial} ${a.name} ${a.user} ${a.model} ${a.assetTag}`.toLowerCase();
+                    if (!searchStr.includes(term)) return false;
+                }
+                return true;
+            });
+
+            if (sortState.key) {
+                filteredData = [...filteredData].sort((a, b) => {
+                    let va = a[sortState.key], vb = b[sortState.key];
+                    if (va === null || va === undefined) va = -1;
+                    if (vb === null || vb === undefined) vb = -1;
+                    if (typeof va === 'string') return va.localeCompare(vb) * sortState.dir;
+                    return (va - vb) * sortState.dir;
+                });
+            }
+
+            document.getElementById('dirCount').innerText = `(${filteredData.length})`;
+            lastFilteredData = filteredData;
+            renderTable(filteredData);
+        }
+
+        function updateDashboardNumbers() {
+            KPI_DEFS.forEach(k => {
+                const count = k.key === 'all' ? globalAssetsData.length : globalAssetsData.filter(a => matchesKpi(a, k.key)).length;
+                const el = document.getElementById(`kpiVal-${k.key}`);
+                if (el) el.innerText = count;
+            });
+        }
+
+        function baseDonut(canvasId, labels, data, colors, onSliceClick) {
+            const canvas = document.getElementById(canvasId);
+            return new Chart(canvas, {
+                type: 'doughnut',
+                data: { labels, datasets: [{ data, backgroundColor: colors, borderWidth: 0 }] },
+                options: {
+                    cutout: '72%',
+                    onClick: (evt, elements) => {
+                        if (elements.length > 0 && onSliceClick) onSliceClick(labels[elements[0].index]);
+                    },
+                    onHover: (evt, elements) => {
+                        canvas.style.cursor = (elements.length > 0 && onSliceClick) ? 'pointer' : 'default';
+                    },
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: { boxWidth: 10, font: { size: 10 }, color: CHART_TEXT },
+                            onClick: (evt, legendItem) => { if (onSliceClick) onSliceClick(legendItem.text); }
+                        }
+                    }
+                }
+            });
+        }
+
+        function updateCharts() {
+            const mfgCounts = {};
+            globalAssetsData.forEach(a => { mfgCounts[a.manufacturer] = (mfgCounts[a.manufacturer] || 0) + 1; });
+            const mArr = Object.entries(mfgCounts).sort((a, b) => b[1] - a[1]).slice(0, 6);
+
+            if (donutChartInstance) donutChartInstance.destroy();
+            donutChartInstance = baseDonut('donutChart', mArr.map(m => m[0]), mArr.map(m => m[1]),
+                ['#22d3ee', '#34d399', '#f5a623', '#a78bfa', '#f5484d', '#38bdf8'],
+                (label) => filterByManufacturer(label));
+
+            let top10 = [...globalAssetsData]
+                .sort((a, b) => ((b.cpuUsage + b.ramUsage) / 2) - ((a.cpuUsage + a.ramUsage) / 2))
+                .slice(0, 10);
+
+            if (barChartInstance) barChartInstance.destroy();
+            barChartInstance = new Chart(document.getElementById('barChart'), {
+                type: 'bar',
+                data: {
+                    labels: top10.map(a => a.name),
+                    datasets: [
+                        { label: 'Uso CPU %', data: top10.map(a => a.cpuUsage), backgroundColor: '#f5484d', borderRadius: 4 },
+                        { label: 'Uso RAM %', data: top10.map(a => a.ramUsage), backgroundColor: '#f5a623', borderRadius: 4 }
+                    ]
+                },
+                options: {
+                    responsive: true, maintainAspectRatio: false,
+                    onClick: (evt, elements) => {
+                        if (elements.length > 0) openModal(top10[elements[0].index]._index);
+                    },
+                    onHover: (evt, elements) => { evt.native.target.style.cursor = elements.length > 0 ? 'pointer' : 'default'; },
+                    scales: {
+                        y: { max: 100, grid: { color: CHART_GRID }, ticks: { color: CHART_TEXT } },
+                        x: { grid: { display: false }, ticks: { color: CHART_TEXT } }
+                    },
+                    plugins: { legend: { position: 'top', align: 'end', labels: { color: CHART_TEXT } } }
+                }
+            });
+
+            // Cifrado
+            const enc = { ok: 0, bad: 0 };
+            globalAssetsData.forEach(a => (a.encryption === 'Activado' || a.encryption === 'Cifrado') ? enc.ok++ : enc.bad++);
+            if (encChartInstance) encChartInstance.destroy();
+            encChartInstance = baseDonut('encChart', ['Cifrado', 'Sin Cifrar'], [enc.ok, enc.bad], ['#34d399', '#a78bfa'],
+                (label) => label === 'Cifrado' ? setFilterKey('enc-good', 'Disco Cifrado', '#34d399') : setFilterKey('security', 'Alertas de Cifrado', '#a78bfa'));
+
+            // Antivirus
+            const av = { ok: 0, bad: 0 };
+            globalAssetsData.forEach(a => (a.antivirus === 'Activado') ? av.ok++ : av.bad++);
+            if (avChartInstance) avChartInstance.destroy();
+            avChartInstance = baseDonut('avChart', ['Activo', 'Inactivo'], [av.ok, av.bad], ['#34d399', '#fb7185'],
+                (label) => label === 'Activo' ? setFilterKey('av-good', 'Antivirus Activo', '#34d399') : setFilterKey('antivirus', 'Alertas de Antivirus', '#fb7185'));
+
+            // Reinicio
+            const rb = { ok: 0, bad: 0 };
+            globalAssetsData.forEach(a => a.rebootPending ? rb.bad++ : rb.ok++);
+            if (rebootChartInstance) rebootChartInstance.destroy();
+            rebootChartInstance = baseDonut('rebootChart', ['Al día', 'Pendiente'], [rb.ok, rb.bad], ['#34d399', '#f5a623'],
+                (label) => label === 'Al día' ? setFilterKey('reboot-good', 'Sin Reinicio Pendiente', '#34d399') : setFilterKey('reboots', 'Requieren Reinicio', '#f5a623'));
+
+            // Actualizaciones
+            const up = { ok: 0, bad: 0 };
+            globalAssetsData.forEach(a => a.updatesPending ? up.bad++ : up.ok++);
+            if (updChartInstance) updChartInstance.destroy();
+            updChartInstance = baseDonut('updChart', ['Al día', 'Pendiente'], [up.ok, up.bad], ['#34d399', '#38bdf8'],
+                (label) => label === 'Al día' ? setFilterKey('upd-good', 'Actualizaciones al Día', '#34d399') : setFilterKey('updates', 'Actualizaciones Pendientes', '#38bdf8'));
+
+            // Ciclo de Vida de Windows
+            const lcCounts = { 'Vigente': 0, 'Sin Soporte': 0, 'Servidor': 0, 'N/A': 0 };
+            globalAssetsData.forEach(a => { lcCounts[a.winLifecycle || 'N/A']++; });
+            if (winLcChartInstance) winLcChartInstance.destroy();
+            winLcChartInstance = baseDonut('winLcChart',
+                Object.keys(lcCounts), Object.values(lcCounts),
+                ['#34d399', '#f5484d', '#a78bfa', '#7c8aa5'],
+                (label) => setFilterKey('winlc-' + label, `Windows: ${label}`, label === 'Sin Soporte' ? '#f5484d' : '#34d399'));
+
+            // Versión de Windows detallada (Win10/Win11 + feature update)
+            const verOrder = ['Win11 25H2', 'Win11 24H2', 'Win11 23H2', 'Win11 22H2', 'Win11 21H2',
+                'Win10 22H2', 'Win10 21H2', 'Win10 21H1', 'Win10 20H2'];
+            const verCounts = {};
+            globalAssetsData.forEach(a => { verCounts[a.verLabel] = (verCounts[a.verLabel] || 0) + 1; });
+            const verArr = Object.entries(verCounts).sort((a, b) => {
+                const ia = verOrder.indexOf(a[0]), ib = verOrder.indexOf(b[0]);
+                if (ia === -1 && ib === -1) return b[1] - a[1];
+                if (ia === -1) return 1;
+                if (ib === -1) return -1;
+                return ia - ib;
+            });
+            const verLabels = verArr.map(v => v[0]);
+            const verColors = verLabels.map(l => {
+                const isEol = l.startsWith('Win10') || ['Win11 22H2', 'Win11 21H2', 'Win11 21H1', 'Win11 20H2'].includes(l);
+                return isEol ? '#f5484d' : (l.startsWith('Win11') ? '#34d399' : '#7c8aa5');
+            });
+            if (winVerChartInstance) winVerChartInstance.destroy();
+            winVerChartInstance = new Chart(document.getElementById('winVerChart'), {
+                type: 'bar',
+                data: { labels: verLabels, datasets: [{ data: verArr.map(v => v[1]), backgroundColor: verColors, borderRadius: 6 }] },
+                options: {
+                    responsive: true, maintainAspectRatio: false,
+                    onClick: (evt, els) => { if (els.length > 0) setFilterKey('ver-' + verLabels[els[0].index], verLabels[els[0].index], verColors[els[0].index]); },
+                    onHover: (evt, els) => { evt.native.target.style.cursor = els.length > 0 ? 'pointer' : 'default'; },
+                    plugins: { legend: { display: false } },
+                    scales: { y: { grid: { color: CHART_GRID }, ticks: { color: CHART_TEXT } }, x: { grid: { display: false }, ticks: { color: CHART_TEXT, font: { size: 10 } } } }
+                }
+            });
+
+            // Histograma Batería
+            const batBuckets = { 'Sin dato': 0, '<30%': 0, '30-50%': 0, '50-80%': 0, '80-100%': 0 };
+            globalAssetsData.forEach(a => {
+                if (a.batteryHealth === null) batBuckets['Sin dato']++;
+                else if (a.batteryHealth < 30) batBuckets['<30%']++;
+                else if (a.batteryHealth < 50) batBuckets['30-50%']++;
+                else if (a.batteryHealth < 80) batBuckets['50-80%']++;
+                else batBuckets['80-100%']++;
+            });
+            const batLabels = Object.keys(batBuckets);
+            if (batteryHistInstance) batteryHistInstance.destroy();
+            batteryHistInstance = new Chart(document.getElementById('batteryHistChart'), {
+                type: 'bar',
+                data: {
+                    labels: batLabels,
+                    datasets: [{ data: Object.values(batBuckets), backgroundColor: ['#475569', '#f5484d', '#f5a623', '#38bdf8', '#34d399'], borderRadius: 6 }]
+                },
+                options: {
+                    responsive: true, maintainAspectRatio: false,
+                    onClick: (evt, els) => { if (els.length > 0) setFilterKey('bat-' + batLabels[els[0].index], `Batería ${batLabels[els[0].index]}`, '#f5a623'); },
+                    onHover: (evt, els) => { evt.native.target.style.cursor = els.length > 0 ? 'pointer' : 'default'; },
+                    plugins: { legend: { display: false } },
+                    scales: { y: { grid: { color: CHART_GRID }, ticks: { color: CHART_TEXT } }, x: { grid: { display: false }, ticks: { color: CHART_TEXT } } }
+                }
+            });
+
+            // Histograma Almacenamiento
+            const stoBuckets = { '<50%': 0, '50-75%': 0, '75-90%': 0, '90-100%': 0 };
+            globalAssetsData.forEach(a => {
+                if (a.storageUsed < 50) stoBuckets['<50%']++;
+                else if (a.storageUsed < 75) stoBuckets['50-75%']++;
+                else if (a.storageUsed < 90) stoBuckets['75-90%']++;
+                else stoBuckets['90-100%']++;
+            });
+            const stoLabels = Object.keys(stoBuckets);
+            if (storageHistInstance) storageHistInstance.destroy();
+            storageHistInstance = new Chart(document.getElementById('storageHistChart'), {
+                type: 'bar',
+                data: {
+                    labels: stoLabels,
+                    datasets: [{ data: Object.values(stoBuckets), backgroundColor: ['#34d399', '#38bdf8', '#f5a623', '#f5484d'], borderRadius: 6 }]
+                },
+                options: {
+                    responsive: true, maintainAspectRatio: false,
+                    onClick: (evt, els) => { if (els.length > 0) setFilterKey('sto-' + stoLabels[els[0].index], `Almacenamiento ${stoLabels[els[0].index]}`, '#38bdf8'); },
+                    onHover: (evt, els) => { evt.native.target.style.cursor = els.length > 0 ? 'pointer' : 'default'; },
+                    plugins: { legend: { display: false } },
+                    scales: { y: { grid: { color: CHART_GRID }, ticks: { color: CHART_TEXT } }, x: { grid: { display: false }, ticks: { color: CHART_TEXT } } }
+                }
+            });
+
+            // OS
+            const osCounts = {};
+            globalAssetsData.forEach(a => { const o = (a.os || 'Desconocido').replace('Microsoft ', ''); osCounts[o] = (osCounts[o] || 0) + 1; });
+            const osArr = Object.entries(osCounts).sort((a, b) => b[1] - a[1]).slice(0, 6);
+            const osLabels = osArr.map(o => o[0]);
+            if (osChartInstance) osChartInstance.destroy();
+            osChartInstance = new Chart(document.getElementById('osChart'), {
+                type: 'bar',
+                data: {
+                    labels: osLabels,
+                    datasets: [{ data: osArr.map(o => o[1]), backgroundColor: '#a78bfa', borderRadius: 6 }]
+                },
+                options: {
+                    indexAxis: 'y',
+                    responsive: true, maintainAspectRatio: false,
+                    onClick: (evt, els) => { if (els.length > 0) setFilterKey('os-' + osLabels[els[0].index], osLabels[els[0].index], '#a78bfa'); },
+                    onHover: (evt, els) => { evt.native.target.style.cursor = els.length > 0 ? 'pointer' : 'default'; },
+                    plugins: { legend: { display: false } },
+                    scales: { x: { grid: { color: CHART_GRID }, ticks: { color: CHART_TEXT } }, y: { grid: { display: false }, ticks: { color: CHART_TEXT, font: { size: 10 } } } }
+                }
+            });
+        }
+
+        function renderTable(dataToRender) {
+            tableBody.innerHTML = '';
+
+            if (dataToRender.length === 0) {
+                tableBody.innerHTML = `<tr><td colspan="8" class="px-5 py-14 text-center text-dim">
+            <i data-lucide="search-x" class="w-8 h-8 mx-auto mb-2 opacity-50"></i>
+            No se encontraron equipos con los filtros actuales.
+        </td></tr>`;
+                lucide.createIcons();
+                return;
+            }
+
+            dataToRender.forEach(asset => {
+                const tr = document.createElement('tr');
+                tr.className = 'hover:bg-panel2/60 transition-colors cursor-pointer';
+                tr.onclick = (e) => { if (!e.target.closest('button')) openModal(asset._index); };
+
+                const cpuColor = asset.cpuUsage > 80 ? 'bg-red' : 'bg-cyan';
+                const ramColor = asset.ramUsage > 80 ? 'bg-red' : 'bg-mint';
+                const stoColor = asset.storageUsed > 90 ? 'bg-red' : (asset.storageUsed > 75 ? 'bg-amber' : 'bg-mint');
+                const batBadge = asset.batteryHealth === null
+                    ? `<span class="text-dim text-xs">N/D</span>`
+                    : `<span class="inline-flex items-center gap-1 text-xs font-semibold px-2.5 py-1 rounded-full ${asset.batteryHealth < 50 ? 'bg-red/10 text-red' : 'bg-mint/10 text-mint'}">
+                <i data-lucide="${asset.batteryHealth < 50 ? 'battery-warning' : 'battery-charging'}" class="w-3.5 h-3.5"></i>${asset.batteryHealth}%</span>`;
+
+                let alertsHtml = '';
+                if (asset.rebootPending) alertsHtml += `<span title="Reinicio Pendiente" class="inline-flex p-1.5 rounded-md bg-amber/10 text-amber mr-1"><i data-lucide="rotate-cw" class="w-4 h-4"></i></span>`;
+                if (!(asset.encryption === 'Activado' || asset.encryption === 'Cifrado')) alertsHtml += `<span title="Sin Cifrar" class="inline-flex p-1.5 rounded-md bg-violet/10 text-violet mr-1"><i data-lucide="shield-alert" class="w-4 h-4"></i></span>`;
+                if (asset.antivirus !== 'Activado') alertsHtml += `<span title="Antivirus Inactivo" class="inline-flex p-1.5 rounded-md bg-rose-500/10 text-rose-400 mr-1"><i data-lucide="shield-off" class="w-4 h-4"></i></span>`;
+                if (asset.updatesPending) alertsHtml += `<span title="Actualizaciones Pendientes" class="inline-flex p-1.5 rounded-md bg-sky-500/10 text-sky-400 mr-1"><i data-lucide="download" class="w-4 h-4"></i></span>`;
+                if (asset.daysSinceReport !== null && asset.daysSinceReport > 7) alertsHtml += `<span title="Sin reportar hace ${asset.daysSinceReport} días" class="inline-flex p-1.5 rounded-md bg-slate-500/10 text-slate-400 mr-1"><i data-lucide="wifi-off" class="w-4 h-4"></i></span>`;
+                if (asset.winLifecycle === 'Sin Soporte') alertsHtml += `<span title="Windows sin soporte (${asset.verLabel})" class="inline-flex p-1.5 rounded-md bg-rose-500/10 text-rose-400 mr-1"><i data-lucide="shield-x" class="w-4 h-4"></i></span>`;
+
+                tr.innerHTML = `
+            <td class="px-5 py-3">
+                <div class="font-bold text-white">${asset.name || 'N/A'}</div>
+                <div class="text-xs text-dim mono mt-0.5">${asset.serial || 'S/N Desconocido'}</div>
+                ${asset.assetTag ? `<div class="text-[11px] mt-1 inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-cyan/10 text-cyan mono"><i data-lucide="tag" class="w-3 h-3"></i>${asset.assetTag}</div>` : ''}
+            </td>
+            <td class="px-5 py-3 text-slate-300 text-sm truncate max-w-[150px]" title="${asset.user}">${asset.user || 'Sin asignar'}</td>
+            <td class="px-5 py-3">
+                <div class="flex items-center gap-2">
+                    <span class="text-sm font-bold w-10 text-right mono ${asset.cpuUsage > 80 ? 'text-red' : 'text-slate-300'}">${asset.cpuUsage.toFixed(0)}%</span>
+                    <div class="flex-1 h-1.5 bg-line rounded-full overflow-hidden"><div class="h-full ${cpuColor}" style="width: ${asset.cpuUsage}%"></div></div>
+                </div>
+            </td>
+            <td class="px-5 py-3">
+                <div class="flex items-center gap-2">
+                    <span class="text-sm font-bold w-10 text-right mono ${asset.ramUsage > 80 ? 'text-red' : 'text-slate-300'}">${asset.ramUsage.toFixed(0)}%</span>
+                    <div class="flex-1 h-1.5 bg-line rounded-full overflow-hidden"><div class="h-full ${ramColor}" style="width: ${asset.ramUsage}%"></div></div>
+                </div>
+            </td>
+            <td class="px-5 py-3">
+                <div class="flex items-center gap-2">
+                    <span class="text-sm font-bold w-10 text-right mono ${asset.storageUsed > 90 ? 'text-red' : 'text-slate-300'}">${asset.storageUsed.toFixed(0)}%</span>
+                    <div class="flex-1 h-1.5 bg-line rounded-full overflow-hidden"><div class="h-full ${stoColor}" style="width: ${asset.storageUsed}%"></div></div>
+                </div>
+            </td>
+            <td class="px-5 py-3 text-center">${batBadge}</td>
+            <td class="px-5 py-3 text-center">${alertsHtml || '<span class="text-line">-</span>'}</td>
+            <td class="px-5 py-3 text-right">
+                <button type="button" onclick="event.stopPropagation(); openModal(${asset._index})" class="text-cyan hover:text-white bg-cyan/10 hover:bg-cyan/20 px-3 py-1.5 rounded-lg text-sm font-semibold transition-colors flex items-center justify-end w-full gap-1">
+                    Detalles <i data-lucide="chevron-right" class="w-4 h-4"></i>
+                </button>
+            </td>
+        `;
+                tableBody.appendChild(tr);
+            });
+            lucide.createIcons();
+        }
+
+        window.openModal = function (index) {
+            const asset = globalAssetsData[index];
+            if (!asset) return;
+
+            document.getElementById('modalName').innerText = asset.name;
+            document.getElementById('modalMfgTag').innerText = asset.manufacturer;
+            const modalAssetTag = document.getElementById('modalAssetTag');
+            if (asset.assetTag) { modalAssetTag.innerText = asset.assetTag; modalAssetTag.classList.remove('hidden'); }
+            else { modalAssetTag.classList.add('hidden'); }
+            document.getElementById('modalUser').innerHTML = `<i data-lucide="user" class="w-4 h-4"></i> ${asset.user || 'Usuario no asignado'}`;
+
+            const staleTag = document.getElementById('modalStaleTag');
+            if (asset.daysSinceReport !== null && asset.daysSinceReport > 7) {
+                staleTag.classList.remove('hidden');
+                staleTag.innerText = `Sin Reportar (${asset.daysSinceReport}d)`;
+            } else {
+                staleTag.classList.add('hidden');
+            }
+
+            document.getElementById('modalCpu').innerText = asset.cpuUsage.toFixed(1) + '%';
+            document.getElementById('modalCpu').style.color = asset.cpuUsage > 80 ? '#f5484d' : '#ffffff';
+
+            document.getElementById('modalRam').innerText = asset.ramUsage.toFixed(1) + '%';
+            document.getElementById('modalRam').style.color = asset.ramUsage > 80 ? '#f5484d' : '#ffffff';
+
+            document.getElementById('modalBattery').innerText = asset.batteryHealth === null ? 'N/D' : asset.batteryHealth + '%';
+            document.getElementById('modalBattery').style.color = (asset.batteryHealth !== null && asset.batteryHealth < 50) ? '#f5484d' : '#ffffff';
+
+            document.getElementById('modalStorage').innerText = asset.storageUsed.toFixed(0) + '%';
+            document.getElementById('modalStorage').style.color = asset.storageUsed > 90 ? '#f5484d' : '#ffffff';
+
+            document.getElementById('modalSerial').innerText = asset.serial;
+            document.getElementById('modalAssetTagRow').innerText = asset.assetTag || 'N/A';
+            document.getElementById('modalModel').innerText = asset.model || 'N/A';
+            document.getElementById('modalCpuName').innerText = asset.cpuName || 'N/A';
+            document.getElementById('modalCpuName').title = asset.cpuName || '';
+            document.getElementById('modalRamSize').innerText = asset.ramSize || 'N/A';
+            document.getElementById('modalDiskIo').innerText = asset.diskIo || 'N/A';
+            document.getElementById('modalLocation').innerText = asset.location || 'N/A';
+
+            document.getElementById('modalOs').innerText = asset.os || 'N/A';
+            document.getElementById('modalOsVer').innerText = asset.osFeature
+                ? `Ver: ${asset.osFeature}${asset.osBuild ? ' · Build ' + asset.osBuild : ''}`
+                : 'Ver: -';
+            document.getElementById('modalBios').innerText = asset.bios || 'N/A';
+            document.getElementById('modalBiosDate').innerText = 'Fecha: ' + (asset.biosDate || '-');
+            const biosQuery = encodeURIComponent(`${asset.manufacturer} ${asset.model} BIOS firmware latest version download`);
+            document.getElementById('modalBiosCheck').href = `https://www.google.com/search?q=${biosQuery}`;
+
+            const lcColors = { 'Vigente': '#34d399', 'Sin Soporte': '#f5484d', 'Servidor': '#a78bfa', 'N/A': '#7c8aa5' };
+            const lc = asset.winLifecycle || 'N/A';
+            document.getElementById('modalWinLc').innerHTML = `<span style="color:${lcColors[lc]}; background:${lcColors[lc]}1a" class="px-2 py-1 rounded">${lc}</span>`;
+
+            document.getElementById('modalEncrypt').innerHTML = (asset.encryption === 'Activado' || asset.encryption === 'Cifrado')
+                ? '<span class="text-mint bg-mint/10 px-2 py-1 rounded">Activo</span>'
+                : `<span class="text-red bg-red/10 px-2 py-1 rounded">${asset.encryption || 'Desactivado'}</span>`;
+
+            document.getElementById('modalAv').innerHTML = (asset.antivirus === 'Activado')
+                ? '<span class="text-mint bg-mint/10 px-2 py-1 rounded">Activo</span>'
+                : `<span class="text-red bg-red/10 px-2 py-1 rounded">${asset.antivirus || 'Inactivo'}</span>`;
+
+            document.getElementById('modalReboot').innerHTML = asset.rebootPending
+                ? '<span class="text-amber bg-amber/10 px-2 py-1 rounded">Pendiente</span>'
+                : '<span class="text-dim">Al día</span>';
+
+            document.getElementById('modalUpdates').innerHTML = asset.updatesPending
+                ? '<span class="text-sky-400 bg-sky-400/10 px-2 py-1 rounded">Pendiente</span>'
+                : '<span class="text-dim">Al día</span>';
+
+            document.getElementById('modalReport').innerText = asset.lastReport ? asset.lastReport.split('T')[0] : 'N/A';
+
+            lucide.createIcons();
+
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+            setTimeout(() => {
+                modal.classList.remove('opacity-0');
+                modalContent.classList.remove('scale-95');
+                modalContent.classList.add('scale-100');
+            }, 10);
+        };
+
+        window.closeModal = function () {
+            modal.classList.add('opacity-0');
+            modalContent.classList.remove('scale-100');
+            modalContent.classList.add('scale-95');
+            setTimeout(() => {
+                modal.classList.add('hidden');
+                modal.classList.remove('flex');
+            }, 300);
+        };
+
+        modal.addEventListener('click', (e) => { if (e.target === modal) closeModal(); });
+        document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeModal(); });
+
+        const csvUpload = document.getElementById('csvUpload');
+        const dragOverlay = document.getElementById('dragOverlay');
+        let dragCounter = 0;
+
+        csvUpload.addEventListener('change', e => { processFile(e.target.files[0]); e.target.value = ''; });
+
+        window.addEventListener('dragenter', e => { e.preventDefault(); dragCounter++; dragOverlay.classList.remove('hidden'); dragOverlay.classList.add('flex'); });
+        window.addEventListener('dragleave', e => { e.preventDefault(); dragCounter--; if (dragCounter === 0) { dragOverlay.classList.add('hidden'); dragOverlay.classList.remove('flex'); } });
+        window.addEventListener('dragover', e => { e.preventDefault(); });
+        window.addEventListener('drop', e => {
+            e.preventDefault(); dragCounter = 0;
+            dragOverlay.classList.add('hidden'); dragOverlay.classList.remove('flex');
+            if (e.dataTransfer.files.length > 0) processFile(e.dataTransfer.files[0]);
+        });
+    </script>
+</body>
+
+</html>
