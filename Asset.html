@@ -392,7 +392,7 @@
             <div id="kpiGrid" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3.5 mb-8 panel-print"></div>
 
             <!-- CLIENTE / SEDE + SALUD (visible siempre que el CSV traiga Ubicación / Estado de salud) -->
-            <div class="grid grid-cols-1 lg:grid-cols-3 gap-5 mb-6">
+            <div class="grid grid-cols-1 lg:grid-cols-4 gap-5 mb-6">
                 <div class="lg:col-span-2 bg-panel border border-line rounded-2xl p-6 shadow-sm panel-print">
                     <h3 class="text-base font-bold text-white flex items-center gap-2 mb-4 display">
                         <i data-lucide="building-2" class="text-cyan w-5 h-5"></i>
@@ -404,11 +404,22 @@
                 </div>
                 <div id="healthChartCard"
                     class="bg-panel border border-line rounded-2xl p-6 shadow-sm flex flex-col panel-print">
-                    <h3 class="text-base font-bold text-white flex items-center gap-2 mb-2 display">
-                        <i data-lucide="heart-pulse" class="text-red w-5 h-5"></i> Salud General
+                    <h3 class="text-base font-bold text-white flex items-center gap-2 mb-1 display">
+                        <i data-lucide="heart-pulse" class="text-red w-5 h-5"></i> Salud (IGAM)
                     </h3>
-                    <div class="relative flex-1 w-full flex items-center justify-center min-h-[210px]"><canvas
+                    <p class="text-[10px] text-dim mb-1">Semáforo calculado por InvGate — fórmula no documentada</p>
+                    <div class="relative flex-1 w-full flex items-center justify-center min-h-[190px]"><canvas
                             id="healthChart"></canvas></div>
+                    <p class="text-[10px] text-dim/70 text-center mt-2 no-print">clic para filtrar</p>
+                </div>
+                <div class="bg-panel border border-cyan/30 rounded-2xl p-6 shadow-sm flex flex-col panel-print">
+                    <h3 class="text-base font-bold text-white flex items-center gap-2 mb-1 display">
+                        <i data-lucide="shield-check" class="text-cyan w-5 h-5"></i> Salud (Nerve Center)
+                    </h3>
+                    <p class="text-[10px] text-dim mb-1">Semáforo transparente: ver reglas exactas en la ficha de cada
+                        equipo</p>
+                    <div class="relative flex-1 w-full flex items-center justify-center min-h-[190px]"><canvas
+                            id="computedHealthChart"></canvas></div>
                     <p class="text-[10px] text-dim/70 text-center mt-2 no-print">clic para filtrar</p>
                 </div>
             </div>
@@ -723,6 +734,9 @@
                             Reportar</span>
                         <span id="modalHealthTag"
                             class="hidden px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wide">SALUD</span>
+                        <span id="modalComputedHealthTag"
+                            class="px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wide border"
+                            title="Salud calculada por Nerve Center">NC: SALUD</span>
                     </div>
                     <p id="modalUser" class="text-dim mt-2 flex items-center gap-2 text-sm"><i data-lucide="user"
                             class="w-4 h-4"></i> Usuario asignado</p>
@@ -852,6 +866,18 @@
                         </ul>
                     </div>
                 </div>
+
+                <div class="mt-8 pt-6 border-t border-line">
+                    <h4
+                        class="text-sm font-bold text-white uppercase tracking-wider mb-3 flex items-center gap-2 display">
+                        <i data-lucide="shield-check" class="w-4 h-4 text-cyan"></i> Por qué esta Salud (Nerve Center) —
+                        100% transparente
+                    </h4>
+                    <ul id="modalHealthReasons" class="space-y-1.5 text-sm"></ul>
+                    <p id="modalHealthReasonsNone" class="hidden text-mint text-sm flex items-center gap-2"><i
+                            data-lucide="check-circle-2" class="w-4 h-4"></i> Ningún factor de riesgo detectado — equipo
+                        saludable según todas las reglas conocidas.</p>
+                </div>
             </div>
         </div>
     </div>
@@ -913,7 +939,7 @@
         let encChartInstance = null, avChartInstance = null, rebootChartInstance = null, updChartInstance = null;
         let batteryHistInstance = null, storageHistInstance = null, osChartInstance = null;
         let winLcChartInstance = null, winVerChartInstance = null;
-        let clientChartInstance = null, healthChartInstance = null, fwChartInstance = null, connChartInstance = null, avProductChartInstance = null;
+        let clientChartInstance = null, healthChartInstance = null, computedHealthChartInstance = null, fwChartInstance = null, connChartInstance = null, avProductChartInstance = null;
         let globalAssetsData = [];
         let companyScope = 'all';
         function getScopedData() {
@@ -1072,6 +1098,37 @@
             return 'N/A';
         }
 
+        // Semáforo de salud PROPIO de Nerve Center, transparente (no depende del "Estado de salud"
+        // de IGAM, que resultó marcar como Alerta equipos sin ningún problema real detectable).
+        // Devuelve { level: 'Safe'|'Warning'|'Critical', reasons: [texto,...] } explicando exactamente
+        // qué disparó cada nivel, para que nunca sea una caja negra.
+        function computeHealth(a) {
+            const critical = [];
+            const warning = [];
+
+            if (a.cpuUsage > 50) critical.push(`CPU en ${a.cpuUsage.toFixed(0)}% (>50%)`);
+            if (a.ramUsage > 85) critical.push(`RAM en ${a.ramUsage.toFixed(0)}% (>85%)`);
+            if (a.storageUsed > 90) critical.push(`Disco en ${a.storageUsed.toFixed(0)}% (>90%)`);
+            if (a.batteryHealth !== null && a.batteryHealth < 30) critical.push(`Batería en ${a.batteryHealth}% (<30%)`);
+            if (a.antivirus !== 'Activado') critical.push('Antivirus inactivo');
+            if (!(a.encryption === 'Activado' || a.encryption === 'Cifrado')) critical.push('Disco sin cifrar');
+            if (a.winLifecycle === 'Sin Soporte') critical.push(`Windows sin soporte (${a.verLabel})`);
+
+            if (a.batteryHealth !== null && a.batteryHealth >= 30 && a.batteryHealth < 50) warning.push(`Batería en ${a.batteryHealth}% (30-50%)`);
+            if (a.storageUsed > 75 && a.storageUsed <= 90) warning.push(`Disco en ${a.storageUsed.toFixed(0)}% (75-90%)`);
+            if (dataFlags.hasFirewall && a.firewall && a.firewall !== 'Activado') warning.push('Firewall desactivado');
+            if (a.rebootPending) warning.push('Reinicio pendiente');
+            if (needsUpdate(a)) warning.push('Actualización pendiente' + (a.hasRealUpdate ? `: ${a.updatesDetail}` : ''));
+            if (a.daysSinceReport !== null && a.daysSinceReport > 7) warning.push(`Sin reportar hace ${a.daysSinceReport} días`);
+            if (dataFlags.hasConnectivity && a.connectivity === 'Desconectado') warning.push('Desconectado');
+
+            let level = 'Safe';
+            if (critical.length > 0) level = 'Critical';
+            else if (warning.length > 0) level = 'Warning';
+
+            return { level, reasons: critical.concat(warning) };
+        }
+
         function daysSince(dateStr) {
             if (!dateStr) return null;
             const d = new Date(dateStr);
@@ -1161,6 +1218,9 @@
                         && (a.encryption === 'Activado' || a.encryption === 'Cifrado')
                         && (a.antivirus === 'Activado')
                         && (a.winLifecycle !== 'Sin Soporte');
+                    const ch = computeHealth(a);
+                    a.computedHealth = ch.level;
+                    a.computedHealthReasons = ch.reasons;
                 });
 
                 applyDataFlagsVisibility();
@@ -1578,6 +1638,9 @@
                 case 'healthcritical': return a.health === 'Critical';
                 case 'healthwarning': return a.health === 'Warning';
                 case 'healthsafe': return a.health === 'Safe';
+                case 'chcritical': return a.computedHealth === 'Critical';
+                case 'chwarning': return a.computedHealth === 'Warning';
+                case 'chsafe': return a.computedHealth === 'Safe';
                 case 'offline': return a.connectivity === 'Desconectado';
                 case 'online': return a.connectivity === 'En línea';
                 case 'firewalloff': return a.firewall !== '' && a.firewall !== 'Activado';
@@ -1708,6 +1771,14 @@
                     ['#34d399', '#f5a623', '#f5484d'],
                     (label) => { const map = { 'Óptima': 'healthsafe', 'Alerta': 'healthwarning', 'Crítica': 'healthcritical' }; setKpiFilter(map[label]); });
             }
+
+            // Salud calculada por Nerve Center (siempre disponible, no depende de que el CSV traiga 'Estado de salud')
+            const chCounts = { Safe: 0, Warning: 0, Critical: 0 };
+            data.forEach(a => { chCounts[a.computedHealth]++; });
+            if (computedHealthChartInstance) computedHealthChartInstance.destroy();
+            computedHealthChartInstance = baseDonut('computedHealthChart', ['Óptima', 'Alerta', 'Crítica'], [chCounts.Safe, chCounts.Warning, chCounts.Critical],
+                ['#34d399', '#f5a623', '#f5484d'],
+                (label) => { const map = { 'Óptima': 'chsafe', 'Alerta': 'chwarning', 'Crítica': 'chcritical' }; setKpiFilter(map[label]); });
 
             // Firewall (solo si el CSV trae 'Estado del Firewall')
             if (dataFlags.hasFirewall) {
@@ -2086,6 +2157,27 @@
                 modalHealthTag.classList.remove('hidden');
             } else {
                 modalHealthTag.classList.add('hidden');
+            }
+
+            const chColors = { 'Safe': '#34d399', 'Warning': '#f5a623', 'Critical': '#f5484d' };
+            const chLabels = { 'Safe': 'NC: Óptima', 'Warning': 'NC: Alerta', 'Critical': 'NC: Crítica' };
+            const modalComputedHealthTag = document.getElementById('modalComputedHealthTag');
+            const chc = chColors[asset.computedHealth] || '#7c8aa5';
+            modalComputedHealthTag.innerText = chLabels[asset.computedHealth] || 'NC: N/D';
+            modalComputedHealthTag.style.color = chc; modalComputedHealthTag.style.background = chc + '1a'; modalComputedHealthTag.style.borderColor = chc + '4d';
+
+            const reasonsList = document.getElementById('modalHealthReasons');
+            const reasonsNone = document.getElementById('modalHealthReasonsNone');
+            if (asset.computedHealthReasons && asset.computedHealthReasons.length > 0) {
+                reasonsList.innerHTML = asset.computedHealthReasons.map(r =>
+                    `<li class="flex items-center gap-2 text-amber"><i data-lucide="alert-triangle" class="w-3.5 h-3.5 shrink-0"></i> ${r}</li>`
+                ).join('');
+                reasonsList.classList.remove('hidden');
+                reasonsNone.classList.add('hidden');
+            } else {
+                reasonsList.innerHTML = '';
+                reasonsList.classList.add('hidden');
+                reasonsNone.classList.remove('hidden');
             }
 
             const modalClientRow = document.getElementById('modalClientRow');
