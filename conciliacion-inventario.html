@@ -1,0 +1,559 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Conciliación de Inventario | Milenio PC</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+<script src="https://unpkg.com/lucide@latest"></script>
+
+<script>
+    tailwind.config = {
+        theme: {
+            extend: {
+                colors: {
+                    ink: '#050a14', panel: '#0e1626', panel2: '#121d33', line: '#1f2c47',
+                    cyan: '#22d3ee', mint: '#34d399', amber: '#f5a623', red: '#f5484d',
+                    violet: '#a78bfa', dim: '#7c8aa5', ice: '#e6edf7'
+                },
+                fontFamily: {
+                    sans: ['Inter', 'ui-sans-serif', 'system-ui', 'sans-serif'],
+                    mono: ['"JetBrains Mono"', 'ui-monospace', 'monospace'],
+                    display: ['"Space Grotesk"', 'Inter', 'sans-serif']
+                }
+            }
+        }
+    }
+</script>
+<style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap');
+    * { font-feature-settings: "tnum" 1; }
+    body {
+        font-family: 'Inter', sans-serif; background-color: #050a14;
+        background-image:
+            radial-gradient(circle at 15% 0%, rgba(34,211,238,0.09), transparent 45%),
+            radial-gradient(circle at 85% 15%, rgba(167,139,250,0.08), transparent 40%),
+            linear-gradient(rgba(255,255,255,0.025) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(255,255,255,0.025) 1px, transparent 1px);
+        background-size: auto, auto, 42px 42px, 42px 42px;
+    }
+    .mono { font-family: 'JetBrains Mono', monospace; }
+    .display { font-family: 'Space Grotesk', sans-serif; }
+    .no-scrollbar::-webkit-scrollbar { display: none; }
+    .scrollbar-thin::-webkit-scrollbar { height: 6px; width: 6px; }
+    .scrollbar-thin::-webkit-scrollbar-thumb { background: #253150; border-radius: 4px; }
+    .step-num {
+        width: 28px; height: 28px; border-radius: 9999px; display: flex; align-items: center; justify-content: center;
+        font-weight: 700; font-size: 13px; flex-shrink: 0;
+    }
+    .toast-in { animation: toastIn .25s ease forwards; }
+    @keyframes toastIn { from { opacity:0; transform: translateY(8px);} to {opacity:1; transform:none;} }
+</style>
+</head>
+
+<body class="text-ice min-h-screen relative">
+
+<div id="toastHost" class="fixed bottom-6 right-6 z-[90] flex flex-col gap-2 items-end"></div>
+
+<div class="p-4 md:p-8 max-w-[1500px] mx-auto">
+
+    <header class="flex items-center gap-4 mb-8 border-b border-line pb-6">
+        <div class="w-11 h-11 rounded-xl bg-panel2 border border-cyan/40 flex items-center justify-center">
+            <i data-lucide="git-compare-arrows" class="text-cyan w-6 h-6"></i>
+        </div>
+        <div>
+            <h1 class="text-3xl font-bold text-white tracking-tight display">Conciliación de Inventario</h1>
+            <p class="text-dim mt-1.5 font-medium text-sm">Cruza el export de IGAM (Asset) contra el inventario físico semanal — el resultado es un Excel limpio.</p>
+        </div>
+    </header>
+
+    <!-- PASO 1 y 2: CARGA DE ARCHIVOS -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-5 mb-6">
+        <div class="bg-panel border border-line rounded-2xl p-6 shadow-sm">
+            <div class="flex items-center gap-3 mb-3">
+                <span class="step-num bg-cyan/15 text-cyan">1</span>
+                <h3 class="text-base font-bold text-white display">Asset (export de IGAM)</h3>
+            </div>
+            <div class="relative">
+                <input type="file" id="assetUpload" accept=".csv,.xlsx,.xls" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10">
+                <div id="assetDrop" class="border-2 border-dashed border-line rounded-xl p-6 text-center hover:border-cyan/40 transition-colors">
+                    <i data-lucide="file-spreadsheet" class="w-8 h-8 text-cyan mx-auto mb-2"></i>
+                    <p class="text-sm text-dim">Arrastra o haz clic para subir el .csv o .xlsx</p>
+                    <p id="assetStatus" class="text-xs text-mint mt-2 hidden"></p>
+                </div>
+            </div>
+        </div>
+
+        <div class="bg-panel border border-line rounded-2xl p-6 shadow-sm">
+            <div class="flex items-center gap-3 mb-3">
+                <span class="step-num bg-cyan/15 text-cyan">2</span>
+                <h3 class="text-base font-bold text-white display">Inventario Semanal (.xlsx)</h3>
+            </div>
+            <div class="relative">
+                <input type="file" id="invUpload" accept=".xlsx,.xls" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10">
+                <div id="invDrop" class="border-2 border-dashed border-line rounded-xl p-6 text-center hover:border-cyan/40 transition-colors">
+                    <i data-lucide="file-spreadsheet" class="w-8 h-8 text-violet mx-auto mb-2"></i>
+                    <p class="text-sm text-dim">Arrastra o haz clic para subir el .xlsx</p>
+                    <p id="invStatus" class="text-xs text-mint mt-2 hidden"></p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- PASO 3: CONFIGURACIÓN -->
+    <div id="configSection" class="hidden bg-panel border border-line rounded-2xl p-6 shadow-sm mb-6">
+        <div class="flex items-center gap-3 mb-4">
+            <span class="step-num bg-cyan/15 text-cyan">3</span>
+            <h3 class="text-base font-bold text-white display">Configurar Columnas y Alcance</h3>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+            <div>
+                <label class="text-xs text-dim font-semibold uppercase block mb-1.5">Hoja del inventario</label>
+                <select id="sheetSelect" class="w-full bg-ink border border-line rounded-lg px-3 py-2.5 text-sm"></select>
+            </div>
+            <div>
+                <label class="text-xs text-dim font-semibold uppercase block mb-1.5">Columna Serial de Fábrica (principal)</label>
+                <select id="colSerialSelect" class="w-full bg-ink border border-line rounded-lg px-3 py-2.5 text-sm"></select>
+            </div>
+            <div>
+                <label class="text-xs text-dim font-semibold uppercase block mb-1.5">Columna Serial ML (respaldo)</label>
+                <select id="colMlSelect" class="w-full bg-ink border border-line rounded-lg px-3 py-2.5 text-sm"></select>
+            </div>
+        </div>
+
+        <div class="bg-panel2/60 border border-line rounded-xl p-4 mb-5 text-sm text-dim flex items-center gap-2">
+            <i data-lucide="info" class="w-4 h-4 shrink-0"></i>
+            Eliminación estricta: si el equipo no aparece en el inventario (por serial o por etiqueta ML), se elimina — sin excepciones.
+        </div>
+
+        <button type="button" onclick="runReconciliation()"
+            class="bg-cyan/10 hover:bg-cyan/20 border border-cyan/30 text-cyan font-bold px-6 py-3 rounded-xl flex items-center gap-2 transition-colors">
+            <i data-lucide="play" class="w-5 h-5"></i> Procesar Conciliación
+        </button>
+    </div>
+
+    <!-- RESULTADOS -->
+    <div id="resultsSection" class="hidden">
+        <div class="grid grid-cols-2 lg:grid-cols-5 gap-3.5 mb-6">
+            <div class="bg-panel border border-line rounded-2xl p-4">
+                <p class="text-dim text-[11px] font-semibold uppercase mb-1">Total en Asset</p>
+                <p id="statTotal" class="text-2xl font-black mono text-cyan">0</p>
+            </div>
+            <div class="bg-panel border border-line rounded-2xl p-4">
+                <p class="text-dim text-[11px] font-semibold uppercase mb-1">Fuera de Alcance</p>
+                <p id="statOutOfScope" class="text-2xl font-black mono text-dim">0</p>
+            </div>
+            <div class="bg-panel border border-mint/30 rounded-2xl p-4">
+                <p class="text-dim text-[11px] font-semibold uppercase mb-1">Confirmados</p>
+                <p id="statConfirmed" class="text-2xl font-black mono text-mint">0</p>
+            </div>
+            <div class="bg-panel border border-violet/30 rounded-2xl p-4">
+                <p class="text-dim text-[11px] font-semibold uppercase mb-1">ML Rellenados</p>
+                <p id="statBackfilled" class="text-2xl font-black mono text-violet">0</p>
+            </div>
+            <div class="bg-panel border border-red/30 rounded-2xl p-4">
+                <p class="text-dim text-[11px] font-semibold uppercase mb-1">A Eliminar</p>
+                <p id="statRemoved" class="text-2xl font-black mono text-red">0</p>
+            </div>
+        </div>
+
+        <div class="bg-panel border border-line rounded-2xl shadow-sm overflow-hidden mb-6">
+            <div class="p-4 border-b border-line bg-panel2/60 flex items-center justify-between flex-wrap gap-3">
+                <h3 class="text-base font-bold text-white flex items-center gap-2 display">
+                    <i data-lucide="alert-triangle" class="text-red w-5 h-5"></i>
+                    Equipos que se eliminarían <span id="removeCount" class="text-dim font-normal text-sm mono">(0)</span>
+                </h3>
+                <p class="text-xs text-dim">Desmarca los que quieras conservar de todas formas antes de descargar</p>
+            </div>
+            <div class="max-h-[420px] overflow-y-auto overflow-x-auto no-scrollbar scrollbar-thin">
+                <table class="w-full text-sm text-left">
+                    <thead class="text-xs text-dim uppercase bg-panel2/60 border-b border-line sticky top-0">
+                        <tr>
+                            <th class="px-4 py-3 font-semibold">Conservar</th>
+                            <th class="px-4 py-3 font-semibold">Activo</th>
+                            <th class="px-4 py-3 font-semibold">Serial</th>
+                            <th class="px-4 py-3 font-semibold">ML</th>
+                            <th class="px-4 py-3 font-semibold">Cliente</th>
+                            <th class="px-4 py-3 font-semibold">Responsable</th>
+                            <th class="px-4 py-3 font-semibold">Último Reporte</th>
+                            <th class="px-4 py-3 font-semibold">Días</th>
+                        </tr>
+                    </thead>
+                    <tbody id="removeTableBody" class="divide-y divide-line/60"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="bg-panel border border-cyan/30 rounded-2xl p-6 shadow-sm flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div>
+                <h3 class="text-base font-bold text-white display mb-1">Descargar Asset Limpio (.xlsx)</h3>
+                <p class="text-sm text-dim">Excel real (.xlsx), mismas columnas del export de IGAM. Nerve Center hoy solo acepta .csv — avísame si quieres que también le agregue soporte para .xlsx.</p>
+            </div>
+            <div class="flex gap-3">
+                <button type="button" onclick="downloadRemovedReport()"
+                    class="bg-panel2 hover:bg-[#182544] border border-line text-dim hover:text-white px-5 py-3 rounded-xl flex items-center gap-2 font-medium transition-colors whitespace-nowrap">
+                    <i data-lucide="file-spreadsheet" class="w-4 h-4"></i> Reporte de Eliminados
+                </button>
+                <button type="button" onclick="downloadCleanAsset()"
+                    class="bg-mint/10 hover:bg-mint/20 border border-mint/30 text-mint px-5 py-3 rounded-xl flex items-center gap-2 font-bold transition-colors whitespace-nowrap">
+                    <i data-lucide="download" class="w-5 h-5"></i> Descargar Asset Limpio
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+lucide.createIcons();
+
+function showToast(msg, color) {
+    const host = document.getElementById('toastHost');
+    const el = document.createElement('div');
+    el.className = 'toast-in bg-panel2 border rounded-xl px-4 py-3 text-sm shadow-2xl flex items-center gap-2 text-ice';
+    el.style.borderColor = color || '#22d3ee';
+    el.innerHTML = `<i data-lucide="check-circle-2" class="w-4 h-4" style="color:${color || '#22d3ee'}"></i> ${msg}`;
+    host.appendChild(el);
+    lucide.createIcons();
+    setTimeout(() => { el.style.opacity = '0'; el.style.transform = 'translateY(8px)'; el.style.transition = 'all .25s ease'; }, 2400);
+    setTimeout(() => el.remove(), 2700);
+}
+
+let assetHeaders = [];
+let assetParsedRows = []; // { cols: [...] } — valores planos; la salida se reconstruye siempre desde aquí
+let colIdx = {}; // índices de columnas clave en Asset
+
+let invWorkbook = null;
+let invSheetData = {}; // cache de hojas ya leídas como arrays de arrays
+
+const NOW = new Date();
+
+function splitCSVLine(line) {
+    return line.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/).map(v => v.replace(/^"|"$/g, '').trim());
+}
+
+function parseAssetCSVText(text) {
+    const lines = text.split(/\r\n|\n/);
+    const headers = splitCSVLine(lines[0]);
+    const rows = [];
+    for (let i = 1; i < lines.length; i++) {
+        if (!lines[i].trim()) continue;
+        rows.push({ cols: splitCSVLine(lines[i]) });
+    }
+    return { headers, rows };
+}
+
+function parseAssetWorkbook(arrayBuffer) {
+    const wb = XLSX.read(arrayBuffer, { type: 'array' });
+    const ws = wb.Sheets[wb.SheetNames[0]];
+    const aoa = XLSX.utils.sheet_to_json(ws, { header: 1, defval: '', raw: false });
+    const headers = (aoa[0] || []).map(h => (h || '').toString().trim());
+    const rows = aoa.slice(1).filter(r => r.some(v => v !== '')).map(r => ({ cols: headers.map((_, i) => (r[i] !== undefined ? r[i].toString() : '')) }));
+    return { headers, rows };
+}
+
+function findColIndex(headers, ...candidates) {
+    for (const cand of candidates) {
+        const idx = headers.findIndex(h => h === cand);
+        if (idx !== -1) return idx;
+    }
+    return -1;
+}
+
+const norm = (s) => (s || '').toString().trim().toUpperCase().replace(/\s+/g, '');
+
+function onAssetLoaded(headers, rows, fileLabel) {
+    assetHeaders = headers;
+    assetParsedRows = rows;
+
+    colIdx.serial = findColIndex(assetHeaders, 'Número de serie (Predeterminado)');
+    colIdx.ml = findColIndex(assetHeaders, 'Etiqueta de activo SMBIOS');
+    colIdx.ubicacion = findColIndex(assetHeaders, 'Ubicación');
+    colIdx.activo = findColIndex(assetHeaders, 'Activo');
+    colIdx.responsable = findColIndex(assetHeaders, 'Nombre del responsable');
+    colIdx.ultimoReporte = findColIndex(assetHeaders, 'Último reporte');
+
+    document.getElementById('assetStatus').textContent = `${assetParsedRows.length} equipos cargados (${fileLabel})`;
+    document.getElementById('assetStatus').classList.remove('hidden');
+    showToast(`Asset cargado: ${assetParsedRows.length} equipos`, '#34d399');
+    checkReadyForConfig();
+}
+
+document.getElementById('assetUpload').addEventListener('change', e => {
+    const file = e.target.files[0];
+    if (!file) return;
+    const isExcel = /\.xlsx?$/i.test(file.name);
+    const reader = new FileReader();
+    reader.onload = ev => {
+        try {
+            if (isExcel) {
+                const { headers, rows } = parseAssetWorkbook(ev.target.result);
+                onAssetLoaded(headers, rows, 'Excel');
+            } else {
+                const { headers, rows } = parseAssetCSVText(ev.target.result);
+                onAssetLoaded(headers, rows, 'CSV');
+            }
+        } catch (err) {
+            console.error(err);
+            showToast('No se pudo leer el archivo del Asset', '#f5484d');
+        }
+    };
+    if (isExcel) reader.readAsArrayBuffer(file);
+    else reader.readAsText(file);
+});
+
+document.getElementById('invUpload').addEventListener('change', e => {
+    const file = e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = ev => {
+        try {
+            invWorkbook = XLSX.read(ev.target.result, { type: 'array' });
+            invSheetData = {};
+            const sheetSelect = document.getElementById('sheetSelect');
+            sheetSelect.innerHTML = invWorkbook.SheetNames.map(n => `<option value="${n}">${n}</option>`).join('');
+            const preferred = invWorkbook.SheetNames.find(n => n.toLowerCase().includes('base general'));
+            if (preferred) sheetSelect.value = preferred;
+            document.getElementById('invStatus').textContent = `${invWorkbook.SheetNames.length} hojas encontradas`;
+            document.getElementById('invStatus').classList.remove('hidden');
+            showToast(`Inventario cargado: ${invWorkbook.SheetNames.length} hojas`, '#a78bfa');
+            populateColumnSelectors();
+            checkReadyForConfig();
+        } catch (err) {
+            console.error(err);
+            showToast('No se pudo leer el archivo .xlsx', '#f5484d');
+        }
+    };
+    reader.readAsArrayBuffer(file);
+});
+
+document.getElementById('sheetSelect').addEventListener('change', populateColumnSelectors);
+
+function getSheetRows(sheetName) {
+    if (invSheetData[sheetName]) return invSheetData[sheetName];
+    const ws = invWorkbook.Sheets[sheetName];
+    const rows = XLSX.utils.sheet_to_json(ws, { header: 1, defval: '' });
+    invSheetData[sheetName] = rows;
+    return rows;
+}
+
+function colLetter(i) {
+    let s = '';
+    i = i + 1;
+    while (i > 0) {
+        const rem = (i - 1) % 26;
+        s = String.fromCharCode(65 + rem) + s;
+        i = Math.floor((i - 1) / 26);
+    }
+    return s;
+}
+
+function populateColumnSelectors() {
+    const sheetName = document.getElementById('sheetSelect').value;
+    if (!sheetName) return;
+    const rows = getSheetRows(sheetName);
+    const header = rows[0] || [];
+    const options = header.map((h, i) => `<option value="${i}">${colLetter(i)} — ${h || '(vacío)'}</option>`).join('');
+
+    const serialSelect = document.getElementById('colSerialSelect');
+    const mlSelect = document.getElementById('colMlSelect');
+    serialSelect.innerHTML = options;
+    mlSelect.innerHTML = options;
+
+    // Prioridad de auto-detección: 1) mismo nombre exacto que usa nuestro Asset.csv (hojas tipo "Asset Ma"),
+    // 2) el patrón "SERIAL DE FABRICA"/"SERIAL" (hojas tipo "Base General"), 3) posición D/C por defecto.
+    let serialIdx = header.findIndex(h => norm(h) === norm('Número de serie (Predeterminado)'));
+    if (serialIdx === -1) serialIdx = header.findIndex(h => norm(h).includes('SERIALDEFABRICA'));
+    let mlIdx = header.findIndex(h => norm(h) === norm('Etiqueta de activo SMBIOS'));
+    if (mlIdx === -1) mlIdx = header.findIndex(h => norm(h) === 'SERIAL');
+    serialSelect.value = serialIdx !== -1 ? serialIdx : Math.min(3, header.length - 1);
+    mlSelect.value = mlIdx !== -1 ? mlIdx : Math.min(2, header.length - 1);
+}
+
+function checkReadyForConfig() {
+    if (assetParsedRows.length > 0 && invWorkbook) {
+        document.getElementById('configSection').classList.remove('hidden');
+        document.getElementById('configSection').scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+}
+
+let reconciliationResult = null;
+
+function daysSince(dateStr) {
+    if (!dateStr) return null;
+    const d = new Date(dateStr);
+    if (isNaN(d.getTime())) return null;
+    return Math.floor((NOW - d) / (1000 * 60 * 60 * 24));
+}
+
+window.runReconciliation = function () {
+    const sheetName = document.getElementById('sheetSelect').value;
+    const serialColIdx = parseInt(document.getElementById('colSerialSelect').value);
+    const mlColIdx = parseInt(document.getElementById('colMlSelect').value);
+
+    if (colIdx.serial === -1) {
+        showToast('No se encontró la columna "Número de serie (Predeterminado)" en el Asset.csv', '#f5484d');
+        return;
+    }
+
+    const invRows = getSheetRows(sheetName).slice(1); // sin encabezado
+    const invSerialSet = new Set();
+    const invMlSet = new Set();
+    const invSerialToMl = {}; // serial normalizado -> ML tal cual viene en el inventario (para rellenar)
+    invRows.forEach(r => {
+        const s = norm(r[serialColIdx]);
+        const mRaw = (r[mlColIdx] || '').toString().trim();
+        const m = norm(mRaw);
+        if (s) { invSerialSet.add(s); if (mRaw) invSerialToMl[s] = mRaw; }
+        if (m) invMlSet.add(m);
+    });
+
+    // Alcance automático: qué clientes (Ubicación) cubre este inventario, según los equipos
+    // del Asset.csv que sí coinciden con él. Solo esos clientes quedan sujetos a la regla de eliminación;
+    // el resto de clientes (sin datos de verificación en este archivo) se deja intacto.
+    const scopeClients = new Set();
+    assetParsedRows.forEach(row => {
+        const serial = norm(row.cols[colIdx.serial]);
+        const ml = colIdx.ml !== -1 ? norm(row.cols[colIdx.ml]) : '';
+        const matches = invSerialSet.has(serial) || (ml && invMlSet.has(ml));
+        if (matches && colIdx.ubicacion !== -1) scopeClients.add(row.cols[colIdx.ubicacion]);
+    });
+
+    let confirmed = 0, outOfScope = 0, backfilled = 0, removed = [];
+
+    assetParsedRows.forEach(row => {
+        const serial = norm(row.cols[colIdx.serial]);
+        const ourMl = colIdx.ml !== -1 ? row.cols[colIdx.ml] : '';
+        const ml = norm(ourMl);
+        const ubic = colIdx.ubicacion !== -1 ? row.cols[colIdx.ubicacion] : '';
+        const matches = invSerialSet.has(serial) || (ml && invMlSet.has(ml));
+        const inScope = scopeClients.has(ubic);
+
+        row._matches = matches;
+        row._inScope = inScope;
+
+        if (matches) {
+            confirmed++;
+            row._decision = 'keep';
+            // Traer el ML del inventario si el nuestro viene vacío — el inventario suele tenerlo completo
+            if (colIdx.ml !== -1 && !ourMl && invSerialToMl[serial]) {
+                row.cols[colIdx.ml] = invSerialToMl[serial];
+                row._backfilled = true;
+                backfilled++;
+            }
+            return;
+        }
+        if (!inScope) { outOfScope++; row._decision = 'keep'; return; }
+
+        // Eliminación estricta: no coincide por serial ni por ML, y sí está en el alcance del inventario -> se elimina
+        row._decision = 'remove_default';
+        row._keepOverride = false;
+        const lastReport = colIdx.ultimoReporte !== -1 ? row.cols[colIdx.ultimoReporte] : '';
+        removed.push({ row, days: daysSince(lastReport) });
+    });
+
+    reconciliationResult = { confirmed, outOfScope, backfilled, removed, scopeClients: [...scopeClients] };
+
+    document.getElementById('statTotal').textContent = assetParsedRows.length;
+    document.getElementById('statOutOfScope').textContent = outOfScope;
+    document.getElementById('statConfirmed').textContent = confirmed;
+    document.getElementById('statBackfilled').textContent = backfilled;
+    document.getElementById('statRemoved').textContent = removed.length;
+    document.getElementById('removeCount').textContent = `(${removed.length})`;
+
+    const tbody = document.getElementById('removeTableBody');
+    tbody.innerHTML = removed.map((item, i) => {
+        const r = item.row;
+        const activo = colIdx.activo !== -1 ? r.cols[colIdx.activo] : '';
+        const serial = r.cols[colIdx.serial];
+        const ml = colIdx.ml !== -1 ? r.cols[colIdx.ml] : '';
+        const ubic = colIdx.ubicacion !== -1 ? r.cols[colIdx.ubicacion] : '';
+        const resp = colIdx.responsable !== -1 ? r.cols[colIdx.responsable] : '';
+        const lastReport = colIdx.ultimoReporte !== -1 ? r.cols[colIdx.ultimoReporte] : '';
+        return `<tr>
+            <td class="px-4 py-2.5"><input type="checkbox" onchange="toggleKeep(${i}, this.checked)" class="w-4 h-4 accent-mint"></td>
+            <td class="px-4 py-2.5 font-semibold text-white">${activo}</td>
+            <td class="px-4 py-2.5 mono text-dim">${serial}</td>
+            <td class="px-4 py-2.5 mono text-dim">${ml || '-'}</td>
+            <td class="px-4 py-2.5 text-dim">${ubic}</td>
+            <td class="px-4 py-2.5 text-dim">${resp || 'Sin asignar'}</td>
+            <td class="px-4 py-2.5 text-dim">${lastReport ? lastReport.split('T')[0] : 'N/A'}</td>
+            <td class="px-4 py-2.5 ${item.days !== null && item.days > 90 ? 'text-red font-bold' : 'text-dim'}">${item.days === null ? 'N/D' : item.days}</td>
+        </tr>`;
+    }).join('');
+    lucide.createIcons();
+
+    document.getElementById('resultsSection').classList.remove('hidden');
+    document.getElementById('resultsSection').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    showToast(`Conciliación lista: ${confirmed} confirmados, ${removed.length} a eliminar`, '#22d3ee');
+};
+
+window.toggleKeep = function (i, checked) {
+    reconciliationResult.removed[i].row._keepOverride = checked;
+};
+
+// El export de IGAM trae un bug de encabezados: "Tipo" sale duplicado (uno en español, otro en
+// inglés) y el orden real es Tipo, ID de activo, Tipo, Activo... Esto corrige el orden final a
+// ID de activo, Tipo, Activo — y deja el resto de columnas tal cual, sin duplicados.
+function buildCanonicalOrder(headers) {
+    const idIdx = headers.findIndex(h => h === 'ID de activo');
+    const activoIdx = headers.findIndex(h => h === 'Activo');
+    const tipoIndices = [];
+    headers.forEach((h, i) => { if (h === 'Tipo') tipoIndices.push(i); });
+    const tipoIdx = tipoIndices.length > 0 ? tipoIndices[0] : -1; // se conserva solo la primera ocurrencia
+
+    const used = new Set([idIdx, activoIdx, ...tipoIndices].filter(i => i !== -1));
+    const order = [];
+    if (idIdx !== -1) order.push(idIdx);
+    if (tipoIdx !== -1) order.push(tipoIdx);
+    if (activoIdx !== -1) order.push(activoIdx);
+    headers.forEach((h, i) => { if (!used.has(i)) order.push(i); });
+    return order;
+}
+
+window.downloadCleanAsset = function () {
+    if (!reconciliationResult) return;
+    const order = buildCanonicalOrder(assetHeaders);
+    const canonicalHeaders = order.map(i => assetHeaders[i]);
+    const keptRows = assetParsedRows
+        .filter(r => r._decision === 'keep' || r._keepOverride)
+        .map(r => order.map(i => r.cols[i]));
+    const aoa = [canonicalHeaders, ...keptRows];
+    const wb = XLSX.utils.book_new();
+    const ws = XLSX.utils.aoa_to_sheet(aoa);
+    ws['!cols'] = canonicalHeaders.map(h => ({ wch: Math.min(Math.max((h || '').length, 12), 34) }));
+    ws['!freeze'] = { xSplit: 0, ySplit: 1 };
+    XLSX.utils.book_append_sheet(wb, ws, 'Asset');
+    const stamp = new Date().toISOString().slice(0, 10);
+    XLSX.writeFile(wb, `Asset_conciliado_${stamp}.xlsx`);
+    const finalRemoved = reconciliationResult.removed.filter(item => !item.row._keepOverride).length;
+    showToast(`Descargado: ${assetParsedRows.length - finalRemoved} equipos en el Asset limpio`, '#34d399');
+};
+
+window.downloadRemovedReport = function () {
+    if (!reconciliationResult || typeof XLSX === 'undefined') return;
+    const rows = reconciliationResult.removed.map(item => {
+        const r = item.row;
+        return {
+            'Activo': colIdx.activo !== -1 ? r.cols[colIdx.activo] : '',
+            'Serial': r.cols[colIdx.serial],
+            'ML': colIdx.ml !== -1 ? r.cols[colIdx.ml] : '',
+            'Cliente': colIdx.ubicacion !== -1 ? r.cols[colIdx.ubicacion] : '',
+            'Responsable': colIdx.responsable !== -1 ? r.cols[colIdx.responsable] : '',
+            'Último Reporte': colIdx.ultimoReporte !== -1 ? r.cols[colIdx.ultimoReporte] : '',
+            'Días Sin Reportar': item.days === null ? '' : item.days,
+            'Conservado Manualmente': r._keepOverride ? 'Sí' : 'No'
+        };
+    });
+    const wb = XLSX.utils.book_new();
+    const ws = XLSX.utils.json_to_sheet(rows);
+    ws['!cols'] = Object.keys(rows[0] || {}).map(k => ({ wch: Math.max(k.length, 14) }));
+    XLSX.utils.book_append_sheet(wb, ws, 'Eliminados');
+    const stamp = new Date().toISOString().slice(0, 10);
+    XLSX.writeFile(wb, `Reporte_eliminados_${stamp}.xlsx`);
+};
+</script>
+</body>
+</html>
