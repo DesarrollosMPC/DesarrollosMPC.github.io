@@ -43,10 +43,8 @@
         body {
             margin: 0;
             font-family: 'Montserrat', sans-serif;
-            /* Fondo enviado por el equipo de comunicaciones (Andicom 2026) */
-            background:
-                linear-gradient(135deg, rgba(14, 29, 44, 0.55), rgba(0, 80, 133, 0.55)),
-                url('https://raw.githubusercontent.com/DesarrollosMPC/DesarrollosMPC.github.io/main/contenido/MIL_RedesAgosto_260803-09.jpg') center/cover no-repeat fixed;
+            /* Fondo enviado por el equipo de comunicaciones (Andicom 2026) - sin overlay */
+            background: url('https://raw.githubusercontent.com/DesarrollosMPC/DesarrollosMPC.github.io/main/contenido/MIL_RedesAgosto_260803-09.jpg') center/cover no-repeat fixed;
             background-color: #0e1d2c; /* fallback mientras carga la imagen */
             min-height: 100vh;
             color: #333;
@@ -290,24 +288,6 @@
                     </div>
                     <div id="vision-cta" class="text-right text-milenio-teal font-bold text-sm">
                         Iniciar dinámica <i class="fa-solid fa-arrow-right ml-1 group-hover:translate-x-1 transition-transform"></i>
-                    </div>
-                </div>
-
-                <!-- Reconocimiento especial invitados Milenio en Andicom -->
-                <div class="mt-6 rounded-2xl overflow-hidden border-2 border-milenio-teal/30 shadow-md">
-                    <div id="reconocimiento-imagen" class="w-full">
-                        <!-- Placeholder hasta que llegue la imagen del lunes -->
-                        <div class="w-full bg-gradient-to-br from-milenio-dark via-milenio-blue to-milenio-teal p-6 md:p-8 flex flex-col items-center justify-center text-center text-white min-h-[180px] relative">
-                            <div class="absolute inset-0 opacity-10 flex items-center justify-center">
-                                <i class="fa-solid fa-award text-[180px]"></i>
-                            </div>
-                            <div class="relative z-10">
-                                <div class="inline-block bg-white/20 backdrop-blur-sm rounded-full px-3 py-1 text-[10px] font-black uppercase tracking-widest mb-3">
-                                    <i class="fa-solid fa-image mr-1"></i>Imagen pendiente
-                                </div>
-                                <p class="text-lg md:text-xl font-black leading-tight">Reconocimiento especial<br/>invitados de Milenio en Andicom</p>
-                            </div>
-                        </div>
                     </div>
                 </div>
 
@@ -642,7 +622,7 @@
                 </div>
 
                 <p class="text-center text-gray-500 mb-6 font-medium text-sm md:text-base italic">
-                    Elige la opción que consideras más relevante y abriremos la conversación.
+                    Elige la opción que consideras más relevante.
                 </p>
 
                 <!-- Tablero (5 opciones - inyectado por JS) -->
@@ -960,6 +940,9 @@
                 id: 'op1',
                 text: 'Renovación tecnológica continua',
                 icon: 'fa-arrows-rotate',
+                color: '#47a5ad',  // Milenio teal
+                bgTint: 'rgba(71, 165, 173, 0.08)',
+                borderTint: 'rgba(71, 165, 173, 0.35)',
                 serviceFocus: 'Renting Tecnológico',
                 intro: 'Desde nuestra experiencia, podemos decir que la obsolescencia tecnológica comienza mucho antes de que un equipo deje de funcionar.',
                 serviceDescription: 'Con nuestro Modelo Renting tienes equipos siempre a la vanguardia, con renovación automática y sin obsolescencia tecnológica.',
@@ -970,6 +953,9 @@
                 id: 'op2',
                 text: 'Equipos de TI saturados por la carga operativa',
                 icon: 'fa-server',
+                color: '#005085',  // Milenio blue oscuro
+                bgTint: 'rgba(0, 80, 133, 0.08)',
+                borderTint: 'rgba(0, 80, 133, 0.35)',
                 serviceFocus: 'Mesa de Ayuda + Servicios Gestionados',
                 intro: 'Para tu prioridad, en Milenio PC te ofrecemos:',
                 serviceDescription: 'Descargamos a tu equipo de TI con servicios gestionados y una Mesa de Ayuda especializada que absorbe la carga operativa.',
@@ -980,6 +966,9 @@
                 id: 'op3',
                 text: 'Optimizar el presupuesto y controlar la inversión',
                 icon: 'fa-piggy-bank',
+                color: '#009fe3',  // Milenio azul claro
+                bgTint: 'rgba(0, 159, 227, 0.08)',
+                borderTint: 'rgba(0, 159, 227, 0.35)',
                 serviceFocus: 'Modelo DaaS (OPEX)',
                 intro: 'Para tu prioridad, en Milenio PC te ofrecemos:',
                 serviceDescription: 'Con nuestro Modelo DaaS conviertes grandes inversiones en una cuota mensual predecible. Presupuesto claro y sin sorpresas.',
@@ -990,6 +979,9 @@
                 id: 'op4',
                 text: 'Crecer rápido con una estructura de TI ajustada',
                 icon: 'fa-arrow-up-right-dots',
+                color: '#10b981',  // Verde esmeralda (Milenio nube)
+                bgTint: 'rgba(16, 185, 129, 0.08)',
+                borderTint: 'rgba(16, 185, 129, 0.35)',
                 serviceFocus: 'Renting Flexible + Consultoría',
                 intro: 'Para tu prioridad, en Milenio PC te ofrecemos:',
                 serviceDescription: 'Nuestro Renting flexible te permite escalar tu infraestructura tecnológica al ritmo de tu crecimiento, sin comprometer flujo de caja.',
@@ -1000,6 +992,9 @@
                 id: 'op5',
                 text: 'Elevar la experiencia y productividad del colaborador',
                 icon: 'fa-user-gear',
+                color: '#0e1d2c',  // Milenio dark
+                bgTint: 'rgba(14, 29, 44, 0.08)',
+                borderTint: 'rgba(14, 29, 44, 0.35)',
                 serviceFocus: 'Workplace Experience',
                 intro: 'Para tu prioridad, en Milenio PC te ofrecemos:',
                 serviceDescription: 'Diseñamos experiencias de trabajo modernas con equipos de última generación, soporte proactivo y herramientas colaborativas.',
@@ -1667,15 +1662,25 @@
             openingOptions.forEach(opt => {
                 const btn = document.createElement('button');
                 const isSelected = appState.opening === opt.id;
-                btn.className = `play-btn opening-btn bg-white border-2 border-gray-100 text-gray-700 font-semibold p-4 md:p-5 rounded-2xl shadow-sm flex items-center gap-3 w-full text-left ${isSelected ? 'selected' : ''}`;
+                btn.className = `play-btn opening-btn font-semibold p-4 md:p-5 rounded-2xl shadow-sm flex items-center gap-3 w-full text-left transition-all ${isSelected ? 'selected' : ''}`;
+                btn.style.background = isSelected
+                    ? `linear-gradient(135deg, ${opt.color}, ${opt.color}dd)`
+                    : `linear-gradient(135deg, #ffffff, ${opt.bgTint})`;
+                btn.style.border = `2px solid ${isSelected ? opt.color : opt.borderTint}`;
+                btn.style.color = isSelected ? '#ffffff' : '#374151';
                 btn.dataset.optionId = opt.id;
+                btn.dataset.color = opt.color;
+                btn.dataset.bgTint = opt.bgTint;
+                btn.dataset.borderTint = opt.borderTint;
 
                 btn.innerHTML = `
-                    <div class="w-12 h-12 rounded-full ${isSelected ? 'bg-white/20 text-white' : 'bg-milenio-blue/10 text-milenio-blue'} flex shrink-0 items-center justify-center btn-icon transition-colors">
+                    <div class="w-12 h-12 rounded-full flex shrink-0 items-center justify-center btn-icon transition-colors"
+                         style="background:${isSelected ? 'rgba(255,255,255,0.25)' : opt.color + '1a'}; color:${isSelected ? '#ffffff' : opt.color};">
                         <i class="fa-solid ${opt.icon} text-xl"></i>
                     </div>
-                    <span class="flex-1 leading-snug text-sm md:text-base">${opt.text}</span>
-                    <div class="check-ring w-8 h-8 rounded-full bg-white text-milenio-teal flex shrink-0 items-center justify-center text-xl shadow-inner"><i class="fa-solid fa-check"></i></div>
+                    <span class="flex-1 leading-snug text-sm md:text-base font-bold">${opt.text}</span>
+                    <div class="check-ring w-8 h-8 rounded-full bg-white flex shrink-0 items-center justify-center text-xl shadow-inner"
+                         style="color:${opt.color};"><i class="fa-solid fa-check"></i></div>
                 `;
 
                 btn.onclick = () => selectOpeningOption(opt.id);
@@ -1684,21 +1689,29 @@
         }
 
         // Selección ÚNICA: al elegir una opción, deselecciona las demás
-        // y navega a la pantalla de imagen alusiva del servicio.
         function selectOpeningOption(optId) {
             document.querySelectorAll('.opening-btn').forEach(b => {
                 const iconBg = b.querySelector('.btn-icon');
+                const color = b.dataset.color;
+                const bgTint = b.dataset.bgTint;
+                const borderTint = b.dataset.borderTint;
                 if (b.dataset.optionId === optId) {
                     b.classList.add('selected');
+                    b.style.background = `linear-gradient(135deg, ${color}, ${color}dd)`;
+                    b.style.border = `2px solid ${color}`;
+                    b.style.color = '#ffffff';
                     if (iconBg) {
-                        iconBg.classList.remove('bg-milenio-blue/10', 'text-milenio-blue');
-                        iconBg.classList.add('bg-white/20', 'text-white');
+                        iconBg.style.background = 'rgba(255,255,255,0.25)';
+                        iconBg.style.color = '#ffffff';
                     }
                 } else {
                     b.classList.remove('selected');
+                    b.style.background = `linear-gradient(135deg, #ffffff, ${bgTint})`;
+                    b.style.border = `2px solid ${borderTint}`;
+                    b.style.color = '#374151';
                     if (iconBg) {
-                        iconBg.classList.remove('bg-white/20', 'text-white');
-                        iconBg.classList.add('bg-milenio-blue/10', 'text-milenio-blue');
+                        iconBg.style.background = color + '1a';
+                        iconBg.style.color = color;
                     }
                 }
             });
@@ -2438,13 +2451,21 @@
             const manualForm = document.getElementById('manual-form');
             if (manualForm) manualForm.reset();
 
-            // Reset visual del tablero de opciones
+            // Reset visual del tablero de opciones (restaura colores corporativos originales)
             document.querySelectorAll('.opening-btn').forEach(b => {
                 b.classList.remove('selected');
+                const color = b.dataset.color;
+                const bgTint = b.dataset.bgTint;
+                const borderTint = b.dataset.borderTint;
+                if (color) {
+                    b.style.background = `linear-gradient(135deg, #ffffff, ${bgTint})`;
+                    b.style.border = `2px solid ${borderTint}`;
+                    b.style.color = '#374151';
+                }
                 const icon = b.querySelector('.btn-icon');
-                if (icon) {
-                    icon.classList.remove('bg-white/20', 'text-white');
-                    icon.classList.add('bg-milenio-blue/10', 'text-milenio-blue');
+                if (icon && color) {
+                    icon.style.background = color + '1a';
+                    icon.style.color = color;
                 }
             });
 
