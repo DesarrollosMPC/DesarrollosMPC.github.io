@@ -1,0 +1,723 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Milenio PC · Andicom 2026 · Registro</title>
+
+    <!-- Tailwind, íconos, tipografía -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700;800;900&display=swap" rel="stylesheet">
+    <!-- html2canvas para descargar el comprobante como imagen -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'milenio-blue': '#005085',
+                        'milenio-teal': '#47a5ad',
+                        'milenio-lightblue': '#009fe3',
+                        'milenio-dark': '#0e1d2c'
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body {
+            margin: 0;
+            font-family: 'Montserrat', sans-serif;
+            /* Mismo fondo que la app comercial para coherencia visual - sin overlay */
+            background: url('https://raw.githubusercontent.com/DesarrollosMPC/DesarrollosMPC.github.io/main/contenido/MIL_RedesAgosto_260803-09.jpg') center/cover no-repeat fixed;
+            background-color: #0e1d2c;
+            min-height: 100vh;
+            color: #333;
+            -webkit-user-select: none;
+            user-select: none;
+        }
+
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.97);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .screen {
+            display: none;
+            animation: fadeIn 0.3s ease-out;
+        }
+        .screen.active { display: flex; }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Toast */
+        #toast {
+            visibility: hidden;
+            min-width: 250px;
+            background-color: #0e1d2c;
+            color: #fff;
+            text-align: center;
+            border-radius: 12px;
+            padding: 14px;
+            position: fixed;
+            z-index: 100;
+            left: 50%;
+            transform: translateX(-50%);
+            bottom: 30px;
+            font-weight: bold;
+            font-size: 14px;
+        }
+        #toast.show {
+            visibility: visible;
+            animation: slideUp 0.4s ease-out;
+        }
+        @keyframes slideUp {
+            from { bottom: 0; opacity: 0; }
+            to { bottom: 30px; opacity: 1; }
+        }
+
+        input:focus, textarea:focus, select:focus { outline: none; }
+        .input-group {
+            position: relative;
+        }
+        .input-group input {
+            width: 100%;
+            padding: 12px 12px 12px 44px;
+            font-size: 16px;
+            border: 2px solid #e5e7eb;
+            border-radius: 12px;
+            background: white;
+            font-weight: 600;
+            transition: border-color 0.2s;
+        }
+        .input-group input:focus { border-color: #005085; }
+        .input-group i {
+            position: absolute;
+            left: 14px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #9ca3af;
+        }
+    </style>
+</head>
+
+<body class="flex flex-col items-center min-h-screen">
+
+    <!-- Header compacto -->
+    <header class="w-full glass-panel p-3 flex flex-col items-center justify-center sticky top-0 z-40 shadow-sm">
+        <img src="https://www.mileniopc.com/wp-content/uploads/2024/03/MPC_logo.svg" alt="Milenio PC" class="h-10">
+        <p class="text-milenio-blue font-bold text-[10px] text-center tracking-widest uppercase mt-1">
+            Somos la selección inteligente en servicios de tecnología
+        </p>
+    </header>
+
+    <main class="w-full max-w-md p-4 flex-grow flex flex-col relative items-center justify-start pt-4">
+
+        <!-- =========================================================
+             PANTALLA 1: BIENVENIDA
+             ========================================================= -->
+        <section id="screen-welcome" class="screen active flex-col items-center w-full">
+            <div class="glass-panel rounded-3xl p-6 w-full shadow-2xl relative overflow-hidden text-center">
+                <div class="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-milenio-blue to-milenio-teal"></div>
+
+                <div class="flex justify-center mb-4 mt-2">
+                    <div class="w-20 h-20 rounded-full bg-gradient-to-br from-milenio-blue to-milenio-teal flex items-center justify-center shadow-xl">
+                        <i class="fa-solid fa-trophy text-white text-3xl"></i>
+                    </div>
+                </div>
+
+                <h1 class="text-2xl md:text-3xl font-black text-milenio-dark mb-2 leading-tight">
+                    ¡Participa por 3 equipos portátiles!
+                </h1>
+
+                <p class="text-sm text-gray-600 mb-5">
+                    Regístrate y podrás ganar uno de los reconocimientos especiales de Milenio PC en Andicom 2026.
+                </p>
+
+                <!-- 3 Reconocimientos con iconos de laptop (composición visual) -->
+                <div class="bg-gradient-to-br from-milenio-dark via-milenio-blue to-milenio-teal rounded-2xl p-4 mb-5 text-white relative overflow-hidden shadow-xl">
+                    <!-- Textura de fondo sutil -->
+                    <div class="absolute inset-0 opacity-5 flex items-center justify-center">
+                        <i class="fa-solid fa-award text-[200px]"></i>
+                    </div>
+
+                    <div class="relative z-10">
+                        <p class="text-center text-[10px] font-black uppercase tracking-widest text-milenio-teal mb-1">
+                            <i class="fa-solid fa-trophy mr-1"></i>3 Reconocimientos Especiales
+                        </p>
+                        <p class="text-center text-xs opacity-80 mb-4">Se entrega uno cada día del evento</p>
+
+                        <!-- Grid de 3 premios -->
+                        <div class="grid grid-cols-3 gap-2">
+                            <!-- Premio 1: Miércoles -->
+                            <div class="bg-white/10 backdrop-blur-sm rounded-xl p-3 text-center border border-white/20">
+                                <div class="text-[9px] font-black uppercase tracking-widest text-milenio-teal mb-1">Miércoles</div>
+                                <i class="fa-solid fa-laptop text-3xl mb-1 text-white/90"></i>
+                                <div class="text-[10px] font-bold leading-tight">EliteBook 8 FLIP G2i</div>
+                            </div>
+                            <!-- Premio 2: Jueves (destacado) -->
+                            <div class="bg-gradient-to-br from-white/20 to-white/5 backdrop-blur-sm rounded-xl p-3 text-center border-2 border-yellow-300/50 relative">
+                                <div class="absolute -top-2 left-1/2 -translate-x-1/2 bg-yellow-400 text-milenio-dark text-[8px] font-black px-2 py-0.5 rounded-full shadow">
+                                    ⭐
+                                </div>
+                                <div class="text-[9px] font-black uppercase tracking-widest text-yellow-300 mb-1">Jueves</div>
+                                <i class="fa-solid fa-laptop text-3xl mb-1 text-white"></i>
+                                <div class="text-[10px] font-bold leading-tight">ThinkPad X1 2-in-1</div>
+                            </div>
+                            <!-- Premio 3: Viernes -->
+                            <div class="bg-white/10 backdrop-blur-sm rounded-xl p-3 text-center border border-white/20">
+                                <div class="text-[9px] font-black uppercase tracking-widest text-milenio-teal mb-1">Viernes</div>
+                                <i class="fa-solid fa-laptop text-3xl mb-1 text-white/90"></i>
+                                <div class="text-[10px] font-bold leading-tight">EliteBook 8 FLIP G2i</div>
+                            </div>
+                        </div>
+
+                        <p class="text-center text-[10px] italic opacity-70 mt-3">
+                            <i class="fa-solid fa-circle-info mr-1"></i>Consulta los términos y condiciones antes de participar
+                        </p>
+                    </div>
+                </div>
+
+                <button onclick="goToScreen('screen-form')"
+                    class="w-full bg-milenio-dark text-white font-black py-4 rounded-2xl text-lg hover:bg-black transition-all shadow-lg flex items-center justify-center gap-2">
+                    Empezar registro <i class="fa-solid fa-arrow-right"></i>
+                </button>
+
+                <p class="text-[10px] text-gray-400 mt-3 uppercase tracking-widest">Andicom 2026 · Milenio PC</p>
+            </div>
+        </section>
+
+        <!-- =========================================================
+             PANTALLA 2: FORMULARIO
+             ========================================================= -->
+        <section id="screen-form" class="screen flex-col items-center w-full">
+            <div class="glass-panel rounded-3xl p-6 w-full shadow-2xl relative">
+                <button onclick="goToScreen('screen-welcome')"
+                    class="absolute top-4 left-4 text-gray-400 hover:text-milenio-blue font-bold text-sm">
+                    <i class="fa-solid fa-chevron-left"></i>
+                </button>
+
+                <h2 class="text-xl font-black text-milenio-dark mb-1 text-center mt-4">Tus datos</h2>
+                <p class="text-xs text-gray-500 mb-5 text-center">Todos los campos con * son obligatorios</p>
+
+                <form id="form-sorteo" class="space-y-3" onsubmit="event.preventDefault(); goToTyc();">
+                    <div class="input-group">
+                        <i class="fa-solid fa-user"></i>
+                        <input type="text" id="f-nombres" required placeholder="Nombres *">
+                    </div>
+                    <div class="input-group">
+                        <i class="fa-solid fa-user"></i>
+                        <input type="text" id="f-apellidos" required placeholder="Apellidos *">
+                    </div>
+                    <div class="input-group">
+                        <i class="fa-solid fa-id-card"></i>
+                        <input type="text" id="f-cedula" required inputmode="numeric" pattern="[0-9]{5,15}"
+                            placeholder="Cédula *" title="Solo números, 5 a 15 dígitos">
+                    </div>
+                    <div class="input-group">
+                        <i class="fa-solid fa-building"></i>
+                        <input type="text" id="f-empresa" required placeholder="Empresa *">
+                    </div>
+                    <div class="input-group">
+                        <i class="fa-solid fa-briefcase"></i>
+                        <input type="text" id="f-cargo" required placeholder="Cargo *">
+                    </div>
+                    <div class="input-group">
+                        <i class="fa-solid fa-envelope"></i>
+                        <input type="email" id="f-correo" required placeholder="Correo electrónico *">
+                    </div>
+                    <div class="input-group">
+                        <i class="fa-solid fa-phone"></i>
+                        <input type="tel" id="f-telefono" required inputmode="numeric" placeholder="Teléfono *">
+                    </div>
+
+                    <button type="submit"
+                        class="w-full bg-milenio-blue text-white font-black py-4 rounded-2xl text-base hover:bg-blue-800 transition-all shadow-lg flex items-center justify-center gap-2 mt-4">
+                        Continuar <i class="fa-solid fa-arrow-right"></i>
+                    </button>
+                </form>
+            </div>
+        </section>
+
+        <!-- =========================================================
+             PANTALLA 3: TÉRMINOS Y CONDICIONES
+             ========================================================= -->
+        <section id="screen-tyc" class="screen flex-col items-center w-full">
+            <div class="glass-panel rounded-3xl p-6 w-full shadow-2xl relative">
+                <button onclick="goToScreen('screen-form')"
+                    class="absolute top-4 left-4 text-gray-400 hover:text-milenio-blue font-bold text-sm">
+                    <i class="fa-solid fa-chevron-left"></i>
+                </button>
+
+                <div class="text-center mb-4 mt-4">
+                    <span class="inline-block bg-milenio-blue/10 text-milenio-blue px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest">
+                        <i class="fa-solid fa-file-shield mr-1"></i>Autorización de datos
+                    </span>
+                </div>
+
+                <h2 class="text-xl font-black text-milenio-dark mb-3 text-center leading-tight">
+                    Términos y Condiciones
+                </h2>
+
+                <!-- T&C oficial - Actividad "La Visión de los Líderes Empresariales" -->
+                <div class="bg-gray-50 border border-gray-200 rounded-xl p-4 mb-4 max-h-72 overflow-y-auto text-xs text-gray-700 leading-relaxed space-y-3">
+
+                    <p class="text-center font-black text-milenio-dark text-sm mb-2">
+                        TÉRMINOS Y CONDICIONES<br>
+                        <span class="text-milenio-blue">Actividad "La Visión de los Líderes Empresariales"</span>
+                    </p>
+
+                    <p><b>1. Organizador:</b> La actividad es organizada por <b>Milenio PC S.A.</b>, NIT 830067055-6, en el marco de ANDICOM 2026.</p>
+
+                    <p><b>2. Vigencia y lugar:</b> La actividad se realizará por Milenio PC durante la participación de la compañía en ANDICOM 2026, en Cartagena de Indias.</p>
+
+                    <p><b>3. Podrán participar personas que:</b></p>
+                    <ul class="list-disc pl-5 space-y-1">
+                        <li>Sean mayores de 18 años.</li>
+                        <li>Asistan presencialmente a ANDICOM 2026.</li>
+                        <li>Compartan su visión sobre uno de los retos tecnológicos planteados.</li>
+                        <li>Completen la información solicitada.</li>
+                        <li>Acepten estos términos y la autorización para el tratamiento de datos personales.</li>
+                        <li>Sigan la página oficial de Milenio PC en LinkedIn.</li>
+                    </ul>
+                    <p class="italic">Cada participante podrá realizar un único registro válido.</p>
+
+                    <p><b>4. Para participar, el asistente deberá:</b></p>
+                    <ol class="list-decimal pl-5 space-y-1">
+                        <li>Conversar con una integrante del equipo comercial de Milenio PC, compartiendo su visión sobre uno de los temas propuestos o escaneando un QR.</li>
+                        <li>Diligenciar sus datos.</li>
+                        <li>Aceptar los presentes términos y la política de tratamiento de datos.</li>
+                        <li>Seguir la página oficial de Milenio PC en LinkedIn.</li>
+                        <li>Enviar el formulario.</li>
+                    </ol>
+                    <p class="italic">La participación únicamente se considera válida cuando el sistema confirme exitosamente el registro.</p>
+
+                    <p><b>5. Asignación de registros:</b> Cada participación válida recibirá un número consecutivo asignado automáticamente por la plataforma según el orden de recepción. Los registros válidos números <b>100, 250 y 500</b> serán objeto de validación para la asignación de los reconocimientos previstos en esta actividad.</p>
+
+                    <p><b>6. Reconocimientos:</b> Se entregarán tres (3) equipos portátiles de acuerdo con las especificaciones publicadas por Milenio PC:</p>
+                    <ul class="list-disc pl-5 space-y-1">
+                        <li>Registro válido No. 100. <b>EliteBook 8 FLIP G2i 113NGAI</b></li>
+                        <li>Registro válido No. 250. <b>ThinkPad X1 2 in 1 Gen 10</b></li>
+                        <li>Registro válido No. 500. <b>EliteBook 8 FLIP G2i 113NGAI</b></li>
+                    </ul>
+                    <p class="italic">Los reconocimientos son personales, intransferibles y no podrán ser canjeados por dinero.</p>
+
+                    <p><b>7. Validación y reemplazo:</b> Antes de la entrega del reconocimiento, Milenio PC verificará:</p>
+                    <ul class="list-disc pl-5 space-y-1">
+                        <li>La identidad del participante.</li>
+                        <li>La validez de la información registrada.</li>
+                        <li>El cumplimiento de todos los requisitos de participación.</li>
+                        <li>La existencia de un único registro válido.</li>
+                        <li>El seguimiento de la página oficial de Milenio PC en LinkedIn.</li>
+                    </ul>
+                    <p>Si alguno de los registros objetivo (100, 250 o 500) resulta inválido, el reconocimiento se asignará al registro válido inmediatamente anterior (99, 249 o 499, según corresponda). Si este tampoco cumple los requisitos, la validación continuará en orden descendente hasta encontrar el primer participante elegible.</p>
+
+                    <p><b>8. Exclusiones:</b> No podrán participar:</p>
+                    <ul class="list-disc pl-5 space-y-1">
+                        <li>Empleados, directivos o contratistas vinculados a la organización de la actividad.</li>
+                        <li>Menores de edad.</li>
+                        <li>Personas que registren datos falsos, incompletos o de terceros.</li>
+                        <li>Personas que manipulen o intenten alterar el sistema de registro.</li>
+                    </ul>
+
+                    <p><b>9. Protección de datos personales:</b> La participación requiere la aceptación previa de la autorización para el tratamiento de datos personales de conformidad con la política de tratamiento de datos de Milenio PC. Los datos suministrados serán utilizados para:</p>
+                    <ul class="list-disc pl-5 space-y-1">
+                        <li>Gestionar la participación en la actividad.</li>
+                        <li>Verificar el cumplimiento de los requisitos.</li>
+                        <li>Contactar a los participantes.</li>
+                        <li>Gestionar la entrega de los reconocimientos.</li>
+                        <li>Realizar actividades de relacionamiento comercial cuando exista autorización expresa para ello.</li>
+                    </ul>
+
+                    <p><b>10. Modificaciones y contingencias:</b> Milenio PC podrá suspender, modificar o cancelar la actividad por causas técnicas, operativas, legales o de fuerza mayor que impidan su desarrollo normal.</p>
+
+                    <p><b>11. Aceptación:</b> Al seleccionar la opción "He leído y acepto los términos y condiciones", el participante declara haber leído, comprendido y aceptado las condiciones aquí descritas.</p>
+
+                    <p class="pt-2 border-t border-gray-300">
+                        Para consultas: <a href="mailto:protecciondatos@mileniopc.com.co" class="text-milenio-blue font-bold underline">protecciondatos@mileniopc.com.co</a><br>
+                        <a href="https://www.mileniopc.com/" target="_blank" rel="noopener" class="text-milenio-blue font-bold underline">
+                            <i class="fa-solid fa-arrow-up-right-from-square text-[9px]"></i> Consultar Política de Tratamiento de Datos
+                        </a>
+                    </p>
+                </div>
+
+                <!-- Checkboxes obligatorios -->
+                <label class="flex items-start gap-3 cursor-pointer p-3 bg-milenio-blue/5 border-2 border-milenio-blue/20 rounded-xl mb-3 hover:bg-milenio-blue/10 transition">
+                    <input type="checkbox" id="tyc-1" class="mt-0.5 w-5 h-5 accent-milenio-blue cursor-pointer" onchange="checkTycState()">
+                    <span class="text-xs text-gray-700 leading-snug">
+                        He leído y acepto los términos y condiciones de la actividad.
+                    </span>
+                </label>
+                <label class="flex items-start gap-3 cursor-pointer p-3 bg-milenio-blue/5 border-2 border-milenio-blue/20 rounded-xl mb-4 hover:bg-milenio-blue/10 transition">
+                    <input type="checkbox" id="tyc-2" class="mt-0.5 w-5 h-5 accent-milenio-blue cursor-pointer" onchange="checkTycState()">
+                    <span class="text-xs text-gray-700 leading-snug">
+                        Autorizo a MILENIO PC S.A. para tratar mis datos personales de acuerdo con las finalidades informadas y su Política de Tratamiento de Datos.
+                    </span>
+                </label>
+
+                <p id="tyc-warning" class="text-[10px] text-red-600 font-bold text-center mb-2 hidden">
+                    <i class="fa-solid fa-triangle-exclamation mr-1"></i>Debes aceptar ambas casillas para continuar
+                </p>
+
+                <button id="tyc-submit-btn" onclick="submitSorteo()"
+                    class="w-full bg-milenio-dark text-white font-black py-4 rounded-2xl text-base transition-all shadow-lg flex items-center justify-center gap-2 opacity-50 cursor-not-allowed"
+                    disabled>
+                    <span id="tyc-btn-text">Aceptar y participar</span>
+                    <i class="fa-solid fa-arrow-right"></i>
+                </button>
+            </div>
+        </section>
+
+        <!-- =========================================================
+             PANTALLA 4: ENVIANDO
+             ========================================================= -->
+        <section id="screen-sending" class="screen flex-col items-center justify-center w-full">
+            <div class="glass-panel rounded-3xl p-8 w-full shadow-2xl text-center">
+                <div class="flex justify-center mb-4">
+                    <div class="w-16 h-16 rounded-full border-4 border-milenio-blue border-t-transparent animate-spin"></div>
+                </div>
+                <p class="text-milenio-dark font-black text-lg mb-1">Registrando...</p>
+                <p class="text-gray-500 text-xs">No cierres esta ventana</p>
+            </div>
+        </section>
+
+        <!-- =========================================================
+             PANTALLA 5: ÉXITO
+             ========================================================= -->
+        <section id="screen-success" class="screen flex-col items-center w-full">
+            <div id="success-card" class="glass-panel rounded-3xl p-6 w-full shadow-2xl text-center relative overflow-hidden">
+                <div class="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-emerald-500 to-green-600"></div>
+
+                <div class="flex justify-center mb-4 mt-2">
+                    <div class="relative">
+                        <div class="absolute inset-0 bg-emerald-400 rounded-full animate-ping opacity-20"></div>
+                        <div class="relative w-20 h-20 rounded-full bg-gradient-to-br from-emerald-500 to-green-600 flex items-center justify-center shadow-2xl">
+                            <i class="fa-solid fa-check text-white text-4xl"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <h2 class="text-2xl font-black text-milenio-dark mb-2">¡Registrado!</h2>
+
+                <div class="my-5">
+                    <p class="text-[10px] uppercase tracking-widest text-gray-500 font-bold mb-2">Tu número de participación</p>
+                    <div class="inline-block bg-gradient-to-r from-milenio-blue to-milenio-teal text-white rounded-2xl px-6 py-3 shadow-xl">
+                        <p id="success-consecutivo"
+                           style="font-family: 'Courier New', Courier, monospace; font-size: 30px; font-weight: 900; letter-spacing: 3px; color: #ffffff; margin: 0; line-height: 1.2;">LEAD-2026-000</p>
+                    </div>
+                </div>
+
+                <p id="success-name" class="text-sm text-gray-700 font-bold mb-1">—</p>
+                <p class="text-xs text-gray-500 mb-4">Andicom 2026</p>
+
+                <div class="bg-milenio-blue/10 border border-milenio-blue/20 rounded-xl p-3 mb-5 text-left">
+                    <p class="text-xs text-milenio-dark">
+                        <i class="fa-solid fa-lightbulb text-milenio-blue mr-1"></i>
+                        <b>Guarda tu número:</b> es tu identificación para los reconocimientos especiales de Milenio PC en Andicom.
+                    </p>
+                </div>
+            </div>
+
+            <button onclick="downloadComprobante()"
+                class="mt-4 bg-white border-2 border-milenio-blue text-milenio-blue font-bold py-3 px-6 rounded-xl hover:bg-milenio-blue hover:text-white transition-all flex items-center justify-center gap-2 w-full">
+                <i class="fa-solid fa-download"></i> Descargar comprobante
+            </button>
+        </section>
+
+        <!-- =========================================================
+             PANTALLA 6: DUPLICADO
+             ========================================================= -->
+        <section id="screen-duplicate" class="screen flex-col items-center w-full">
+            <div id="dup-card" class="glass-panel rounded-3xl p-6 w-full shadow-2xl text-center relative overflow-hidden">
+                <div class="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-amber-500 to-orange-600"></div>
+
+                <div class="flex justify-center mb-4 mt-2">
+                    <div class="w-20 h-20 rounded-full bg-gradient-to-br from-amber-500 to-orange-600 flex items-center justify-center shadow-2xl">
+                        <i class="fa-solid fa-triangle-exclamation text-white text-4xl"></i>
+                    </div>
+                </div>
+
+                <h2 class="text-xl font-black text-milenio-dark mb-2">Ya estabas registrado</h2>
+                <p class="text-sm text-gray-600 mb-4">Este documento ya fue usado en un registro anterior. No se creó un nuevo participante.</p>
+
+                <div class="my-4">
+                    <p class="text-[10px] uppercase tracking-widest text-gray-500 font-bold mb-2">Tu número original</p>
+                    <div class="inline-block bg-gradient-to-r from-milenio-blue to-milenio-teal text-white rounded-2xl px-6 py-3 shadow-xl">
+                        <p id="dup-consecutivo"
+                           style="font-family: 'Courier New', Courier, monospace; font-size: 26px; font-weight: 900; letter-spacing: 3px; color: #ffffff; margin: 0; line-height: 1.2;">LEAD-2026-000</p>
+                    </div>
+                </div>
+
+                <p class="text-xs text-gray-500 mb-5">Cada persona solo puede participar una vez.</p>
+            </div>
+
+            <button onclick="downloadComprobanteDup()"
+                class="mt-4 bg-white border-2 border-milenio-blue text-milenio-blue font-bold py-3 px-6 rounded-xl hover:bg-milenio-blue hover:text-white transition-all flex items-center justify-center gap-2 w-full">
+                <i class="fa-solid fa-download"></i> Descargar comprobante
+            </button>
+        </section>
+
+        <!-- =========================================================
+             PANTALLA 7: ERROR
+             ========================================================= -->
+        <section id="screen-error" class="screen flex-col items-center w-full">
+            <div class="glass-panel rounded-3xl p-6 w-full shadow-2xl text-center">
+                <div class="flex justify-center mb-4 mt-2">
+                    <div class="w-20 h-20 rounded-full bg-red-100 flex items-center justify-center">
+                        <i class="fa-solid fa-xmark text-red-500 text-4xl"></i>
+                    </div>
+                </div>
+
+                <h2 class="text-xl font-black text-milenio-dark mb-2">Algo salió mal</h2>
+                <p id="error-message" class="text-sm text-gray-600 mb-5">
+                    No pudimos completar tu registro. Intenta de nuevo en un momento.
+                </p>
+
+                <button onclick="goToScreen('screen-tyc')"
+                    class="w-full bg-milenio-blue text-white font-bold py-3 rounded-xl transition-all">
+                    Intentar de nuevo
+                </button>
+            </div>
+        </section>
+
+    </main>
+
+    <div id="toast"></div>
+
+    <script>
+        // ==========================================================
+        // CONFIGURACIÓN
+        // ==========================================================
+        const CONFIG = {
+            // MISMA URL del Apps Script que usa la app comercial
+            APPS_SCRIPT_URL: 'https://script.google.com/macros/s/AKfycbxf9YgVcvv5jDuM8Q6tFLcp1wUOGZGk8E0ZfUs5MDpeMeUW7OJEx649ZZVW-V4S6lrk/exec',
+            EVENTO: 'Andicom 2026'
+        };
+
+        // Estado
+        let formState = {
+            nombres: '', apellidos: '', cedula: '',
+            empresa: '', cargo: '', correo: '', telefono: '',
+            tycAcceptedAt: null,
+            consecutivo: null
+        };
+
+        function goToScreen(id) {
+            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+            const el = document.getElementById(id);
+            if (el) el.classList.add('active');
+            window.scrollTo(0, 0);
+        }
+
+        function showToast(msg) {
+            const toast = document.getElementById('toast');
+            toast.innerText = msg;
+            toast.className = 'show';
+            setTimeout(() => { toast.className = toast.className.replace('show', ''); }, 3000);
+        }
+
+        // ==========================================================
+        // T&C: valida checkboxes y habilita botón
+        // ==========================================================
+        function checkTycState() {
+            const c1 = document.getElementById('tyc-1').checked;
+            const c2 = document.getElementById('tyc-2').checked;
+            const btn = document.getElementById('tyc-submit-btn');
+            const warn = document.getElementById('tyc-warning');
+            if (c1 && c2) {
+                btn.disabled = false;
+                btn.classList.remove('opacity-50', 'cursor-not-allowed');
+                btn.classList.add('hover:bg-black');
+                warn.classList.add('hidden');
+            } else {
+                btn.disabled = true;
+                btn.classList.add('opacity-50', 'cursor-not-allowed');
+                btn.classList.remove('hover:bg-black');
+            }
+        }
+
+        function goToTyc() {
+            // Guardar datos del formulario
+            formState.nombres = document.getElementById('f-nombres').value.trim();
+            formState.apellidos = document.getElementById('f-apellidos').value.trim();
+            formState.cedula = document.getElementById('f-cedula').value.trim();
+            formState.empresa = document.getElementById('f-empresa').value.trim();
+            formState.cargo = document.getElementById('f-cargo').value.trim();
+            formState.correo = document.getElementById('f-correo').value.trim();
+            formState.telefono = document.getElementById('f-telefono').value.trim();
+
+            // Validaciones básicas
+            if (!formState.nombres || !formState.apellidos || !formState.cedula ||
+                !formState.empresa || !formState.cargo || !formState.correo || !formState.telefono) {
+                showToast('Completa todos los campos obligatorios');
+                return;
+            }
+            if (!/^\d{5,15}$/.test(formState.cedula)) {
+                showToast('La cédula debe tener entre 5 y 15 dígitos');
+                return;
+            }
+            if (formState.correo.indexOf('@') === -1) {
+                showToast('El correo no parece válido');
+                return;
+            }
+
+            goToScreen('screen-tyc');
+        }
+
+        // ==========================================================
+        // Enviar al backend
+        // ==========================================================
+        function submitSorteo() {
+            const c1 = document.getElementById('tyc-1').checked;
+            const c2 = document.getElementById('tyc-2').checked;
+            if (!c1 || !c2) {
+                document.getElementById('tyc-warning').classList.remove('hidden');
+                return;
+            }
+            formState.tycAcceptedAt = new Date().toISOString();
+
+            goToScreen('screen-sending');
+
+            const payload = {
+                timestamp: new Date().toISOString(),
+                evento: CONFIG.EVENTO,
+                origen: 'AUTOSERVICIO',
+                contacto: {
+                    name: (formState.nombres + ' ' + formState.apellidos).trim(),
+                    cedula: formState.cedula,
+                    company: formState.empresa,
+                    role: formState.cargo,
+                    email: formState.correo,
+                    phone: formState.telefono
+                },
+                qr_raw: '',
+                apertura: null,
+                calificacion_comercial: '',
+                tyc_accepted: true,
+                tyc_accepted_at: formState.tycAcceptedAt,
+                // El autoservicio no pasa por dinámica ni calificación,
+                // pero necesita un tier para no romper el backend.
+                // Usamos AUTOSERVICIO como tier propio.
+                lead_score: 'AUTOSERVICIO',
+                lead_label: 'Registro autoservicio'
+            };
+
+            // Timeout de seguridad
+            let done = false;
+            const safety = setTimeout(() => {
+                if (done) return;
+                done = true;
+                showError('No pudimos conectar con el servidor. Verifica tu conexión e intenta de nuevo.');
+            }, 20000);
+
+            fetch(CONFIG.APPS_SCRIPT_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                body: JSON.stringify(payload)
+            })
+            .then(r => r.json())
+            .then(json => {
+                if (done) return;
+                done = true;
+                clearTimeout(safety);
+                handleResponse(json);
+            })
+            .catch(err => {
+                if (done) return;
+                done = true;
+                clearTimeout(safety);
+                console.error('Error de red:', err);
+                showError('Sin conexión. Revisa tu WiFi/datos e intenta de nuevo.');
+            });
+        }
+
+        function handleResponse(json) {
+            if (json.status === 'error') {
+                // Errores controlados del backend
+                if (json.reason === 'lock_timeout') {
+                    showError('El sistema está ocupado. Espera unos segundos y vuelve a intentar.');
+                } else {
+                    showError(json.message || 'No pudimos completar tu registro.');
+                }
+                return;
+            }
+
+            if (json.status === 'duplicado') {
+                // Ya estaba registrado — mostrar consecutivo original
+                formState.consecutivo = json.consecutivo;
+                document.getElementById('dup-consecutivo').innerText = json.consecutivo || '—';
+                goToScreen('screen-duplicate');
+                return;
+            }
+
+            // Éxito
+            formState.consecutivo = json.consecutivo;
+            document.getElementById('success-consecutivo').innerText = json.consecutivo || '—';
+            const fullName = (formState.nombres + ' ' + formState.apellidos).trim();
+            document.getElementById('success-name').innerText = fullName;
+            goToScreen('screen-success');
+        }
+
+        function showError(msg) {
+            document.getElementById('error-message').innerText = msg;
+            goToScreen('screen-error');
+        }
+
+        // ==========================================================
+        // Descargar comprobante como PNG
+        // ==========================================================
+        function downloadComprobante() {
+            captureCard('success-card', 'exito');
+        }
+        function downloadComprobanteDup() {
+            captureCard('dup-card', 'ya-registrado');
+        }
+        function captureCard(cardId, prefix) {
+            const card = document.getElementById(cardId);
+            if (!card) return;
+            if (typeof html2canvas === 'undefined') {
+                showToast('Módulo de descarga no cargado');
+                return;
+            }
+            showToast('Generando imagen...');
+
+            // Esperar a que TODAS las fuentes estén cargadas antes de capturar
+            // (fix bug de html2canvas con font-mono / gradients en primer render)
+            const fontsReady = document.fonts ? document.fonts.ready : Promise.resolve();
+
+            fontsReady.then(() => {
+                // Pequeño delay adicional para reflow completo
+                return new Promise(r => setTimeout(r, 100));
+            }).then(() => {
+                return html2canvas(card, {
+                    backgroundColor: '#f8fafc',
+                    scale: 2,
+                    useCORS: true,
+                    logging: false,
+                    letterRendering: true,
+                    allowTaint: false
+                });
+            }).then(canvas => {
+                const link = document.createElement('a');
+                const numero = formState.consecutivo || 'registro';
+                link.download = `${prefix}-${numero}.png`;
+                link.href = canvas.toDataURL('image/png');
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                showToast('Comprobante descargado');
+            }).catch(err => {
+                console.error('html2canvas error:', err);
+                showToast('No se pudo generar. Toma un screenshot manual.');
+            });
+        }
+    </script>
+</body>
+</html>
