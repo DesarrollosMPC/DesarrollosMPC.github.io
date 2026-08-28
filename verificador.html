@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Milenio PC · Verificador de ganadores</title>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700;800;900&display=swap" rel="stylesheet">
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'milenio-blue': '#005085',
+                        'milenio-teal': '#47a5ad',
+                        'milenio-dark': '#0e1d2c'
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body {
+            margin: 0;
+            font-family: 'Montserrat', sans-serif;
+            background: url('https://raw.githubusercontent.com/DesarrollosMPC/DesarrollosMPC.github.io/main/contenido/MIL_RedesAgosto_260803-09.jpg') center/cover no-repeat fixed;
+            background-color: #0e1d2c;
+            min-height: 100vh;
+            color: #333;
+        }
+
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.97);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .result-card {
+            animation: fadeIn 0.4s ease-out;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+
+<body class="flex flex-col items-center min-h-screen">
+
+    <!-- Header -->
+    <header class="w-full glass-panel p-4 flex flex-col items-center justify-center sticky top-0 z-40 shadow-md">
+        <img src="https://www.mileniopc.com/wp-content/uploads/2024/03/MPC_logo.svg" alt="Milenio PC" class="h-10">
+        <p class="text-milenio-blue font-bold text-xs text-center tracking-widest uppercase mt-1">
+            Verificador de ganadores · Andicom 2026
+        </p>
+    </header>
+
+    <main class="w-full max-w-2xl p-4 md:p-8 flex-grow flex flex-col items-center justify-start">
+
+        <div class="glass-panel rounded-3xl p-6 md:p-8 w-full shadow-2xl relative overflow-hidden">
+            <div class="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-milenio-blue to-milenio-teal"></div>
+
+            <div class="text-center mb-6 mt-2">
+                <div class="inline-block bg-amber-100 text-amber-700 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest mb-3">
+                    <i class="fa-solid fa-lock mr-1"></i>Uso interno · Equipo Milenio PC
+                </div>
+                <h1 class="text-2xl md:text-3xl font-black text-milenio-dark mb-2">Verificar ganador</h1>
+                <p class="text-sm text-gray-500">Ingresa el número del participante ganador para validar si cumple los requisitos.</p>
+            </div>
+
+            <!-- Formulario de búsqueda -->
+            <div class="bg-gray-50 border border-gray-200 rounded-2xl p-5 mb-4">
+                <label class="block text-xs uppercase tracking-widest text-milenio-dark font-bold mb-2">
+                    <i class="fa-solid fa-hashtag mr-1"></i>Número del participante
+                </label>
+                <div class="flex flex-col md:flex-row gap-3">
+                    <input type="text" id="numero-input" placeholder="Ej: 100, 001, LEAD-2026-100..."
+                        class="flex-1 p-4 text-lg border-2 border-gray-200 rounded-xl focus:border-milenio-blue outline-none transition-all bg-white font-mono font-bold"
+                        onkeydown="if(event.key==='Enter') verificar()">
+                    <button onclick="verificar()"
+                        class="bg-milenio-blue text-white font-black py-4 px-6 rounded-xl hover:bg-blue-800 transition-all shadow-md flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-magnifying-glass"></i> Verificar
+                    </button>
+                </div>
+                <p class="text-[10px] text-gray-400 italic mt-2">
+                    <i class="fa-solid fa-lightbulb mr-1"></i>Acepta cualquier formato: solo números o completo (LEAD-2026-XXX)
+                </p>
+            </div>
+
+            <!-- Resultado -->
+            <div id="resultado" class="hidden"></div>
+
+        </div>
+
+        <button onclick="limpiar()" id="btn-limpiar"
+            class="mt-4 text-white/70 hover:text-white text-xs font-bold uppercase tracking-widest hidden">
+            <i class="fa-solid fa-eraser mr-1"></i>Limpiar y buscar otro
+        </button>
+
+    </main>
+
+    <script>
+        const CONFIG = {
+            // MISMA URL del Apps Script
+            APPS_SCRIPT_URL: 'https://script.google.com/macros/s/AKfycbxf9YgVcvv5jDuM8Q6tFLcp1wUOGZGk8E0ZfUs5MDpeMeUW7OJEx649ZZVW-V4S6lrk/exec'
+        };
+
+        // Normaliza cualquier entrada al formato LEAD-2026-XXX
+        function normalizarNumero(input) {
+            if (!input) return null;
+            const clean = input.toString().trim().toUpperCase();
+
+            // Ya viene con formato completo
+            if (/^LEAD-2026-\d+$/.test(clean)) {
+                const num = parseInt(clean.split('-')[2], 10);
+                return 'LEAD-2026-' + String(num).padStart(3, '0');
+            }
+
+            // Solo números
+            const soloNumeros = clean.replace(/\D/g, '');
+            if (soloNumeros && !isNaN(parseInt(soloNumeros, 10))) {
+                return 'LEAD-2026-' + String(parseInt(soloNumeros, 10)).padStart(3, '0');
+            }
+
+            return null;
+        }
+
+        async function verificar() {
+            const input = document.getElementById('numero-input').value;
+            const resultDiv = document.getElementById('resultado');
+            const btnLimpiar = document.getElementById('btn-limpiar');
+
+            const numeroNormalizado = normalizarNumero(input);
+
+            if (!numeroNormalizado) {
+                resultDiv.className = 'result-card mt-4';
+                resultDiv.innerHTML = `
+                    <div class="bg-red-50 border-2 border-red-200 rounded-2xl p-5 text-center">
+                        <i class="fa-solid fa-triangle-exclamation text-red-500 text-3xl mb-2"></i>
+                        <p class="font-bold text-red-700">Formato inválido</p>
+                        <p class="text-xs text-red-600 mt-1">Ingresa un número válido (ej: 100 o LEAD-2026-100)</p>
+                    </div>`;
+                resultDiv.classList.remove('hidden');
+                return;
+            }
+
+            // Loading
+            resultDiv.className = 'result-card mt-4';
+            resultDiv.innerHTML = `
+                <div class="bg-gray-50 border-2 border-gray-200 rounded-2xl p-8 text-center">
+                    <div class="w-12 h-12 rounded-full border-4 border-milenio-blue border-t-transparent animate-spin mx-auto mb-3"></div>
+                    <p class="font-bold text-gray-600">Consultando ${numeroNormalizado}...</p>
+                </div>`;
+            resultDiv.classList.remove('hidden');
+            btnLimpiar.classList.add('hidden');
+
+            try {
+                // Apps Script GET con parámetros
+                const url = `${CONFIG.APPS_SCRIPT_URL}?action=verificar&numero=${encodeURIComponent(numeroNormalizado)}`;
+                const response = await fetch(url);
+                const data = await response.json();
+
+                if (data.status === 'ok' && data.encontrado) {
+                    mostrarEncontrado(data);
+                } else if (data.status === 'ok' && !data.encontrado) {
+                    mostrarNoEncontrado(numeroNormalizado);
+                } else {
+                    mostrarError(data.message || 'Error al consultar');
+                }
+
+                btnLimpiar.classList.remove('hidden');
+            } catch (err) {
+                console.error('Error:', err);
+                mostrarError('No se pudo conectar con la base de datos. Revisa tu conexión.');
+                btnLimpiar.classList.remove('hidden');
+            }
+        }
+
+        function mostrarEncontrado(data) {
+            const resultDiv = document.getElementById('resultado');
+            const p = data.participante;
+
+            // Reglas del sorteo: para cumplir tiene que haber aceptado T&C
+            const cumple = p.tycAceptado === true;
+            const origenLabel = p.origen === 'AUTOSERVICIO' ? 'Autoservicio (QR)' : 'Comercial (tableta)';
+            const origenColor = p.origen === 'AUTOSERVICIO' ? 'bg-blue-100 text-blue-700' : 'bg-teal-100 text-teal-700';
+
+            resultDiv.innerHTML = `
+                <div class="border-2 ${cumple ? 'border-emerald-400 bg-emerald-50' : 'border-red-400 bg-red-50'} rounded-2xl p-5 md:p-6">
+
+                    <!-- Cabecera con veredicto -->
+                    <div class="text-center mb-5">
+                        ${cumple ? `
+                            <div class="w-20 h-20 rounded-full bg-gradient-to-br from-emerald-500 to-green-600 flex items-center justify-center shadow-2xl mx-auto mb-3">
+                                <i class="fa-solid fa-check text-white text-4xl"></i>
+                            </div>
+                            <p class="text-2xl md:text-3xl font-black text-emerald-700 mb-1">✓ CUMPLE REQUISITOS</p>
+                            <p class="text-sm text-emerald-600">Este participante puede recibir el reconocimiento</p>
+                        ` : `
+                            <div class="w-20 h-20 rounded-full bg-gradient-to-br from-red-500 to-red-600 flex items-center justify-center shadow-2xl mx-auto mb-3">
+                                <i class="fa-solid fa-xmark text-white text-4xl"></i>
+                            </div>
+                            <p class="text-2xl md:text-3xl font-black text-red-700 mb-1">✗ NO CUMPLE</p>
+                            <p class="text-sm text-red-600">Este participante NO puede recibir el reconocimiento</p>
+                        `}
+                    </div>
+
+                    <!-- Datos del participante -->
+                    <div class="bg-white/70 rounded-xl p-4 space-y-2">
+                        <div class="flex items-center justify-between">
+                            <span class="text-xs font-bold text-gray-500 uppercase tracking-widest">Consecutivo</span>
+                            <span class="font-mono font-black text-milenio-blue text-lg">${p.consecutivo}</span>
+                        </div>
+                        <div class="flex items-center justify-between border-t border-gray-200 pt-2">
+                            <span class="text-xs font-bold text-gray-500 uppercase tracking-widest">Nombre</span>
+                            <span class="font-bold text-milenio-dark text-right">${p.nombre || '-'}</span>
+                        </div>
+                        <div class="flex items-center justify-between border-t border-gray-200 pt-2">
+                            <span class="text-xs font-bold text-gray-500 uppercase tracking-widest">Cédula</span>
+                            <span class="font-mono font-bold text-milenio-dark">${p.cedula || '-'}</span>
+                        </div>
+                        <div class="flex items-center justify-between border-t border-gray-200 pt-2">
+                            <span class="text-xs font-bold text-gray-500 uppercase tracking-widest">Empresa</span>
+                            <span class="font-bold text-milenio-dark text-right">${p.empresa || '-'}</span>
+                        </div>
+                        <div class="flex items-center justify-between border-t border-gray-200 pt-2">
+                            <span class="text-xs font-bold text-gray-500 uppercase tracking-widest">T&C aceptados</span>
+                            <span class="${p.tycAceptado ? 'bg-emerald-500 text-white' : 'bg-red-500 text-white'} px-3 py-1 rounded-full text-xs font-black">
+                                ${p.tycAceptado ? 'SÍ' : 'NO'}
+                            </span>
+                        </div>
+                        <div class="flex items-center justify-between border-t border-gray-200 pt-2">
+                            <span class="text-xs font-bold text-gray-500 uppercase tracking-widest">Origen</span>
+                            <span class="${origenColor} px-3 py-1 rounded-full text-xs font-bold">${origenLabel}</span>
+                        </div>
+                        <div class="flex items-center justify-between border-t border-gray-200 pt-2">
+                            <span class="text-xs font-bold text-gray-500 uppercase tracking-widest">Fecha registro</span>
+                            <span class="text-milenio-dark text-sm">${p.fecha || '-'}</span>
+                        </div>
+                        ${p.duplicado ? `
+                            <div class="flex items-center justify-between border-t border-gray-200 pt-2">
+                                <span class="text-xs font-bold text-gray-500 uppercase tracking-widest">Duplicado</span>
+                                <span class="bg-orange-500 text-white px-3 py-1 rounded-full text-xs font-black">MARCADO COMO DUPLICADO</span>
+                            </div>
+                        ` : ''}
+                    </div>
+
+                    ${!cumple ? `
+                        <div class="mt-4 bg-red-100 border border-red-200 rounded-xl p-3 text-xs text-red-700">
+                            <b><i class="fa-solid fa-triangle-exclamation mr-1"></i>Motivo del no cumplimiento:</b>
+                            <ul class="list-disc pl-5 mt-1 space-y-1">
+                                ${!p.tycAceptado ? '<li>No aceptó los términos y condiciones</li>' : ''}
+                                ${p.duplicado ? '<li>Registro marcado como duplicado</li>' : ''}
+                            </ul>
+                        </div>
+                    ` : ''}
+                </div>
+            `;
+        }
+
+        function mostrarNoEncontrado(numero) {
+            const resultDiv = document.getElementById('resultado');
+            resultDiv.innerHTML = `
+                <div class="bg-amber-50 border-2 border-amber-300 rounded-2xl p-6 text-center">
+                    <div class="w-20 h-20 rounded-full bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center shadow-xl mx-auto mb-3">
+                        <i class="fa-solid fa-magnifying-glass text-white text-3xl"></i>
+                    </div>
+                    <p class="text-xl font-black text-amber-700 mb-2">No encontrado</p>
+                    <p class="text-sm text-amber-600 mb-3">El consecutivo <b class="font-mono">${numero}</b> no existe en la base de datos.</p>
+                    <p class="text-xs text-gray-500 italic">Verifica que el número esté correcto o pregunta a Sistemas.</p>
+                </div>
+            `;
+        }
+
+        function mostrarError(msg) {
+            const resultDiv = document.getElementById('resultado');
+            resultDiv.innerHTML = `
+                <div class="bg-red-50 border-2 border-red-300 rounded-2xl p-6 text-center">
+                    <i class="fa-solid fa-circle-exclamation text-red-500 text-3xl mb-2"></i>
+                    <p class="font-bold text-red-700 mb-1">Error de consulta</p>
+                    <p class="text-xs text-red-600">${msg}</p>
+                </div>
+            `;
+        }
+
+        function limpiar() {
+            document.getElementById('numero-input').value = '';
+            document.getElementById('resultado').classList.add('hidden');
+            document.getElementById('btn-limpiar').classList.add('hidden');
+            document.getElementById('numero-input').focus();
+        }
+    </script>
+</body>
+</html>
