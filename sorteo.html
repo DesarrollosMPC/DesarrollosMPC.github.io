@@ -267,9 +267,11 @@
                 </button>
 
                 <div class="text-center mb-4 mt-4">
-                    <span class="inline-block bg-milenio-blue/10 text-milenio-blue px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest">
-                        <i class="fa-solid fa-file-shield mr-1"></i>Autorización de datos
-                    </span>
+                    <a href="https://www.mileniopc.com/" target="_blank" rel="noopener"
+                       class="inline-flex items-center gap-1 bg-milenio-blue/10 hover:bg-milenio-blue/20 text-milenio-blue px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest transition-colors cursor-pointer">
+                        <i class="fa-solid fa-file-shield"></i>Autorización de datos
+                        <i class="fa-solid fa-arrow-up-right-from-square text-[8px] ml-1"></i>
+                    </a>
                 </div>
 
                 <h2 class="text-xl font-black text-milenio-dark mb-3 text-center leading-tight">
@@ -394,7 +396,40 @@
                     </p>
                 </div>
 
+                <!-- Bloque de Protección de Datos Personales (autorización expresa) -->
+                <div class="bg-gradient-to-br from-milenio-blue/5 to-milenio-teal/5 border-2 border-milenio-blue/20 rounded-xl p-4 mb-4">
+                    <p class="text-center text-milenio-blue font-black text-xs uppercase tracking-widest mb-3">
+                        <i class="fa-solid fa-shield-halved mr-1"></i>Protección de tus datos
+                    </p>
+
+                    <div class="text-xs text-gray-700 leading-relaxed space-y-2">
+                        <p>
+                            <b>MILENIO PC S.A.</b>, NIT 830.067.005-6, utilizará tus datos para las siguientes finalidades:
+                            gestionar tu participación en esta actividad, validar el cumplimiento de sus condiciones,
+                            contactarte por medios físicos, electrónicos (correo, WhatsApp y similares) y/o llamadas
+                            telefónicas si tu registro resulta seleccionado y enviarte información comercial sobre sus
+                            soluciones, contenidos y eventos.
+                        </p>
+                        <p>
+                            Podrás consultar, actualizar, rectificar o solicitar la supresión de tus datos, así como
+                            revocar la autorización cuando sea procedente, escribiendo a
+                            <a href="mailto:protecciondatos@mileniopc.com.co"
+                               class="text-milenio-blue font-bold underline break-all">protecciondatos@mileniopc.com.co</a>.
+                        </p>
+                        <p class="pt-1">
+                            <a href="https://www.mileniopc.com/" target="_blank" rel="noopener"
+                               class="inline-flex items-center gap-1 text-milenio-blue font-bold underline hover:text-milenio-teal transition-colors">
+                                <i class="fa-solid fa-arrow-up-right-from-square text-[9px]"></i>
+                                Consultar Política de Tratamiento de Datos
+                            </a>
+                        </p>
+                    </div>
+                </div>
+
                 <!-- Checkboxes obligatorios -->
+                <p class="text-[10px] uppercase tracking-widest text-milenio-dark font-bold mb-2">
+                    <i class="fa-solid fa-check-double mr-1"></i>Casillas obligatorias
+                </p>
                 <label class="flex items-start gap-3 cursor-pointer p-3 bg-milenio-blue/5 border-2 border-milenio-blue/20 rounded-xl mb-3 hover:bg-milenio-blue/10 transition">
                     <input type="checkbox" id="tyc-1" class="mt-0.5 w-5 h-5 accent-milenio-blue cursor-pointer" onchange="checkTycState()">
                     <span class="text-xs text-gray-700 leading-snug">
@@ -415,7 +450,7 @@
                 <button id="tyc-submit-btn" onclick="submitSorteo()"
                     class="w-full bg-milenio-dark text-white font-black py-4 rounded-2xl text-base transition-all shadow-lg flex items-center justify-center gap-2 opacity-50 cursor-not-allowed"
                     disabled>
-                    <span id="tyc-btn-text">Aceptar y participar</span>
+                    <span id="tyc-btn-text">Aceptar y continuar</span>
                     <i class="fa-solid fa-arrow-right"></i>
                 </button>
             </div>
